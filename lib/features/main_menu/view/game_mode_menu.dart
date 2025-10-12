@@ -34,7 +34,9 @@ class GameModeMenu extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.push("/pve/match");
+                },
                 child: Text(
                   "PVE",
                   style: AppTextStyles.menu(

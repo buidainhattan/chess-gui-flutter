@@ -15,8 +15,8 @@ class Square extends StatelessWidget {
 
   final ChessBoardViewmodel chessBoardViewmodel;
   final double tileSize;
-  final Sides squareColor;
   final int index;
+  final Sides squareColor;
 
   @override
   Widget build(BuildContext context) {

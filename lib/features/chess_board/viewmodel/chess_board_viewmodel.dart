@@ -3,25 +3,26 @@ import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/engine_bridge.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
-import 'package:chess_app/features/chess_board/service/fen_service.dart';
-import 'package:chess_app/features/chess_board/service/match_manager_service.dart';
-import 'package:chess_app/features/chess_board/service/move_service.dart';
+import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
+import 'package:chess_app/features/chess_board/helper/match_manager.dart';
+import 'package:chess_app/features/chess_board/helper/move_manager.dart';
 import 'package:flutter/material.dart';
 
 class ChessBoardViewmodel extends ChangeNotifier {
-  late final FENService _fenService;
-  final MoveService _moveService = MoveService();
+  late final FENHelper _fenHelper;
+  final MoveManager _moveManager = MoveManager();
   final AudioController _audioController = AudioController();
   final EngineBridge _engineBridge = EngineBridge();
-  final MatchManagerService _matchManagerService = MatchManagerService();
+  final MatchManager _matchManager = MatchManager();
 
   // <--- GUI control variables --->
   // A bool value to control whether to display a promotion dialog or not
   bool isPromotion = false;
   // List to hold address (key) of current piece on that square
   final List<String> pieceKeys = List.filled(64, "", growable: false);
-  // Map to hold current index value of each piece
-  final Map<String, int> pieceIndices = {};
+  // A map to access piece properties through key
+  late final Map<String, PieceModel> _pieceList;
+  Map<String, PieceModel> get pieceList => _pieceList;
   // Moveable square indices of selected piece
   final List<int> moveList = [];
   String? _selectedPieceKey; // Store current selected piece key
@@ -29,17 +30,21 @@ class ChessBoardViewmodel extends ChangeNotifier {
   int? to; // The index which seletected piece is about to move to
   int? promoteIndex;
 
-  // A map to access piece properties through key
-  late final Map<String, PieceModel> pieceList;
-
   ChessBoardViewmodel() {
     _parseFEN();
     initializeChessBoard();
   }
 
   void initializeChessBoard() {
-    for (var piece in pieceList.values) {
+    for (var piece in _pieceList.values) {
       _addToPieceCoordKeys(piece.index, piece.key);
+    }
+  }
+
+  void toggleBot(bool toggleBot, Sides botSide) {
+    if (toggleBot) {
+      _engineBridge.toggleBot(botSide);
+      _matchManager.enableBot(botSide);
     }
   }
 
@@ -56,7 +61,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   }
 
   Sides getCurrentSide() {
-    return _matchManagerService.getSideToMove();
+    return _matchManager.getSideToMove();
   }
 
   void openPromotionDialog() {
@@ -66,24 +71,31 @@ class ChessBoardViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void promotePiece(PieceTypes? piecePromotedTo) {
-
-
+  void promotePiece(PieceTypes piecePromotedTo) {
+    MoveModel move = _moveManager.getPromotionMove(
+      promoteIndex!,
+      piecePromotedTo,
+    );
+    String key = pieceKeys[promoteIndex!];
+    PieceModel pieceWithNewAttribute = _pieceList[key]!.copyWith(
+      type: piecePromotedTo,
+    );
+    _pieceList[key] = pieceWithNewAttribute;
     isPromotion = false;
+    _update(move.index);
     notifyListeners();
   }
 
-  void _parseFEN({String fen = FENService.startFEN}) {
-    _fenService = stringFENParser(fen);
+  void _parseFEN({String fen = FENHelper.startFEN}) {
+    _fenHelper = stringFENParser(fen);
     _engineBridge.loadFromFEN(fen);
     _update();
-    _matchManagerService.initialSet(_fenService);
-    pieceList = _fenService.pieceList;
+    _matchManager.initialSet(_fenHelper);
+    _pieceList = _fenHelper.pieceList;
   }
 
   void _addToPieceCoordKeys(int squareIndex, String key) {
     pieceKeys[squareIndex] = key;
-    pieceIndices[key] = squareIndex;
   }
 
   bool _conditionCheck(int index) {
@@ -95,8 +107,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
       // If the square clicked on has no piece
       if (key == "") {
         return false;
-      } else if (pieceList[key]!.color !=
-          _matchManagerService.getSideToMove()) {
+      } else if (_pieceList[key]!.color != _matchManager.getSideToMove()) {
         // The piece not belong to current side to move
         return false;
       }
@@ -117,30 +128,43 @@ class ChessBoardViewmodel extends ChangeNotifier {
     return true;
   }
 
-  void _update([final int? moveIndex]) {
+  void _update([final int? moveIndex]) async {
     if (moveIndex != null) {
-      _matchManagerService.switchSide();
+      _matchManager.switchSide();
       _engineBridge.makeMove(moveIndex);
+      if (_matchManager.isBotEnabled()) {
+        if (_matchManager.isBotTurn()) {
+          _botMakeMove();
+          return;
+        }
+      }
     }
-    final List<MoveModel> legalMoves = _engineBridge.getLegalMoves();
-    _moveService.populateMoveMap(legalMoves);
+    final List<MoveModel> legalMoves = await _engineBridge.getLegalMoves();
+    _moveManager.populateMoveMap(legalMoves);
   }
 
-  void _makeMove() {
+  void _makeMove([MoveModel? botMove]) {
     // Make a move after all conditions are met
-    if (_selectedPieceKey == null || from == null || to == null) return;
 
-    MoveModel move = _moveService.getMove(from!, to!);
+    MoveModel move;
+    if (botMove == null) {
+      move = _moveManager.getMove(from!, to!);
+    } else {
+      move = botMove;
+    }
+    int moveFrom = move.from;
+    String pieceToMoveKey = pieceKeys[moveFrom];
+    int moveTo = move.to;
     MoveFlags flag = move.moveFlag;
     switch (flag) {
       case MoveFlags.doublePawnPush:
-        _matchManagerService.setEnPassantTarget(to!);
+        _matchManager.setEnPassantTarget(moveTo);
       case MoveFlags.promotion || MoveFlags.promotionCapture:
         openPromotionDialog();
         if (flag == MoveFlags.promotionCapture) continue capture;
       capture:
       case MoveFlags.capture:
-        _capturePiece(to!);
+        _capturePiece(moveTo);
       case MoveFlags.enPassant:
         _enPasssantCapture();
       case MoveFlags.kingCastle:
@@ -148,13 +172,15 @@ class ChessBoardViewmodel extends ChangeNotifier {
       case MoveFlags.queenCastle:
         _castling(flag);
       default:
-        _matchManagerService.setEnPassantTarget(null);
+        _matchManager.setEnPassantTarget(null);
     }
 
-    _movePiece(_selectedPieceKey!, from!, to!);
-
-    _update(move.index);
+    _movePiece(pieceToMoveKey, moveFrom, moveTo);
     _deSelectPiece();
+
+    if (flag != MoveFlags.promotion && flag != MoveFlags.promotionCapture) {
+      _update(move.index);
+    }
 
     // Handle sound
     switch (flag) {
@@ -170,32 +196,37 @@ class ChessBoardViewmodel extends ChangeNotifier {
   void _movePiece(String pieceKey, int from, int to) {
     // Move a piece from from-to index
 
-    pieceIndices[pieceKey] = to;
     pieceKeys[from] = "";
     pieceKeys[to] = pieceKey;
+    PieceModel pieceWithNewAttribute = _pieceList[pieceKey]!.copyWith(
+      index: to,
+    );
+    _pieceList[pieceKey] = pieceWithNewAttribute;
   }
 
   void _capturePiece(int to) {
     // Capture piece if there's any at move to square
 
     String key = pieceKeys[to];
-    pieceIndices.remove(key);
+    PieceModel pieceWithNewAttribute = _pieceList[key]!.copyWith(
+      isCaptured: true,
+    );
+    _pieceList[key] = pieceWithNewAttribute;
   }
 
   void _enPasssantCapture() {
     // EnPassant Capture if eligible
 
-    Squares? enPassantTargetSquare = _matchManagerService.getEnPassantTarget();
+    Squares? enPassantTargetSquare = _matchManager.getEnPassantTarget();
     int index = enPassantTargetSquare!.index;
-    String key = pieceKeys[index];
-    pieceIndices.remove(key);
+    _capturePiece(index);
     pieceKeys[index] = "";
   }
 
   void _castling(MoveFlags flag) {
     // Handle king castling for view
 
-    Sides sideToMove = _matchManagerService.getSideToMove();
+    Sides sideToMove = _matchManager.getSideToMove();
     int rookMoveFrom, rookMoveTo;
     String rookKey;
     if (flag == MoveFlags.kingCastle) {
@@ -230,6 +261,12 @@ class ChessBoardViewmodel extends ChangeNotifier {
     // Populate moveList with moves based on selected piece index
 
     moveList.clear();
-    moveList.addAll(_moveService.getMovesOfPiece(selectedPieceIndex));
+    moveList.addAll(_moveManager.getMovesOfPiece(selectedPieceIndex));
+  }
+
+  void _botMakeMove() async {
+    MoveModel bestMove = await _engineBridge.getBestMove(5);
+    _makeMove(bestMove);
+    notifyListeners();
   }
 }

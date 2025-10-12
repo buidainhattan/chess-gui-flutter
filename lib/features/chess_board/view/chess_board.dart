@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/features/chess_board/model/piece_model.dart';
 import 'package:chess_app/features/chess_board/view/promotion.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:chess_app/core/widgets/piece.dart';
@@ -9,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChessBoard extends StatelessWidget {
-  const ChessBoard({super.key});
+  const ChessBoard({super.key, required this.enableBot});
+
+  final bool enableBot;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +20,7 @@ class ChessBoard extends StatelessWidget {
       context,
       listen: false,
     );
+    chessBoardViewmodel.toggleBot(enableBot, Sides.black);
 
     const List<String> files = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
@@ -102,14 +106,17 @@ class ChessBoard extends StatelessWidget {
                 }),
               ),
               ...chessBoardViewmodel.pieceList.entries.map(
-                (entry) => Selector<ChessBoardViewmodel, int?>(
+                (entry) => Selector<ChessBoardViewmodel, PieceModel?>(
+                  key: ValueKey(entry.key),
+
                   selector: (context, viewModel) =>
-                      viewModel.pieceIndices[entry.key],
-                  builder: (context, index, child) {
-                    if (index == null) {
+                      viewModel.pieceList[entry.key],
+                  builder: (context, pieceModel, child) {
+                    if (pieceModel!.isCaptured) {
                       return SizedBox.shrink();
                     }
 
+                    int index = pieceModel.index;
                     int rowIndex = (7 - index ~/ 8);
                     int colIndex = (index % 8 + 1);
                     double topPosition =
@@ -120,8 +127,7 @@ class ChessBoard extends StatelessWidget {
                         (tileSize - pieceSize) / 2);
 
                     return Piece(
-                      side: entry.value.color,
-                      piece: entry.value.type,
+                      piece: pieceModel,
                       pieceSize: pieceSize,
                       topPosition: topPosition,
                       leftPosition: leftPosition,

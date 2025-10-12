@@ -2,7 +2,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
 
 /// A class to hold the parsed information from a FEN string.
-class FENService {
+class FENHelper {
   static const startFEN =
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -13,7 +13,7 @@ class FENService {
   final int halfmoveClock;
   final int fullmoveNumber;
 
-  FENService({
+  FENHelper({
     required this.pieceList,
     required this.activeColor,
     required this.castlingAvailability,
@@ -38,10 +38,10 @@ Fullmove Number: $fullmoveNumber
   }
 }
 
-/// Parses a FEN (Forsyth-Edwards Notation) string and returns a [FENService] object.
+/// Parses a FEN (Forsyth-Edwards Notation) string and returns a [FENHelper] object.
 ///
 /// Throws a [FormatException] if the FEN string is invalid.
-FENService stringFENParser(String fenString) {
+FENHelper stringFENParser(String fenString) {
   final parts = fenString.split(' ');
 
   if (parts.length != 6) {
@@ -76,7 +76,7 @@ FENService stringFENParser(String fenString) {
     throw FormatException('Invalid fullmove number in FEN string: ${parts[5]}');
   }
 
-  return FENService(
+  return FENHelper(
     pieceList: boardMap,
     activeColor: activeColor,
     castlingAvailability: castlingAvailability,

@@ -1,11 +1,11 @@
 import 'package:chess_app/features/chess_board/view/chess_board.dart';
-import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class Match extends StatelessWidget {
-  const Match({super.key});
+  const Match({super.key, this.enableBot = false});
+
+  final bool enableBot;
 
   @override
   Widget build(BuildContext context) {
@@ -13,27 +13,18 @@ class Match extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ChessBoard(),
-        Consumer<ChessBoardViewmodel>(
-          builder: (context, viewmodel, child) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    viewmodel.openPromotionDialog();
-                  },
-                  child: Text("TEST PROMOTION"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    context.pop();
-                  },
-                  child: Text("BACK"),
-                ),
-              ],
-            );
-          }
+        ChessBoard(enableBot: enableBot,),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            ElevatedButton(onPressed: () {}, child: Text("TEST BUTTON")),
+            ElevatedButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text("BACK"),
+            ),
+          ],
         ),
       ],
     );

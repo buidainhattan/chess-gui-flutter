@@ -35,6 +35,10 @@ class MyApp extends StatelessWidget {
                   path: "/pvp/match",
                   builder: (context, state) => Match(),
                 ),
+                GoRoute(
+                  path: "/pve/match",
+                  builder: (context, state) => Match(enableBot: true),
+                ),
               ],
             ),
           ],
@@ -43,9 +47,7 @@ class MyApp extends StatelessWidget {
     );
 
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ChessBoardViewmodel()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => ChessBoardViewmodel())],
       child: MaterialApp.router(
         routerConfig: router,
         title: 'Chess Game',

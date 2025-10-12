@@ -1,5 +1,6 @@
 enum Sides { 
-  white(0), black(1);
+  // ignore: constant_identifier_names
+  white(0), black(1), color_NB(2);
 
   final int value;
   const Sides(this.value);
@@ -12,7 +13,8 @@ enum Sides {
 }
 
 enum PieceTypes { 
-  pawn(0), knight(1), bishop(2), rook(3), queen(4), king(5), pieceTypeNB(6);
+  // ignore: constant_identifier_names
+  pawn(0), knight(1), bishop(2), rook(3), queen(4), king(5), pieceType_NB(6);
 
   final int value;
   const PieceTypes(this.value);
