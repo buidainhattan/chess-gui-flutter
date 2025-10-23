@@ -5,9 +5,9 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
 
   await AudioController().initialize();
-  await windowManager.ensureInitialized();
 
   await windowManager.waitUntilReadyToShow().then((_) async {
     await windowManager.setAspectRatio(16 / 9);

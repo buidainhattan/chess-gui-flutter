@@ -27,8 +27,8 @@ class ChessBoard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double size = math.min(
-          constraints.maxWidth / 2,
-          constraints.maxHeight - 40,
+          constraints.maxWidth,
+          constraints.maxHeight,
         );
         final double tileSize, pieceSize, rankOffset, fileOffset;
         tileSize = size * 43 / 370;
@@ -49,7 +49,9 @@ class ChessBoard extends StatelessWidget {
                         context,
                         chessBoardViewmodel.getCurrentSide(),
                       ).then((chosenPiece) {
-                        chessBoardViewmodel.promotePiece(chosenPiece!);
+                        chessBoardViewmodel.promotePiece(
+                          piecePromotedTo: chosenPiece!,
+                        );
                       });
                     });
                   }

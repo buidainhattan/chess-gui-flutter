@@ -1,6 +1,12 @@
 import 'package:chess_app/core/constants/all_enum.dart';
 
 class PieceModel {
+  final String key;
+  final int index;
+  final Sides color;
+  final PieceTypes type;
+  final bool isCaptured;
+
   const PieceModel({
     required this.key,
     required this.index,
@@ -18,10 +24,4 @@ class PieceModel {
       isCaptured: isCaptured ?? this.isCaptured,
     );
   }
-
-  final String key;
-  final int index;
-  final Sides color;
-  final PieceTypes type;
-  final bool isCaptured;
 }

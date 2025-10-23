@@ -2,7 +2,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 
 class AudioController {
-  SoLoud? _soLoud;
+  final SoLoud _soLoud = SoLoud.instance;
   final Map<SoundFXs, AudioSource> _sounds = {};
 
   // 1. Singleton pattern
@@ -13,8 +13,7 @@ class AudioController {
   AudioController._internal();
 
   Future<void> initialize() async {
-    _soLoud = SoLoud.instance;
-    await _soLoud!.init();
+    await _soLoud.init();
     await _preloadSounds();
   }
 
@@ -23,11 +22,11 @@ class AudioController {
       return;
     }
 
-    await _soLoud!.play(_sounds[sound]!);
+    await _soLoud.play(_sounds[sound]!);
   }
 
   void dispose() {
-    _soLoud?.deinit();
+    _soLoud.deinit();
   }
 
   Future<void> _preloadSounds() async {
@@ -38,7 +37,7 @@ class AudioController {
     };
 
     for (var entry in soundsToLoad.entries) {
-      final source = await _soLoud!.loadAsset(entry.value);
+      final source = await _soLoud.loadAsset(entry.value);
       _sounds[entry.key] = source;
     }
   }

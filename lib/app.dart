@@ -4,6 +4,7 @@ import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.d
 import 'package:chess_app/features/main_menu/view/game_mode_menu.dart';
 import 'package:chess_app/features/main_menu/view/main_menu.dart';
 import 'package:chess_app/features/match/view/match.dart';
+import 'package:chess_app/features/match/viewmodel/match_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +48,10 @@ class MyApp extends StatelessWidget {
     );
 
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => ChessBoardViewmodel())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => ChessBoardViewmodel()),
+        ChangeNotifierProvider(create: (_) => MatchViewmodel()),
+      ],
       child: MaterialApp.router(
         routerConfig: router,
         title: 'Chess Game',

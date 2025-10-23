@@ -9,7 +9,13 @@ enum Sides {
     for (Sides side in values) side.value: side
   };
 
+  static final Map<String, Sides> _fromName = {
+    for (Sides side in values) side.name: side
+  };
+
   static Sides? fromValue(int value) => _fromValue[value];
+
+  static Sides? fromName(String name) => _fromName[name];
 }
 
 enum PieceTypes { 
