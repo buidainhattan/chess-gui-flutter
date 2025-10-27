@@ -1,14 +1,9 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/constants/c_style_struct.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:ffi/ffi.dart';
-
-// Typedefs for the C function that returns a boolean
-typedef ToggleBotNative = Bool Function(Pointer<Utf8>);
-typedef ToggleBot = bool Function(Pointer<Utf8>);
 
 // Typedefs for the C function that returns void
 typedef SetBoardNative = Void Function(Pointer<Utf8>);
@@ -45,16 +40,6 @@ class EngineBridge {
 
   EngineBridge.internal() {
     _startFuture = _startEngineIsolate();
-  }
-
-  Future<bool> toggleBot(Sides botSide) async {
-    String botSideString = botSide.name;
-    final Pointer<Utf8> stringPointer = botSideString.toNativeUtf8();
-    try {
-      return await _send("toggleBot", stringPointer) as bool;
-    } finally {
-      calloc.free(stringPointer);
-    }
   }
 
   void loadFromFEN(String fen) async {
@@ -133,9 +118,6 @@ class EngineBridge {
     final DynamicLibrary dylib = DynamicLibrary.open(libraryPath);
 
     // Look up the C++ functions by name
-    final ToggleBot toggleBot = dylib
-        .lookup<NativeFunction<ToggleBotNative>>('toggle_bot')
-        .asFunction();
     final SetBoard setBoard = dylib
         .lookup<NativeFunction<SetBoardNative>>('set_board_from_fen')
         .asFunction();
@@ -162,9 +144,6 @@ class EngineBridge {
 
       dynamic result;
       switch (taskType) {
-        case 'toggleBot':
-          result = toggleBot(data);
-          break;
         case 'setBoard':
           setBoard(data);
           break;

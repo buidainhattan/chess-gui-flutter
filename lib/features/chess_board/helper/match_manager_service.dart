@@ -4,9 +4,19 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 
 class MatchManagerService {
+  late final FENHelper _fenHelper;
+  FENHelper get fenHelper => _fenHelper;
+
   final StreamController<MatchState> _stateController =
       StreamController<MatchState>.broadcast();
   Stream<MatchState> get stateStream => _stateController.stream;
+
+  final StreamController<(bool, Sides)> _isMatchEndController =
+      StreamController<(bool, Sides)>.broadcast();
+  Stream<(bool, Sides)> get isMatchEndStream => _isMatchEndController.stream;
+
+  late String _fen;
+  String get fen => _fen;
 
   late final Sides _playerOneSide;
   Sides get playerOneSide => _playerOneSide;
@@ -18,22 +28,17 @@ class MatchManagerService {
 
   bool botEnabled = false;
 
-  static final MatchManagerService _instance = MatchManagerService._internal();
-  factory MatchManagerService() {
-    return _instance;
-  }
-
-  MatchManagerService._internal();
-
-  void initialSet(FENHelper fen, Sides playerOneSide) {
+  void initialSet(String fen, Sides playerOneSide) {
+    _fen = fen.isEmpty? FENHelper.startFEN : fen;
+    _fenHelper = stringFENParser(_fen);
     _playerOneSide = playerOneSide;
     _playerTwoSide = playerOneSide == Sides.white ? Sides.black : Sides.white;
     _matchState = MatchState(
-      activeSide: fen.activeColor,
-      castlingRight: fen.castlingAvailability,
-      enPassantTarget: fen.enPassantTarget,
-      halfMoveClock: fen.halfmoveClock,
-      fullMoveNumber: fen.fullmoveNumber,
+      activeSide: _fenHelper.activeColor,
+      castlingRight: _fenHelper.castlingAvailability,
+      enPassantTarget: _fenHelper.enPassantTarget,
+      halfMoveClock: _fenHelper.halfmoveClock,
+      fullMoveNumber: _fenHelper.fullmoveNumber,
     );
   }
 
@@ -57,11 +62,23 @@ class MatchManagerService {
 
   void setEnPassantTarget(int? index) {
     if (index == null) {
-      _matchState.copyWith(enPassantTarget: null);
+      _matchState = _matchState.copyWith(enPassantTarget: null);
       return;
     }
     Squares? enPassantTarget = Squares.fromIndex(index);
-    _matchState.copyWith(enPassantTarget: enPassantTarget);
+    _matchState = _matchState.copyWith(enPassantTarget: enPassantTarget);
+  }
+
+  void matchEnd() {
+    Sides winnerSide = _matchState.activeSide == Sides.white
+        ? Sides.black
+        : Sides.white;
+    _isMatchEndController.add((true, winnerSide));
+  }
+
+  void dispose() {
+    _stateController.close();
+    _isMatchEndController.close();
   }
 }
 

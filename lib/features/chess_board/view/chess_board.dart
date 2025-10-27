@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChessBoard extends StatelessWidget {
-  const ChessBoard({super.key, required this.enableBot});
-
   final bool enableBot;
+
+  const ChessBoard({super.key, required this.enableBot});
 
   @override
   Widget build(BuildContext context) {

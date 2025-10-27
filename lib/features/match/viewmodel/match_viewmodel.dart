@@ -5,7 +5,7 @@ import 'package:chess_app/features/chess_board/helper/match_manager_service.dart
 import 'package:flutter/widgets.dart';
 
 class MatchViewmodel extends ChangeNotifier {
-  final MatchManagerService _matchManagerService = MatchManagerService();
+  final MatchManagerService _matchManagerService;
 
   late final String playerOneSide;
   late final String playerTwoSide;
@@ -15,41 +15,36 @@ class MatchViewmodel extends ChangeNotifier {
   late int halfMoveClock;
   late int fullMoveCount;
 
-  Timer? _timer;
-  DateTime? _lastTickTime;
-  bool _isTimerRunning = false;
-  Duration _playerOneRemainingTime = const Duration(minutes: 10);
-  Duration _playerTwoRemainingTime = const Duration(minutes: 10);
-  late String playerOneTime;
-  late String playerTwoTime;
   List<PieceTypes>? playerOnePieceCaptured = [];
   List<PieceTypes>? playerTwoPieceCaptured = [];
 
-  late final StreamSubscription _subscription;
+  bool isMatchEnd = false;
+  late bool isWinner;
 
-  MatchViewmodel() {
+  late final StreamSubscription _matchStateSubscription;
+  late final StreamSubscription _isMatchEndSubscription;
+
+  MatchViewmodel(this._matchManagerService) {
     playerOneSide = _matchManagerService.playerOneSide.name;
     playerTwoSide = _matchManagerService.playerTwoSide.name;
-
-    playerOneTime = _formatDuration(_playerOneRemainingTime);
-    playerTwoTime = _formatDuration(_playerTwoRemainingTime);
-
-    _startTimer();
 
     sideToMove = _matchManagerService.matchState.activeSide.name;
     halfMoveClock = _matchManagerService.matchState.halfMoveClock;
     fullMoveCount = _matchManagerService.matchState.fullMoveNumber;
 
-    _subscription = _matchManagerService.stateStream.listen((newState) {
+    _matchStateSubscription = _matchManagerService.stateStream.listen((newState) {
       sideToMove = newState.activeSide.name;
       halfMoveClock = newState.halfMoveClock;
       fullMoveCount = newState.fullMoveNumber;
       playerOnePieceCaptured = newState.capturedPieces[Sides.fromName(playerOneSide)];
       playerTwoPieceCaptured = newState.capturedPieces[Sides.fromName(playerTwoSide)];
 
-      for (var piece in playerOnePieceCaptured!) {
-        print(piece.name);
-      }
+      notifyListeners();
+    });
+
+    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((newState) {
+      isMatchEnd = newState.$1;
+      isWinner = newState.$2.name == playerOneSide;
 
       notifyListeners();
     });
@@ -57,56 +52,8 @@ class MatchViewmodel extends ChangeNotifier {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _matchStateSubscription.cancel();
+    _isMatchEndSubscription.cancel();
     super.dispose();
-  }
-
-  void _startTimer() {
-    if (_isTimerRunning) return;
-    _isTimerRunning = true;
-    _lastTickTime = DateTime.now();
-    _timer = Timer.periodic(const Duration(milliseconds: 100), _tick);
-  }
-
-  void _tick(Timer timer) {
-    if (!_isTimerRunning) {
-      _timer?.cancel();
-      return;
-    }
-
-    if (_lastTickTime == null) return;
-
-    final DateTime now = DateTime.now();
-    final Duration elapsed = now.difference(_lastTickTime!);
-    if (sideToMove == playerOneSide) {
-      if (_playerOneRemainingTime > Duration.zero) {
-        _playerOneRemainingTime -= elapsed;
-      } else {
-        _playerOneRemainingTime = Duration.zero;
-      }
-      playerOneTime = _formatDuration(_playerOneRemainingTime);
-    }
-    if (sideToMove == playerTwoSide) {
-      if (_playerTwoRemainingTime > Duration.zero) {
-        _playerTwoRemainingTime -= elapsed;
-      } else {
-        _playerTwoRemainingTime = Duration.zero;
-      }
-      playerTwoTime = _formatDuration(_playerTwoRemainingTime);
-    }
-    _lastTickTime = now;
-    notifyListeners();
-  }
-
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-    final miliseconds = duration.inMilliseconds.remainder(1000);
-
-    final formattedMinutes = minutes.toString().padLeft(2, '0');
-    final formattedSeconds = seconds.toString().padLeft(2, '0');
-    final formattedMiliseconds = miliseconds.toString().padLeft(4, '0');
-
-    return '$formattedMinutes:$formattedSeconds:$formattedMiliseconds';
   }
 }

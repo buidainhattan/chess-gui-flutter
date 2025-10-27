@@ -1,13 +1,10 @@
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
-import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:chess_app/features/main_menu/view/game_mode_menu.dart';
 import 'package:chess_app/features/main_menu/view/main_menu.dart';
-import 'package:chess_app/features/match/view/match.dart';
-import 'package:chess_app/features/match/viewmodel/match_viewmodel.dart';
+import 'package:chess_app/features/match/view/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -34,11 +31,11 @@ class MyApp extends StatelessWidget {
               routes: [
                 GoRoute(
                   path: "/pvp/match",
-                  builder: (context, state) => Match(),
+                  builder: (context, state) => Loading(),
                 ),
                 GoRoute(
                   path: "/pve/match",
-                  builder: (context, state) => Match(enableBot: true),
+                  builder: (context, state) => Loading(enableBot: true),
                 ),
               ],
             ),
@@ -47,18 +44,12 @@ class MyApp extends StatelessWidget {
       ],
     );
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ChessBoardViewmodel()),
-        ChangeNotifierProvider(create: (_) => MatchViewmodel()),
-      ],
-      child: MaterialApp.router(
-        routerConfig: router,
-        title: 'Chess Game',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          fontFamily: "Roboto",
-        ),
+    return MaterialApp.router(
+      routerConfig: router,
+      title: 'Chess Game',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        fontFamily: "Roboto",
       ),
     );
   }

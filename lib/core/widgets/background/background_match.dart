@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class BackgroundMatch extends StatelessWidget {
   final Widget child;
@@ -11,10 +10,6 @@ class BackgroundMatch extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          SvgPicture.asset(
-            "assets/images/backgrounds/match_bg.svg",
-            fit: BoxFit.fill,
-          ),
           child,
         ],
       ),
