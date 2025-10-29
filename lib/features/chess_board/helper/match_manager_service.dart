@@ -29,7 +29,7 @@ class MatchManagerService {
   bool botEnabled = false;
 
   void initialSet(String fen, Sides playerOneSide) {
-    _fen = fen.isEmpty? FENHelper.startFEN : fen;
+    _fen = fen.isEmpty ? FENHelper.startFEN : fen;
     _fenHelper = stringFENParser(_fen);
     _playerOneSide = playerOneSide;
     _playerTwoSide = playerOneSide == Sides.white ? Sides.black : Sides.white;
@@ -43,8 +43,12 @@ class MatchManagerService {
   }
 
   void switchSide() {
+    int newFullMoveCount = _updateFullMoveNumber();
     Sides activeSide = Sides.fromValue(_matchState.activeSide.value ^ 1)!;
-    _matchState = _matchState.copyWith(activeSide: activeSide);
+    _matchState = _matchState.copyWith(
+      activeSide: activeSide,
+      fullMoveNumber: newFullMoveCount,
+    );
     _stateController.add(_matchState);
   }
 
@@ -69,6 +73,16 @@ class MatchManagerService {
     _matchState = _matchState.copyWith(enPassantTarget: enPassantTarget);
   }
 
+  void updateHalfMoveClock(PieceTypes movingPiece, MoveFlags flag) {
+    if (movingPiece != PieceTypes.pawn && flag != MoveFlags.capture) {
+      _matchState = _matchState.copyWith(
+        halfMoveClock: _matchState.halfMoveClock + 1,
+      );
+    } else {
+      _matchState = _matchState.copyWith(halfMoveClock: 0);
+    }
+  }
+
   void matchEnd() {
     Sides winnerSide = _matchState.activeSide == Sides.white
         ? Sides.black
@@ -79,6 +93,13 @@ class MatchManagerService {
   void dispose() {
     _stateController.close();
     _isMatchEndController.close();
+  }
+
+  int _updateFullMoveNumber() {
+    if (_matchState.activeSide == Sides.black) {
+      return _matchState.fullMoveNumber + 1;
+    }
+    return _matchState.fullMoveNumber;
   }
 }
 
@@ -110,7 +131,7 @@ class MatchState {
     return MatchState(
       activeSide: activeSide ?? this.activeSide,
       castlingRight: castlingRight ?? this.castlingRight,
-      enPassantTarget: enPassantTarget,
+      enPassantTarget: enPassantTarget ?? this.enPassantTarget,
       halfMoveClock: halfMoveClock ?? this.halfMoveClock,
       fullMoveNumber: fullMoveNumber ?? this.fullMoveNumber,
       capturedPieces: capturedPieces ?? this.capturedPieces,

@@ -28,6 +28,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/icons/
     - assets/images/backgrounds/
     - assets/images/chess_pieces/white/
     - assets/images/chess_pieces/black/

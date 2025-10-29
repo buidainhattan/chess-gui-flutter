@@ -15,8 +15,8 @@ class MatchViewmodel extends ChangeNotifier {
   late int halfMoveClock;
   late int fullMoveCount;
 
-  List<PieceTypes>? playerOnePieceCaptured = [];
-  List<PieceTypes>? playerTwoPieceCaptured = [];
+  late List<PieceTypes> playerOnePieceCaptured;
+  late List<PieceTypes> playerTwoPieceCaptured;
 
   bool isMatchEnd = false;
   late bool isWinner;
@@ -27,22 +27,34 @@ class MatchViewmodel extends ChangeNotifier {
   MatchViewmodel(this._matchManagerService) {
     playerOneSide = _matchManagerService.playerOneSide.name;
     playerTwoSide = _matchManagerService.playerTwoSide.name;
+    playerOnePieceCaptured = _matchManagerService
+        .matchState
+        .capturedPieces[Sides.fromName(playerOneSide)]!;
+    playerTwoPieceCaptured = _matchManagerService
+        .matchState
+        .capturedPieces[Sides.fromName(playerTwoSide)]!;
 
     sideToMove = _matchManagerService.matchState.activeSide.name;
     halfMoveClock = _matchManagerService.matchState.halfMoveClock;
     fullMoveCount = _matchManagerService.matchState.fullMoveNumber;
 
-    _matchStateSubscription = _matchManagerService.stateStream.listen((newState) {
+    _matchStateSubscription = _matchManagerService.stateStream.listen((
+      newState,
+    ) {
       sideToMove = newState.activeSide.name;
       halfMoveClock = newState.halfMoveClock;
       fullMoveCount = newState.fullMoveNumber;
-      playerOnePieceCaptured = newState.capturedPieces[Sides.fromName(playerOneSide)];
-      playerTwoPieceCaptured = newState.capturedPieces[Sides.fromName(playerTwoSide)];
+      playerOnePieceCaptured =
+          newState.capturedPieces[Sides.fromName(playerOneSide)]!;
+      playerTwoPieceCaptured =
+          newState.capturedPieces[Sides.fromName(playerTwoSide)]!;
 
       notifyListeners();
     });
 
-    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((newState) {
+    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
+      newState,
+    ) {
       isMatchEnd = newState.$1;
       isWinner = newState.$2.name == playerOneSide;
 
