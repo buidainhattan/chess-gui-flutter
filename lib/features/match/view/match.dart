@@ -232,8 +232,6 @@ class _MatchStateDisplayer extends StatelessWidget {
 }
 
 class _ZebraStripedList extends StatelessWidget {
-  final List<String> data = List.generate(20, (i) => 'Item $i');
-
   // Define the alternating colors
   static const Color primaryColor = Color.fromRGBO(183, 192, 216, 1);
   static const Color alternateColor = Color.fromRGBO(
@@ -243,48 +241,46 @@ class _ZebraStripedList extends StatelessWidget {
     1,
   ); // Slightly darker Periwinkle
 
-  _ZebraStripedList();
+  const _ZebraStripedList();
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: data.length,
-      itemBuilder: (context, index) {
-        // Determine the background color based on the index (even or odd)
-        final Color rowColor = index.isEven ? primaryColor : alternateColor;
+    return Selector<MatchViewmodel, List<String>>(
+      selector: (context, matchViewmodel) => matchViewmodel.algebraicHistory,
+      builder: (context, algebraicHistory, child) {
+        final List<String> data = algebraicHistory;
 
-        return Container(
-          // Set the calculated alternating color as the row background
-          color: rowColor,
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 5,
+          ),
+          itemCount: algebraicHistory.length,
+          itemBuilder: (context, index) {
+            // Determine the background color based on the index (even or odd)
+            final int rowIndex = index ~/ 2;
+            final Color rowColor = rowIndex.isEven
+                ? primaryColor
+                : alternateColor;
+            final String notation = data[index];
 
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // --- Column 1 (Left Side) ---
-              // This is typically the main content or title
-              Text(
-                data[index],
+            return Container(
+              // Set the calculated alternating color as the row background
+              color: rowColor,
+              padding: const EdgeInsets.symmetric(
+                vertical: 12.0,
+                horizontal: 16.0,
+              ),
+
+              child: Text(
+                "$index. $notation",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
-
-              // --- Column 2 (Right Side) ---
-              // This is often a value, status, or icon
-              Row(
-                children: [
-                  const Icon(Icons.star, size: 18, color: Colors.amber),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Value: ${index * 10}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

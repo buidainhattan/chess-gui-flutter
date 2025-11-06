@@ -18,10 +18,13 @@ class MatchViewmodel extends ChangeNotifier {
   late List<PieceTypes> playerOnePieceCaptured;
   late List<PieceTypes> playerTwoPieceCaptured;
 
+  late List<String> algebraicHistory;
+
   bool isMatchEnd = false;
   late bool isWinner;
 
   late final StreamSubscription _matchStateSubscription;
+  late final StreamSubscription _algebraicHistorySubscription;
   late final StreamSubscription _isMatchEndSubscription;
 
   MatchViewmodel(this._matchManagerService) {
@@ -38,6 +41,8 @@ class MatchViewmodel extends ChangeNotifier {
     halfMoveClock = _matchManagerService.matchState.halfMoveClock;
     fullMoveCount = _matchManagerService.matchState.fullMoveNumber;
 
+    algebraicHistory = _matchManagerService.algebraicHistory;
+
     _matchStateSubscription = _matchManagerService.stateStream.listen((
       newState,
     ) {
@@ -51,6 +56,13 @@ class MatchViewmodel extends ChangeNotifier {
 
       notifyListeners();
     });
+
+    _algebraicHistorySubscription = _matchManagerService.algebraicHistoryStream
+        .listen((newState) {
+          algebraicHistory = newState;
+
+          notifyListeners();
+        });
 
     _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
       newState,
@@ -66,6 +78,7 @@ class MatchViewmodel extends ChangeNotifier {
   void dispose() {
     _matchStateSubscription.cancel();
     _isMatchEndSubscription.cancel();
+    _algebraicHistorySubscription.cancel();
     super.dispose();
   }
 }

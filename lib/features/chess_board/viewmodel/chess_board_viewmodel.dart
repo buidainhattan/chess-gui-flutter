@@ -159,7 +159,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
     String pieceToMoveKey = pieceKeys[moveFrom];
     int moveTo = move.to;
     MoveFlags flag = move.moveFlag;
-    _matchManagerService.updateHalfMoveClock(pieceList[pieceToMoveKey]!.type, flag);
+    _matchManagerService.updateHalfMoveClock(
+      pieceList[pieceToMoveKey]!.type,
+      flag,
+    );
     switch (flag) {
       case MoveFlags.doublePawnPush:
         _matchManagerService.setEnPassantTarget(moveTo);
@@ -185,6 +188,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     _movePiece(pieceToMoveKey, moveFrom, moveTo);
     _deSelectPiece();
+    _matchManagerService.getAlgebraicNotation(
+      pieceList[pieceToMoveKey]!.type,
+      move,
+    );
 
     if (flag != MoveFlags.promotion && flag != MoveFlags.promotionCapture) {
       _update(move.index);

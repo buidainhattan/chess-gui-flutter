@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/constants/c_style_struct.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:ffi/ffi.dart';
@@ -16,6 +17,9 @@ typedef UnmakeMove = void Function(int moveIndex);
 // Typedefs for the C function that returns a string
 typedef GetSideToMoveNative = Pointer<Utf8> Function();
 typedef GetSideToMove = Pointer<Utf8> Function();
+typedef DisambiguatingNative =
+    Pointer<Utf8> Function(Int32 sideToMove, Int32 moveIndex);
+typedef Disambiguating = Pointer<Utf8> Function(int sideToMove, int moveIndex);
 
 // Typedefs for the C function that returns the move list struct
 typedef GetLegalMovesNative = MoveListResult Function();
@@ -83,6 +87,14 @@ class EngineBridge {
     return MoveModel.fromFFI(bestMove);
   }
 
+  Future<String> disambiguating(Sides sideToMove, int moveIndex) async {
+    final Map<String, int> data = {
+      'sideToMove': sideToMove.value,
+      'moveIndex': moveIndex,
+    };
+    return await _send('disambiguating', data) as String;
+  }
+
   // Clean up when done
   void dispose() {
     _engineIsolate.kill(); // Terminate the isolate
@@ -136,6 +148,9 @@ class EngineBridge {
     final GetBestMove getBestMove = dylib
         .lookup<NativeFunction<GetBestMoveNative>>('get_best_move')
         .asFunction();
+    final Disambiguating disambiguating = dylib
+        .lookup<NativeFunction<DisambiguatingNative>>('disambiguating')
+        .asFunction();
 
     isolateReceivePort.listen((message) {
       final taskType = message['type'] as String;
@@ -146,21 +161,18 @@ class EngineBridge {
       switch (taskType) {
         case 'setBoard':
           setBoard(data);
-          break;
         case 'getSideToMove':
           result = getSideToMove().toDartString();
-          break;
         case 'getLegalMoves':
           result = getLegalMoves();
-          break;
         case 'makeMove':
           makeMove(data);
-          break;
         case 'unMakeMove':
           unMakeMove(data);
-          break;
         case 'getBestMove':
           result = getBestMove(data);
+        case 'disambiguating':
+          result = disambiguating(data['sideToMove'], data['moveIndex']).toDartString();
         default:
           result = {'error': 'Unknown task type'};
       }

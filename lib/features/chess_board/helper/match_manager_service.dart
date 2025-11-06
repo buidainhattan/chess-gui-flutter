@@ -1,15 +1,23 @@
 import 'dart:async';
 
+import 'package:chess_app/core/basics/helper_methods.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/engine_bridge.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
+import 'package:chess_app/features/chess_board/model/move_model.dart';
 
 class MatchManagerService {
   late final FENHelper _fenHelper;
   FENHelper get fenHelper => _fenHelper;
+  final EngineBridge _engineBridge = EngineBridge();
 
   final StreamController<MatchState> _stateController =
       StreamController<MatchState>.broadcast();
   Stream<MatchState> get stateStream => _stateController.stream;
+
+  final StreamController<List<String>> _algebraicHistoryController =
+      StreamController<List<String>>.broadcast();
+  Stream<List<String>> get algebraicHistoryStream => _algebraicHistoryController.stream;
 
   final StreamController<(bool, Sides)> _isMatchEndController =
       StreamController<(bool, Sides)>.broadcast();
@@ -25,6 +33,8 @@ class MatchManagerService {
 
   late MatchState _matchState;
   MatchState get matchState => _matchState;
+  late List<String> _algebraicHistory;
+  List<String> get algebraicHistory => _algebraicHistory;
 
   bool botEnabled = false;
 
@@ -40,6 +50,7 @@ class MatchManagerService {
       halfMoveClock: _fenHelper.halfmoveClock,
       fullMoveNumber: _fenHelper.fullmoveNumber,
     );
+    _algebraicHistory = [];
   }
 
   void switchSide() {
@@ -81,6 +92,27 @@ class MatchManagerService {
     } else {
       _matchState = _matchState.copyWith(halfMoveClock: 0);
     }
+  }
+
+  void getAlgebraicNotation(
+    PieceTypes movingPiece,
+    MoveModel move,
+  ) async {
+    String disambiguation = await _engineBridge.disambiguating(
+      matchState.activeSide,
+      move.index,
+    );
+    String algebraic = toAlgebraic(
+      movingPiece.name,
+      move,
+      disambiguation: disambiguation,
+    );
+    final List<String> newAlgebraicHistory = [
+      ..._algebraicHistory,
+      algebraic,
+    ];
+    _algebraicHistory = newAlgebraicHistory;
+    _algebraicHistoryController.add(_algebraicHistory);
   }
 
   void matchEnd() {

@@ -1,4 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/features/chess_board/model/move_model.dart';
 
 /// Converts structured move data into standard algebraic chess notation using a
 /// single flag for move type (capture, castling, etc.).
@@ -14,56 +15,59 @@ import 'package:chess_app/core/constants/all_enum.dart';
 /// - promotionPiece (optional): The symbol of the piece promoted to (Q, R, B, N).
 String toAlgebraic(
   String pieceMoved,
-  String targetSquare,
-  int moveFlagValue,
-  bool isChecking,
-  bool isCheckmate, {
-  String startFile = '',
-  String startRank = '',
-  String promotionPiece = '',
+  MoveModel move, {
+  String disambiguation = '',
+  bool isChecking = false,
+  bool isCheckmate = false,
 }) {
+  // Convert move data into String
+  final String targetSquare = Squares.fromIndex(move.to)!.name;
+  final String promotionPiece = move.piecePromotedTo.name;
+
   // Derive move characteristics from the flag value
-  final isCastling = moveFlagValue == MoveFlags.kingCastle.value || moveFlagValue == MoveFlags.queenCastle.value;
-  final isEnPassant = moveFlagValue == MoveFlags.enPassant.value;
-  final isPromotion = moveFlagValue == MoveFlags.promotion.value || moveFlagValue == MoveFlags.promotionCapture.value;
+  final MoveFlags moveFlag = move.moveFlag;
+  final bool isCastling =
+      moveFlag == MoveFlags.kingCastle || moveFlag == MoveFlags.queenCastle;
+  final bool isPromotion =
+      moveFlag == MoveFlags.promotion || moveFlag == MoveFlags.promotionCapture;
 
   // A move is a capture if the flag is 4 (standard), 5 (en passant), or 12 (promotion capture).
-  final isCapture = moveFlagValue == MoveFlags.capture.value ||
-                    moveFlagValue == MoveFlags.enPassant.value ||
-                    moveFlagValue == MoveFlags.promotionCapture.value;
+  final bool isCapture =
+      moveFlag == MoveFlags.capture ||
+      moveFlag == MoveFlags.enPassant ||
+      moveFlag == MoveFlags.promotionCapture;
 
   // Convert inputs to standard symbols/case
-  final piece = pieceMoved.toUpperCase();
-  final target = targetSquare.toLowerCase();
-  final file = startFile.toLowerCase();
-  final rank = startRank.toLowerCase();
-  final promotion = promotionPiece.toUpperCase();
+  final String piece = pieceMoved.toUpperCase();
+  final String promotion = promotionPiece.toUpperCase();
 
   // 1. Castling has the highest priority and is handled uniquely
   if (isCastling) {
     // King-side (g-file destination) or Queen-side (c-file destination)
-    return target.contains('g') ? 'O-O' : 'O-O-O';
+    return targetSquare.contains('g') ? 'O-O' : 'O-O-O';
   }
 
   String notation = '';
 
   // 2. Piece Symbol and Disambiguation
-  if (piece == 'P' || piece == 'PAWN') {
+  if (piece == 'PAWN') {
     if (isCapture) {
       // Pawn captures MUST include the starting file (e.g., exd5)
-      notation += file;
-      notation += 'x';
+      final String pawnStartFile = Squares.fromIndex(move.from)!.name;
+      notation += '${pawnStartFile[0]}x';
     }
   } else {
     // Standard Piece (K, Q, R, B, N)
-    notation += piece;
+    if (piece.toLowerCase() == PieceTypes.knight.name) {
+      notation += piece[1];
+    } else {
+      notation += piece[0];
+    }
 
     // Disambiguation Logic (applies only to non-Pawn, non-King pieces)
     // Append the start file OR start rank if provided.
-    if (file.isNotEmpty) {
-      notation += file;
-    } else if (rank.isNotEmpty) {
-      notation += rank;
+    if (disambiguation.isNotEmpty) {
+      notation += disambiguation;
     }
 
     // Capture indicator ('x') goes AFTER the piece symbol and optional disambiguation
@@ -73,11 +77,10 @@ String toAlgebraic(
   }
 
   // 3. Target Square
-  notation += target;
+  notation += targetSquare;
 
   // 4. Promotion
   if (isPromotion && promotion.isNotEmpty) {
-    notation += '=';
     notation += promotion;
   }
 
