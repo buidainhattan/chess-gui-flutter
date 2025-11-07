@@ -2,6 +2,7 @@ import 'package:chess_app/core/basics/string_extensions.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/chess_board/view/chess_board.dart';
+import 'package:chess_app/features/match/view/match_end.dart';
 import 'package:chess_app/features/match/viewmodel/match_viewmodel.dart';
 import 'package:chess_app/features/match/viewmodel/timer_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -25,68 +26,85 @@ class Match extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+      child: Stack(
         children: [
-          IntrinsicWidth(
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: _PlayerInfoDisplayer(
-                    playerName: "Player 2 (Bot)",
-                    playerSide: matchViewmodel.playerOneSide,
-                    isPlayerOne: false,
-                    pieceSize: pieceSize,
-                  ),
+          Selector<MatchViewmodel, GameResultType>(
+            selector: (context, matchViewmodel) => matchViewmodel.result,
+            builder: (context, result, child) {
+              if (result != GameResultType.ongoing) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  MatchEndDialog.show(context, result);
+                });
+              }
+              return SizedBox.shrink();
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IntrinsicWidth(
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: _PlayerInfoDisplayer(
+                        playerName: "Player 2 (Bot)",
+                        playerSide: matchViewmodel.playerOneSide,
+                        isPlayerOne: false,
+                        pieceSize: pieceSize,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 10,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 3, 3, 3),
+                        child: AspectRatio(
+                          aspectRatio: 1.0,
+                          child: ChessBoard(enableBot: enableBot),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: _PlayerInfoDisplayer(
+                        playerName: "Player 1",
+                        playerSide: matchViewmodel.playerTwoSide,
+                        isPlayerOne: true,
+                        pieceSize: pieceSize,
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  flex: 10,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 3, 3, 3),
-                    child: AspectRatio(
-                      aspectRatio: 1.0,
-                      child: ChessBoard(enableBot: enableBot),
+              ),
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(left: 10),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Color.fromRGBO(232, 237, 249, 1),
+                    border: Border(
+                      bottom: BorderSide(width: 2),
+                      left: BorderSide(width: 2),
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(5),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: _PlayerInfoDisplayer(
-                    playerName: "Player 1",
-                    playerSide: matchViewmodel.playerTwoSide,
-                    isPlayerOne: true,
-                    pieceSize: pieceSize,
+                  child: Column(
+                    children: [
+                      _MatchStateDisplayer(),
+                      SizedBox(height: 20),
+                      Expanded(child: _ZebraStripedList()),
+                      SizedBox(height: 20),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                        child: _MenuBar(),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(left: 10),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(232, 237, 249, 1),
-                border: Border(
-                  bottom: BorderSide(width: 2),
-                  left: BorderSide(width: 2),
-                ),
-                borderRadius: BorderRadius.only(topRight: Radius.circular(5)),
               ),
-              child: Column(
-                children: [
-                  _MatchStateDisplayer(),
-                  SizedBox(height: 20),
-                  Expanded(child: _ZebraStripedList()),
-                  SizedBox(height: 20),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-                    child: _MenuBar(),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
         ],
       ),

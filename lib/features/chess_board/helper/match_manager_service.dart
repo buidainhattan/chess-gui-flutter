@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chess_app/core/basics/helper_methods.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/constants/game_end_constraint.dart';
 import 'package:chess_app/core/engine_bridge.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
@@ -17,11 +18,12 @@ class MatchManagerService {
 
   final StreamController<List<String>> _algebraicHistoryController =
       StreamController<List<String>>.broadcast();
-  Stream<List<String>> get algebraicHistoryStream => _algebraicHistoryController.stream;
+  Stream<List<String>> get algebraicHistoryStream =>
+      _algebraicHistoryController.stream;
 
-  final StreamController<(bool, Sides)> _isMatchEndController =
-      StreamController<(bool, Sides)>.broadcast();
-  Stream<(bool, Sides)> get isMatchEndStream => _isMatchEndController.stream;
+  final StreamController<GameResultType> _isMatchEndController =
+      StreamController<GameResultType>.broadcast();
+  Stream<GameResultType> get isMatchEndStream => _isMatchEndController.stream;
 
   late String _fen;
   String get fen => _fen;
@@ -53,12 +55,15 @@ class MatchManagerService {
     _algebraicHistory = [];
   }
 
-  void switchSide() {
+  void switchSide({bool isCheckmate = false}) async {
     int newFullMoveCount = _updateFullMoveNumber();
     Sides activeSide = Sides.fromValue(_matchState.activeSide.value ^ 1)!;
+    bool isChecking = await _engineBridge.isKingInCheck(activeSide);
     _matchState = _matchState.copyWith(
       activeSide: activeSide,
       fullMoveNumber: newFullMoveCount,
+      isChecking: isChecking,
+      isCheckmate: isCheckmate,
     );
     _stateController.add(_matchState);
   }
@@ -92,12 +97,12 @@ class MatchManagerService {
     } else {
       _matchState = _matchState.copyWith(halfMoveClock: 0);
     }
+    if (_draw75MovesRule(_matchState.halfMoveClock)) {
+      _matchEnd(GameResultType.draw);
+    }
   }
 
-  void getAlgebraicNotation(
-    PieceTypes movingPiece,
-    MoveModel move,
-  ) async {
+  void getAlgebraicNotation(PieceTypes movingPiece, MoveModel move) async {
     String disambiguation = await _engineBridge.disambiguating(
       matchState.activeSide,
       move.index,
@@ -107,24 +112,28 @@ class MatchManagerService {
       move,
       disambiguation: disambiguation,
     );
-    final List<String> newAlgebraicHistory = [
-      ..._algebraicHistory,
-      algebraic,
-    ];
+    final List<String> newAlgebraicHistory = [..._algebraicHistory, algebraic];
     _algebraicHistory = newAlgebraicHistory;
     _algebraicHistoryController.add(_algebraicHistory);
   }
 
-  void matchEnd() {
-    Sides winnerSide = _matchState.activeSide == Sides.white
-        ? Sides.black
-        : Sides.white;
-    _isMatchEndController.add((true, winnerSide));
+  void noLegalMoveToMake() {
+    if (_matchState.isChecking) {
+      _matchState = _matchState.copyWith(isChecking: false, isCheckmate: true);
+      _matchEnd(GameResultType.win);
+    } else {
+      _matchEnd(GameResultType.draw);
+    }
   }
 
   void dispose() {
     _stateController.close();
+    _algebraicHistoryController.close();
     _isMatchEndController.close();
+  }
+
+  void _matchEnd(GameResultType result) {
+    _isMatchEndController.add(result);
   }
 
   int _updateFullMoveNumber() {
@@ -132,6 +141,10 @@ class MatchManagerService {
       return _matchState.fullMoveNumber + 1;
     }
     return _matchState.fullMoveNumber;
+  }
+
+  bool _draw75MovesRule(int halfMoveClock) {
+    return halfMoveClock == automaticDrawHalfMoves;
   }
 }
 
@@ -142,6 +155,8 @@ class MatchState {
   final int halfMoveClock;
   final int fullMoveNumber;
   final Map<Sides, List<PieceTypes>> capturedPieces;
+  final bool isChecking;
+  final bool isCheckmate;
 
   MatchState({
     required this.activeSide,
@@ -150,6 +165,8 @@ class MatchState {
     this.halfMoveClock = 0,
     this.fullMoveNumber = 0,
     Map<Sides, List<PieceTypes>>? capturedPieces,
+    this.isChecking = false,
+    this.isCheckmate = false,
   }) : capturedPieces = capturedPieces ?? {Sides.black: [], Sides.white: []};
 
   MatchState copyWith({
@@ -159,6 +176,8 @@ class MatchState {
     int? halfMoveClock,
     int? fullMoveNumber,
     Map<Sides, List<PieceTypes>>? capturedPieces,
+    bool? isChecking,
+    bool? isCheckmate,
   }) {
     return MatchState(
       activeSide: activeSide ?? this.activeSide,
@@ -167,6 +186,8 @@ class MatchState {
       halfMoveClock: halfMoveClock ?? this.halfMoveClock,
       fullMoveNumber: fullMoveNumber ?? this.fullMoveNumber,
       capturedPieces: capturedPieces ?? this.capturedPieces,
+      isChecking: isChecking ?? this.isChecking,
+      isCheckmate: isCheckmate ?? this.isCheckmate,
     );
   }
 }

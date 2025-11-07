@@ -124,8 +124,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   void _update([final int? moveIndex]) async {
     if (moveIndex != null) {
-      _matchManagerService.switchSide();
       _engineBridge.makeMove(moveIndex);
+      _matchManagerService.switchSide();
       if (_matchManagerService.botEnabled) {
         if (_matchManagerService.isPlayerTwoTurn()) {
           await _botMakeMove();
@@ -134,10 +134,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
       }
     }
     final List<MoveModel> legalMoves = await _engineBridge.getLegalMoves();
-    _moveManager.populateMoveMap(legalMoves);
     if (legalMoves.isEmpty) {
-      _matchManagerService.matchEnd();
+      _matchManagerService.noLegalMoveToMake();
     }
+    _moveManager.populateMoveMap(legalMoves);
   }
 
   void _playerMakeMove() {

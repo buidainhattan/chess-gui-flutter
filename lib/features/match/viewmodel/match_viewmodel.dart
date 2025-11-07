@@ -20,8 +20,7 @@ class MatchViewmodel extends ChangeNotifier {
 
   late List<String> algebraicHistory;
 
-  bool isMatchEnd = false;
-  late bool isWinner;
+  GameResultType result = GameResultType.ongoing;
 
   late final StreamSubscription _matchStateSubscription;
   late final StreamSubscription _algebraicHistorySubscription;
@@ -67,8 +66,7 @@ class MatchViewmodel extends ChangeNotifier {
     _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
       newState,
     ) {
-      isMatchEnd = newState.$1;
-      isWinner = newState.$2.name == playerOneSide;
+      result = newState;
 
       notifyListeners();
     });

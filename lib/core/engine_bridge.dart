@@ -21,6 +21,10 @@ typedef DisambiguatingNative =
     Pointer<Utf8> Function(Int32 sideToMove, Int32 moveIndex);
 typedef Disambiguating = Pointer<Utf8> Function(int sideToMove, int moveIndex);
 
+// Typedefs for the C function that returns an integer
+typedef IsKingInCheckNative = Int32 Function(Int32 kingSide);
+typedef IsKingInCheck = int Function(int kingSide);
+
 // Typedefs for the C function that returns the move list struct
 typedef GetLegalMovesNative = MoveListResult Function();
 typedef GetLegalMoves = MoveListResult Function();
@@ -87,6 +91,12 @@ class EngineBridge {
     return MoveModel.fromFFI(bestMove);
   }
 
+  Future<bool> isKingInCheck(Sides kingSide) async {
+    final int data = kingSide.value;
+    final bool isInCheck = await _send("isKingInCheck", data) == 1;
+    return isInCheck;
+  }
+
   Future<String> disambiguating(Sides sideToMove, int moveIndex) async {
     final Map<String, int> data = {
       'sideToMove': sideToMove.value,
@@ -148,6 +158,9 @@ class EngineBridge {
     final GetBestMove getBestMove = dylib
         .lookup<NativeFunction<GetBestMoveNative>>('get_best_move')
         .asFunction();
+    final IsKingInCheck isKingInCheck = dylib
+        .lookup<NativeFunction<IsKingInCheckNative>>('is_king_in_check')
+        .asFunction();
     final Disambiguating disambiguating = dylib
         .lookup<NativeFunction<DisambiguatingNative>>('disambiguating')
         .asFunction();
@@ -171,8 +184,13 @@ class EngineBridge {
           unMakeMove(data);
         case 'getBestMove':
           result = getBestMove(data);
+        case 'isKingInCheck':
+          result = isKingInCheck(data);
         case 'disambiguating':
-          result = disambiguating(data['sideToMove'], data['moveIndex']).toDartString();
+          result = disambiguating(
+            data['sideToMove'],
+            data['moveIndex'],
+          ).toDartString();
         default:
           result = {'error': 'Unknown task type'};
       }
