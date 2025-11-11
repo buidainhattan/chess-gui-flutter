@@ -19,35 +19,36 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool isPromotion = false;
   // List to hold address (key) of current piece on that square
   final List<String> pieceKeys = List.filled(64, "", growable: false);
+  Sides get activeSide => _matchManagerService.matchState.activeSide;
   // A map to access piece properties through key
   late final Map<String, PieceModel> pieceList;
   // Moveable square indices of selected piece
   final List<int> moveList = [];
   String? _selectedPieceKey; // Store current selected piece key
+  int? preFrom; // The index which selected piece a turn before from
   int? from; // The index which selected piece is on
   int? to; // The index which seletected piece is about to move to
   int? _promoteIndex;
 
-  ChessBoardViewmodel(this._matchManagerService) {
-    initializeChessBoard();
-  }
+  bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
 
-  void initializeChessBoard() {
-    _parseFEN();
+  ChessBoardViewmodel(this._matchManagerService);
+
+  Future<void> initializeChessBoard() async {
+    if (_isInitialized) return;
+    await _parseFEN();
     for (var piece in pieceList.values) {
-      _addToPieceCoordKeys(piece.index, piece.key);
+      pieceKeys[piece.index] = piece.key;
     }
+    _isInitialized = true;
   }
 
-  void _parseFEN() {
+  Future<void> _parseFEN() async {
     String fen = _matchManagerService.fen;
-    _engineBridge.loadFromFEN(fen);
-    _update();
+    await _engineBridge.loadFromFEN(fen);
+    await _getMoves();
     pieceList = _matchManagerService.fenHelper.pieceList;
-  }
-
-  void _addToPieceCoordKeys(int squareIndex, String key) {
-    pieceKeys[squareIndex] = key;
   }
 
   void toggleBot(bool toggleBot, Sides botSide) {
@@ -65,10 +66,6 @@ class ChessBoardViewmodel extends ChangeNotifier {
     }
 
     _playerMakeMove();
-  }
-
-  Sides getCurrentSide() {
-    return _matchManagerService.matchState.activeSide;
   }
 
   void promotePiece({
@@ -122,17 +119,19 @@ class ChessBoardViewmodel extends ChangeNotifier {
     return true;
   }
 
-  void _update([final int? moveIndex]) async {
-    if (moveIndex != null) {
-      _engineBridge.makeMove(moveIndex);
-      _matchManagerService.switchSide();
-      if (_matchManagerService.botEnabled) {
-        if (_matchManagerService.isPlayerTwoTurn()) {
-          await _botMakeMove();
-          return;
-        }
+  void _update(int moveIndex) async {
+    _engineBridge.makeMove(moveIndex);
+    await _matchManagerService.switchSide();
+    if (_matchManagerService.botEnabled) {
+      if (_matchManagerService.isPlayerTwoTurn()) {
+        await _botMakeMove();
+        return;
       }
     }
+    await _getMoves();
+  }
+
+  Future<void> _getMoves() async {
     final List<MoveModel> legalMoves = await _engineBridge.getLegalMoves();
     if (legalMoves.isEmpty) {
       _matchManagerService.noLegalMoveToMake();
@@ -275,7 +274,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     // Deselect piece and clear moveList
 
     _selectedPieceKey = null;
-    from = null;
+    preFrom = from;
     moveList.clear();
   }
 

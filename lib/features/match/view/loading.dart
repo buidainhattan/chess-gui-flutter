@@ -24,50 +24,51 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  late final Future<MatchManagerService> _initServiceFuture;
+  late final Future<_InitializedData> _initAll;
 
   @override
   void initState() {
     super.initState();
-    _initServiceFuture = _initializeService();
+    _initAll = _initializeAll();
   }
 
-  Future<MatchManagerService> _initializeService() async {
-    final MatchManagerService service = MatchManagerService();
-    service.initialSet(widget.fen, widget.playerSide);
-    return service;
+  Future<_InitializedData> _initializeAll() async {
+    final MatchManagerService matchManagerService = MatchManagerService();
+    matchManagerService.initialSet(widget.fen, widget.playerSide);
+    final chessBoardViewmodel = ChessBoardViewmodel(matchManagerService);
+    final matchViewmodel = MatchViewmodel(matchManagerService);
+    final timerViewmodel = TimerViewmodel(matchManagerService);
+
+    await chessBoardViewmodel.initializeChessBoard();
+
+    return _InitializedData(
+      matchManagerService: matchManagerService,
+      chessBoardViewmodel: chessBoardViewmodel,
+      matchViewmodel: matchViewmodel,
+      timerViewmodel: timerViewmodel,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _initServiceFuture,
+      future: _initAll,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
-
         if (asyncSnapshot.hasData) {
-          final MatchManagerService initializedService = asyncSnapshot.data!;
+          final data = asyncSnapshot.data!;
 
           return MultiProvider(
             providers: [
               Provider<MatchManagerService>(
-                create: (_) => initializedService,
+                create: (_) => data.matchManagerService,
                 dispose: (_, service) => service.dispose(),
               ),
-              ChangeNotifierProvider(
-                create: (context) =>
-                    ChessBoardViewmodel(context.read<MatchManagerService>()),
-              ),
-              ChangeNotifierProvider(
-                create: (context) =>
-                    MatchViewmodel(context.read<MatchManagerService>()),
-              ),
-              ChangeNotifierProvider(
-                create: (context) =>
-                    TimerViewmodel(context.read<MatchManagerService>()),
-              ),
+              ChangeNotifierProvider.value(value: data.chessBoardViewmodel),
+              ChangeNotifierProvider.value(value: data.matchViewmodel),
+              ChangeNotifierProvider.value(value: data.timerViewmodel),
             ],
             child: Match(enableBot: widget.enableBot),
           );
@@ -77,4 +78,18 @@ class _LoadingState extends State<Loading> {
       },
     );
   }
+}
+
+class _InitializedData {
+  final MatchManagerService matchManagerService;
+  final ChessBoardViewmodel chessBoardViewmodel;
+  final MatchViewmodel matchViewmodel;
+  final TimerViewmodel timerViewmodel;
+
+  _InitializedData({
+    required this.matchManagerService,
+    required this.chessBoardViewmodel,
+    required this.matchViewmodel,
+    required this.timerViewmodel,
+  });
 }

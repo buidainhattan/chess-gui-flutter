@@ -50,7 +50,7 @@ class EngineBridge {
     _startFuture = _startEngineIsolate();
   }
 
-  void loadFromFEN(String fen) async {
+  Future<void> loadFromFEN(String fen) async {
     final Pointer<Utf8> stringPointer = fen.toNativeUtf8();
     try {
       await _send("setBoard", stringPointer);

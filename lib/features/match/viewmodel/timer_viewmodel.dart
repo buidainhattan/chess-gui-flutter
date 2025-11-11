@@ -45,6 +45,7 @@ class TimerViewmodel extends ChangeNotifier {
   @override
   void dispose() {
     _matchStateSubscription.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -82,6 +83,8 @@ class TimerViewmodel extends ChangeNotifier {
       playerTwoTime = _formatDuration(_playerTwoRemainingTime);
     }
     _lastTickTime = now;
+
+    notifyListeners();
   }
 
   String _formatDuration(Duration duration) {

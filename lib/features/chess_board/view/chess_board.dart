@@ -34,7 +34,7 @@ class ChessBoard extends StatelessWidget {
         tileSize = size * 43 / 370;
         pieceSize = tileSize * 0.75;
         rankOffset = fileOffset = tileSize / 2;
-
+    
         return SizedBox(
           width: size,
           height: size,
@@ -47,7 +47,7 @@ class ChessBoard extends StatelessWidget {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       PromotionDialog.show(
                         context,
-                        chessBoardViewmodel.getCurrentSide(),
+                        chessBoardViewmodel.activeSide,
                       ).then((chosenPiece) {
                         chessBoardViewmodel.promotePiece(
                           piecePromotedTo: chosenPiece!,
@@ -64,13 +64,13 @@ class ChessBoard extends StatelessWidget {
                     children: List.generate(9, (colIndex) {
                       int loopIndex = (8 - rowIndex) * 9 + colIndex;
                       int squareIndex = loopIndex - 17 + rowIndex;
-
+    
                       // Generate board black and white squares
                       if (loopIndex % 9 != 0 && loopIndex > 8) {
                         Sides squareColor = (rowIndex + colIndex) % 2 == 0
                             ? Sides.black
                             : Sides.white;
-
+    
                         return Square(
                           chessBoardViewmodel: chessBoardViewmodel,
                           tileSize: tileSize,
@@ -99,7 +99,9 @@ class ChessBoard extends StatelessWidget {
                           return SizedBox(
                             width: tileSize,
                             height: fileOffset,
-                            child: Center(child: Text((files[colIndex - 1]))),
+                            child: Center(
+                              child: Text((files[colIndex - 1])),
+                            ),
                           );
                         }
                       }
@@ -110,24 +112,25 @@ class ChessBoard extends StatelessWidget {
               ...chessBoardViewmodel.pieceList.entries.map(
                 (entry) => Selector<ChessBoardViewmodel, PieceModel?>(
                   key: ValueKey(entry.key),
-
+    
                   selector: (context, viewModel) =>
                       viewModel.pieceList[entry.key],
                   builder: (context, pieceModel, child) {
                     if (pieceModel!.isCaptured) {
                       return SizedBox.shrink();
                     }
-
+    
                     int index = pieceModel.index;
                     int rowIndex = (7 - index ~/ 8);
                     int colIndex = (index % 8 + 1);
                     double topPosition =
-                        ((rowIndex * tileSize) + (tileSize - pieceSize) / 2);
+                        ((rowIndex * tileSize) +
+                        (tileSize - pieceSize) / 2);
                     double leftPosition =
                         (((colIndex - 1) * tileSize) +
                         rankOffset +
                         (tileSize - pieceSize) / 2);
-
+    
                     return Piece(
                       piece: pieceModel,
                       pieceSize: pieceSize,

@@ -157,7 +157,9 @@ class _PlayerInfoDisplayer extends StatelessWidget {
           ),
         ),
         Selector<TimerViewmodel, String>(
-          selector: (context, timerViewmodel) => timerViewmodel.playerTwoTime,
+          selector: (context, timerViewmodel) => isPlayerOne
+              ? timerViewmodel.playerOneTime
+              : timerViewmodel.playerTwoTime,
           builder: (context, timeString, child) {
             return Container(
               padding: EdgeInsets.fromLTRB(10, 0, 10, 0),

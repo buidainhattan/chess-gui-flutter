@@ -55,7 +55,7 @@ class MatchManagerService {
     _algebraicHistory = [];
   }
 
-  void switchSide({bool isCheckmate = false}) async {
+  Future<void> switchSide({bool isCheckmate = false}) async {
     int newFullMoveCount = _updateFullMoveNumber();
     Sides activeSide = Sides.fromValue(_matchState.activeSide.value ^ 1)!;
     bool isChecking = await _engineBridge.isKingInCheck(activeSide);

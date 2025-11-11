@@ -30,7 +30,10 @@ class Square extends StatelessWidget {
         child: Stack(
           children: [
             Selector<ChessBoardViewmodel, bool>(
-              selector: (context, viewmodel) => viewmodel.from == index,
+              selector: (context, viewmodel) =>
+                  viewmodel.preFrom == index ||
+                  viewmodel.from == index ||
+                  viewmodel.to == index,
               builder: (context, isSelected, child) {
                 final String assetName = isSelected
                     ? "assets/images/tiles/tile_${squareColor.name}_selected.svg"
