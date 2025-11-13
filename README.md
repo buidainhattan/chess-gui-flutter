@@ -1,16 +1,15 @@
-# chess_app
+# chess_GUI
 
-A new Flutter project.
+A chess GUI made using Flutter framework to interact with my chess engine.
 
-## Getting Started
+# Features
 
-This project is a starting point for a Flutter application.
+Currently working features:
+- Player versus player mode (PVP).
+- Player versus Bot mode (PVE).
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+W.I.P:
+- Save and load ongoing match.
+- Theme customization.
+- Background music.
+- Redo move (in PVE only).
