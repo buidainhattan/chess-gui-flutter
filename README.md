@@ -1,6 +1,6 @@
 # chess_GUI
 
-A chess GUI made using Flutter framework to interact with my chess engine.
+A chess GUI made with Flutter to interact with my chess engine.
 
 # Features
 
@@ -13,3 +13,8 @@ W.I.P:
 - Theme customization.
 - Background music.
 - Redo move (in PVE only).
+
+# Future Plan
+
+Extend PVP mode, allow LAN connection to play.
+Bot levels selection.
