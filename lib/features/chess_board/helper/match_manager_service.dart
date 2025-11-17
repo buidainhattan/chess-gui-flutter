@@ -32,6 +32,8 @@ class MatchManagerService {
   Sides get playerOneSide => _playerOneSide;
   late final Sides _playerTwoSide;
   Sides get playerTwoSide => _playerTwoSide;
+  late int? _checkedKingSquare;
+  int? get checkedKingSquare => _checkedKingSquare;
 
   late MatchState _matchState;
   MatchState get matchState => _matchState;

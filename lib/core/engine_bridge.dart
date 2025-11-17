@@ -22,6 +22,8 @@ typedef DisambiguatingNative =
 typedef Disambiguating = Pointer<Utf8> Function(int sideToMove, int moveIndex);
 
 // Typedefs for the C function that returns an integer
+typedef GetKingSquareNative = Int32 Function(Int32 kingSide);
+typedef GetKingSquare = int Function(int kingSide);
 typedef IsKingInCheckNative = Int32 Function(Int32 kingSide);
 typedef IsKingInCheck = int Function(int kingSide);
 
@@ -91,6 +93,12 @@ class EngineBridge {
     return MoveModel.fromFFI(bestMove);
   }
 
+  Future<int> getKingSquare(Sides kingSide) async {
+    final int data = kingSide.value;
+    final int kingSquare = await _send("getKingSquare", data);
+    return kingSquare;
+  }
+
   Future<bool> isKingInCheck(Sides kingSide) async {
     final int data = kingSide.value;
     final bool isInCheck = await _send("isKingInCheck", data) == 1;
@@ -118,7 +126,7 @@ class EngineBridge {
     _engineIsolate = await Isolate.spawn(_isolateEntry, _receivePort.sendPort);
     _sendPort = await _receivePort.first;
     _isStarted = true;
-  }
+  } 
 
   static void _isolateEntry(SendPort mainSendPort) {
     final isolateReceivePort = ReceivePort();
@@ -158,6 +166,9 @@ class EngineBridge {
     final GetBestMove getBestMove = dylib
         .lookup<NativeFunction<GetBestMoveNative>>('get_best_move')
         .asFunction();
+    final GetKingSquare getKingSquare = dylib
+        .lookup<NativeFunction<GetKingSquareNative>>('get_king_square')
+        .asFunction();
     final IsKingInCheck isKingInCheck = dylib
         .lookup<NativeFunction<IsKingInCheckNative>>('is_king_in_check')
         .asFunction();
@@ -184,6 +195,8 @@ class EngineBridge {
           unMakeMove(data);
         case 'getBestMove':
           result = getBestMove(data);
+        case 'getKingSquare':
+          result = getKingSquare(data);
         case 'isKingInCheck':
           result = isKingInCheck(data);
         case 'disambiguating':

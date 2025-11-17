@@ -28,6 +28,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   int? preFrom; // The index which selected piece a turn before from
   int? from; // The index which selected piece is on
   int? to; // The index which seletected piece is about to move to
+  int? checkedKingSquare;
   int? _promoteIndex;
 
   bool _isInitialized = false;
@@ -122,6 +123,13 @@ class ChessBoardViewmodel extends ChangeNotifier {
   void _update(int moveIndex) async {
     _engineBridge.makeMove(moveIndex);
     await _matchManagerService.switchSide();
+    if (_matchManagerService.matchState.isChecking) {
+      checkedKingSquare = await _engineBridge.getKingSquare(
+        _matchManagerService.matchState.activeSide,
+      );
+    } else {
+      checkedKingSquare = null;
+    }
     if (_matchManagerService.botEnabled) {
       if (_matchManagerService.isPlayerTwoTurn()) {
         await _botMakeMove();

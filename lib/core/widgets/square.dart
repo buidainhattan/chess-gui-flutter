@@ -84,6 +84,27 @@ class Square extends StatelessWidget {
                 );
               },
             ),
+            Selector<ChessBoardViewmodel, bool>(
+              selector: (context, viewmodel) {
+                if (viewmodel.checkedKingSquare != null &&
+                    viewmodel.checkedKingSquare == index) {
+                  return true;
+                }
+                return false;
+              },
+              builder: (context, isChecked, child) {
+                if (!isChecked) {
+                  return SizedBox.shrink();
+                }
+                final String hintName = "assets/images/tiles/tile_hint_checking.svg";
+
+                return SvgPicture.asset(
+                  hintName,
+                  width: tileSize,
+                  height: tileSize,
+                );
+              },
+            ),
           ],
         ),
       ),
