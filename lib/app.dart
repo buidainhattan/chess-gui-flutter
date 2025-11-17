@@ -1,3 +1,4 @@
+import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
 import 'package:chess_app/features/main_menu/view/game_mode_menu.dart';
@@ -6,8 +7,26 @@ import 'package:chess_app/features/match/view/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    AudioController().dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
