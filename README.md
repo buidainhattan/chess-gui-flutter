@@ -1,4 +1,4 @@
-# chess_GUI_
+# chess_GUI
 
 A chess GUI made with Flutter to interact with my chess engine.
 
