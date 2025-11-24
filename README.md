@@ -18,3 +18,6 @@ A chess GUI made with Flutter to interact with my chess engine.
 
 - Extend PVP mode, allow LAN connection to play\
 - Bot levels selection.
+
+# Demo
+- Window: [link](https://drive.google.com/uc?export=download&id=1mdsFAlQrRkyKBUUrxPM0MkD1JE7t2Y7s)
