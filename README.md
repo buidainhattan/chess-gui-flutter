@@ -20,4 +20,4 @@ A chess GUI made with Flutter to interact with my chess engine.
 - Bot levels selection.
 
 # Demo
-- Window: [link](https://drive.google.com/uc?export=download&id=1mdsFAlQrRkyKBUUrxPM0MkD1JE7t2Y7s)
+- Window: [download(googledrive)](https://drive.google.com/uc?export=download&id=1mdsFAlQrRkyKBUUrxPM0MkD1JE7t2Y7s)
