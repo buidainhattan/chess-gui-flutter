@@ -155,7 +155,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   Future<void> _botMakeMove() async {
     MoveModel bestMove = await _engineBridge.getBestMove(5);
-    _makeMove(bestMove);
+    _makeMove(bestMove, true);
     notifyListeners();
   }
 
@@ -218,6 +218,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   void _movePiece(String pieceKey, int from, int to) {
     // Move a piece from from-to index
 
+    preFrom = from;
     pieceKeys[from] = "";
     pieceKeys[to] = pieceKey;
     PieceModel pieceWithNewAttribute = pieceList[pieceKey]!.copyWith(index: to);
@@ -282,7 +283,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     // Deselect piece and clear moveList
 
     _selectedPieceKey = null;
-    preFrom = from;
+    from = null;
     moveList.clear();
   }
 
