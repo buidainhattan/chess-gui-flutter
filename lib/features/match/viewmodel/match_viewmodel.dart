@@ -58,7 +58,7 @@ class MatchViewmodel extends ChangeNotifier {
 
     _algebraicHistorySubscription = _matchManagerService.algebraicHistoryStream
         .listen((newState) {
-          algebraicHistory = newState;
+          algebraicHistory = List<String>.from(newState);
 
           notifyListeners();
         });
@@ -70,6 +70,12 @@ class MatchViewmodel extends ChangeNotifier {
 
       notifyListeners();
     });
+  }
+
+  void delegateUnMakeMove() {
+    _matchManagerService.proceedUnMakeMove();
+
+    notifyListeners();
   }
 
   @override

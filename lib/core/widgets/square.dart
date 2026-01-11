@@ -31,9 +31,9 @@ class Square extends StatelessWidget {
           children: [
             Selector<ChessBoardViewmodel, bool>(
               selector: (context, viewmodel) =>
-                  viewmodel.preFrom == index ||
-                  viewmodel.from == index ||
-                  viewmodel.to == index,
+                  viewmodel.boardState.preFrom == index ||
+                  viewmodel.boardState.from == index ||
+                  viewmodel.boardState.to == index,
               builder: (context, isSelected, child) {
                 final String assetName = isSelected
                     ? "assets/images/tiles/tile_${squareColor.name}_selected.svg"
@@ -51,8 +51,8 @@ class Square extends StatelessWidget {
               ({bool isMoveableTo, bool isCapture})
             >(
               selector: (context, viewmodel) {
-                final bool isMoveableTo = viewmodel.moveList.contains(index);
-                final bool isCapture = viewmodel.pieceKeys[index].isNotEmpty;
+                final bool isMoveableTo = viewmodel.boardState.moveList.contains(index);
+                final bool isCapture = viewmodel.boardState.pieceKeys[index].isNotEmpty;
 
                 return (isMoveableTo: isMoveableTo, isCapture: isCapture);
               },
@@ -86,8 +86,8 @@ class Square extends StatelessWidget {
             ),
             Selector<ChessBoardViewmodel, bool>(
               selector: (context, viewmodel) {
-                if (viewmodel.checkedKingSquare != null &&
-                    viewmodel.checkedKingSquare == index) {
+                if (viewmodel.boardState.checkedKingSquare != null &&
+                    viewmodel.boardState.checkedKingSquare == index) {
                   return true;
                 }
                 return false;

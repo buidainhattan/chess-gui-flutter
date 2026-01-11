@@ -6,11 +6,16 @@ import 'package:chess_app/core/constants/game_end_constraint.dart';
 import 'package:chess_app/core/engine_bridge.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
+import 'package:chess_app/features/match/model/match_state_model.dart';
 
 class MatchManagerService {
   late final FENHelper _fenHelper;
   FENHelper get fenHelper => _fenHelper;
   final EngineBridge _engineBridge = EngineBridge();
+
+  final StreamController<int> _redoSignalController =
+      StreamController<int>.broadcast();
+  Stream<int> get redoSignalStream => _redoSignalController.stream;
 
   final StreamController<MatchState> _stateController =
       StreamController<MatchState>.broadcast();
@@ -37,6 +42,7 @@ class MatchManagerService {
 
   late MatchState _matchState;
   MatchState get matchState => _matchState;
+  late List<MatchState> _matchStateHistory;
   late List<String> _algebraicHistory;
   List<String> get algebraicHistory => _algebraicHistory;
 
@@ -50,10 +56,11 @@ class MatchManagerService {
     _matchState = MatchState(
       activeSide: _fenHelper.activeColor,
       castlingRight: _fenHelper.castlingAvailability,
-      enPassantTarget: _fenHelper.enPassantTarget,
+      enPassantSquare: _fenHelper.enPassantTarget,
       halfMoveClock: _fenHelper.halfmoveClock,
       fullMoveNumber: _fenHelper.fullmoveNumber,
     );
+    _matchStateHistory = [];
     _algebraicHistory = [];
   }
 
@@ -70,6 +77,25 @@ class MatchManagerService {
     _stateController.add(_matchState);
   }
 
+  void pushMatchStateHistory() {
+    _matchStateHistory.add(_matchState);
+  }
+
+  void proceedUnMakeMove() {
+    for (int i = 2; i > 0; i--) {
+      if (_matchStateHistory.isEmpty || _algebraicHistory.isEmpty) return;
+
+      _matchStateHistory.removeLast();
+      _matchState = _matchStateHistory.last;
+      _algebraicHistory.removeLast();
+      _engineBridge.unMakeMove();
+
+      _redoSignalController.add(i);
+      _stateController.add(_matchState);
+      _algebraicHistoryController.add(_algebraicHistory);
+    }
+  }
+
   bool isPlayerOneTurn() {
     return _playerOneSide == _matchState.activeSide;
   }
@@ -79,25 +105,31 @@ class MatchManagerService {
   }
 
   void updatePieceCaptured(PieceTypes piece) {
+    if (piece == PieceTypes.pieceType_NB) return;
+
     _matchState.capturedPieces[_matchState.activeSide]!.add(piece);
   }
 
   void setEnPassantTarget(int? index) {
     if (index == null) {
-      _matchState = _matchState.copyWith(enPassantTarget: null);
+      _matchState = _matchState.copyWith(enPassantSquare: null);
       return;
     }
     Squares? enPassantTarget = Squares.fromIndex(index);
-    _matchState = _matchState.copyWith(enPassantTarget: enPassantTarget);
+    _matchState = _matchState.copyWith(enPassantSquare: enPassantTarget);
   }
 
-  void updateHalfMoveClock(PieceTypes movingPiece, MoveFlags flag) {
+  void updateHalfMoveClock(PieceTypes movingPiece, MoveFlags flag) async {
     if (movingPiece != PieceTypes.pawn && flag != MoveFlags.capture) {
       _matchState = _matchState.copyWith(
         halfMoveClock: _matchState.halfMoveClock + 1,
       );
     } else {
       _matchState = _matchState.copyWith(halfMoveClock: 0);
+    }
+
+    if (await _engineBridge.isRepetition()) {
+      _matchEnd(GameResultType.draw);
     }
     if (_draw75MovesRule(_matchState.halfMoveClock)) {
       _matchEnd(GameResultType.draw);
@@ -147,49 +179,5 @@ class MatchManagerService {
 
   bool _draw75MovesRule(int halfMoveClock) {
     return halfMoveClock == automaticDrawHalfMoves;
-  }
-}
-
-class MatchState {
-  final Sides activeSide; // Current active side
-  final String castlingRight; // Castling right
-  final Squares? enPassantTarget; // enpassant target sqsuare
-  final int halfMoveClock;
-  final int fullMoveNumber;
-  final Map<Sides, List<PieceTypes>> capturedPieces;
-  final bool isChecking;
-  final bool isCheckmate;
-
-  MatchState({
-    required this.activeSide,
-    required this.castlingRight,
-    this.enPassantTarget,
-    this.halfMoveClock = 0,
-    this.fullMoveNumber = 0,
-    Map<Sides, List<PieceTypes>>? capturedPieces,
-    this.isChecking = false,
-    this.isCheckmate = false,
-  }) : capturedPieces = capturedPieces ?? {Sides.black: [], Sides.white: []};
-
-  MatchState copyWith({
-    Sides? activeSide,
-    String? castlingRight,
-    Squares? enPassantTarget,
-    int? halfMoveClock,
-    int? fullMoveNumber,
-    Map<Sides, List<PieceTypes>>? capturedPieces,
-    bool? isChecking,
-    bool? isCheckmate,
-  }) {
-    return MatchState(
-      activeSide: activeSide ?? this.activeSide,
-      castlingRight: castlingRight ?? this.castlingRight,
-      enPassantTarget: enPassantTarget ?? this.enPassantTarget,
-      halfMoveClock: halfMoveClock ?? this.halfMoveClock,
-      fullMoveNumber: fullMoveNumber ?? this.fullMoveNumber,
-      capturedPieces: capturedPieces ?? this.capturedPieces,
-      isChecking: isChecking ?? this.isChecking,
-      isCheckmate: isCheckmate ?? this.isCheckmate,
-    );
   }
 }

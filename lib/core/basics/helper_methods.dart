@@ -22,7 +22,7 @@ String toAlgebraic(
 }) {
   // Convert move data into String
   final String targetSquare = Squares.fromIndex(move.to)!.name;
-  final String promotionPiece = move.piecePromotedTo.name;
+  final String promotionPiece = move.piecePromotedTo!.name;
 
   // Derive move characteristics from the flag value
   final MoveFlags moveFlag = move.moveFlag;

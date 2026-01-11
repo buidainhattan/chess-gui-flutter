@@ -18,7 +18,7 @@ class MoveManager {
       int to = move.to;
 
       if (flag == MoveFlags.promotion || flag == MoveFlags.promotionCapture) {
-        _movePromotionList[to + move.piecePromotedTo.value] ??= move;
+        _movePromotionList[to * move.piecePromotedTo!.value] ??= move;
       }
 
       _moveMap[from] ??= {};
@@ -39,6 +39,6 @@ class MoveManager {
   }
 
   MoveModel getPromotionMove(int to, PieceTypes piecePromotedTo) {
-    return _movePromotionList[to + piecePromotedTo.value]!;
+    return _movePromotionList[to * piecePromotedTo.value]!;
   }
 }

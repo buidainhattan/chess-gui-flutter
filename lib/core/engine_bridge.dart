@@ -11,8 +11,8 @@ typedef SetBoardNative = Void Function(Pointer<Utf8>);
 typedef SetBoard = void Function(Pointer<Utf8>);
 typedef MakeMoveNative = Void Function(Int32 moveIndex);
 typedef MakeMove = void Function(int moveIndex);
-typedef UnmakeMoveNative = Void Function(Int32 moveIndex);
-typedef UnmakeMove = void Function(int moveIndex);
+typedef UnmakeMoveNative = Void Function();
+typedef UnmakeMove = void Function();
 
 // Typedefs for the C function that returns a string
 typedef GetSideToMoveNative = Pointer<Utf8> Function();
@@ -26,6 +26,8 @@ typedef GetKingSquareNative = Int32 Function(Int32 kingSide);
 typedef GetKingSquare = int Function(int kingSide);
 typedef IsKingInCheckNative = Int32 Function(Int32 kingSide);
 typedef IsKingInCheck = int Function(int kingSide);
+typedef IsRepetitionNative = Int32 Function();
+typedef IsRepetition = int Function();
 
 // Typedefs for the C function that returns the move list struct
 typedef GetLegalMovesNative = MoveListResult Function();
@@ -84,8 +86,8 @@ class EngineBridge {
     await _send("makeMove", moveIndex);
   }
 
-  void unMakeMove(int moveIndex) async {
-    await _send("unMakeMove", moveIndex);
+  void unMakeMove() async {
+    await _send("unMakeMove", "");
   }
 
   Future<MoveModel> getBestMove(int depth) async {
@@ -103,6 +105,11 @@ class EngineBridge {
     final int data = kingSide.value;
     final bool isInCheck = await _send("isKingInCheck", data) == 1;
     return isInCheck;
+  }
+
+  Future<bool> isRepetition() async {
+    final bool isRepetition = await _send("isRepetition", "") == 1;
+    return isRepetition;
   }
 
   Future<String> disambiguating(Sides sideToMove, int moveIndex) async {
@@ -126,7 +133,7 @@ class EngineBridge {
     _engineIsolate = await Isolate.spawn(_isolateEntry, _receivePort.sendPort);
     _sendPort = await _receivePort.first;
     _isStarted = true;
-  } 
+  }
 
   static void _isolateEntry(SendPort mainSendPort) {
     final isolateReceivePort = ReceivePort();
@@ -172,6 +179,9 @@ class EngineBridge {
     final IsKingInCheck isKingInCheck = dylib
         .lookup<NativeFunction<IsKingInCheckNative>>('is_king_in_check')
         .asFunction();
+    final IsRepetition isRepetition = dylib
+        .lookup<NativeFunction<IsRepetitionNative>>('is_repetition')
+        .asFunction();
     final Disambiguating disambiguating = dylib
         .lookup<NativeFunction<DisambiguatingNative>>('disambiguating')
         .asFunction();
@@ -192,13 +202,15 @@ class EngineBridge {
         case 'makeMove':
           makeMove(data);
         case 'unMakeMove':
-          unMakeMove(data);
+          unMakeMove();
         case 'getBestMove':
           result = getBestMove(data);
         case 'getKingSquare':
           result = getKingSquare(data);
         case 'isKingInCheck':
           result = isKingInCheck(data);
+        case 'isRepetition':
+          result = isRepetition();
         case 'disambiguating':
           result = disambiguating(
             data['sideToMove'],

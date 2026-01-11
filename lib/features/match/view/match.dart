@@ -270,34 +270,47 @@ class _ZebraStripedList extends StatelessWidget {
       builder: (context, algebraicHistory, child) {
         final List<String> data = algebraicHistory;
 
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 5,
-          ),
-          itemCount: algebraicHistory.length,
-          itemBuilder: (context, index) {
-            // Determine the background color based on the index (even or odd)
-            final int rowIndex = index ~/ 2;
+        return ListView.builder(
+          // We divide by 2 because each row displays 2 moves
+          itemCount: (algebraicHistory.length / 2).ceil(),
+          itemBuilder: (context, rowIndex) {
+            // Row background color logic
             final Color rowColor = rowIndex.isEven
                 ? primaryColor
                 : alternateColor;
-            final String notation = data[index];
 
             return Container(
-              // Set the calculated alternating color as the row background
               color: rowColor,
               padding: const EdgeInsets.symmetric(
                 vertical: 12.0,
                 horizontal: 16.0,
               ),
+              child: Row(
+                children: [
+                  // 1. White's Move
+                  Expanded(
+                    child: Text(
+                      "${rowIndex + 1}. ${data[rowIndex * 2]}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
 
-              child: Text(
-                "$index. $notation",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                  // 2. Black's Move (Check if it exists yet)
+                  Expanded(
+                    child: (rowIndex * 2 + 1 < algebraicHistory.length)
+                        ? Text(
+                            algebraicHistory[rowIndex * 2 + 1],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          )
+                        : const SizedBox(), // Empty space if game ended on White's move
+                  ),
+                ],
               ),
             );
           },
@@ -315,6 +328,11 @@ class _MenuBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MatchViewmodel matchViewmodel = Provider.of<MatchViewmodel>(
+      context,
+      listen: false,
+    );
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -330,7 +348,9 @@ class _MenuBar extends StatelessWidget {
             ),
             SizedBox(width: 25),
             InMatchIconButton(
-              onPressed: () {},
+              onPressed: () {
+                matchViewmodel.delegateUnMakeMove();
+              },
               svgIconPath: "assets/icons/redo.svg",
               tooltip: "Redo",
               borderRadius: 10,

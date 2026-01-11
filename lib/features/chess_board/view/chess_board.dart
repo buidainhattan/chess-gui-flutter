@@ -41,13 +41,13 @@ class ChessBoard extends StatelessWidget {
           child: Stack(
             children: [
               Selector<ChessBoardViewmodel, bool>(
-                selector: (context, viewmodel) => viewmodel.isPromotion,
+                selector: (context, viewmodel) => viewmodel.boardState.isPromotion,
                 builder: (context, isPromotion, child) {
                   if (isPromotion) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       PromotionDialog.show(
                         context,
-                        chessBoardViewmodel.activeSide,
+                        chessBoardViewmodel.boardState.activeSide,
                       ).then((chosenPiece) {
                         chessBoardViewmodel.promotePiece(
                           piecePromotedTo: chosenPiece!,
@@ -109,14 +109,14 @@ class ChessBoard extends StatelessWidget {
                   );
                 }),
               ),
-              ...chessBoardViewmodel.pieceList.entries.map(
+              ...chessBoardViewmodel.boardState.pieceList.entries.map(
                 (entry) => Selector<ChessBoardViewmodel, PieceModel?>(
                   key: ValueKey(entry.key),
     
                   selector: (context, viewModel) =>
-                      viewModel.pieceList[entry.key],
+                      viewModel.boardState.pieceList[entry.key],
                   builder: (context, pieceModel, child) {
-                    if (pieceModel!.isCaptured) {
+                    if (pieceModel == null || pieceModel.isCaptured) {
                       return SizedBox.shrink();
                     }
     
