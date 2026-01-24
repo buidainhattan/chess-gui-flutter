@@ -20,6 +20,7 @@ class TimerViewmodel extends ChangeNotifier {
   late Sides _sideToMove;
 
   late final StreamSubscription _matchStateSubscription;
+  late final StreamSubscription _isMatchEndSubscription;
 
   TimerViewmodel(this._matchManagerService) {
     _playerOneSide = _matchManagerService.playerOneSide;
@@ -40,11 +41,20 @@ class TimerViewmodel extends ChangeNotifier {
         _sideToMove = newState.activeSide;
       }
     });
+
+    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
+      newState,
+    ) {
+      if (newState != GameResultType.ongoing) {
+        _stopTimer();
+      }
+    });
   }
 
   @override
   void dispose() {
     _matchStateSubscription.cancel();
+    _isMatchEndSubscription.cancel();
     _timer?.cancel();
     super.dispose();
   }
@@ -85,6 +95,10 @@ class TimerViewmodel extends ChangeNotifier {
     _lastTickTime = now;
 
     notifyListeners();
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
   }
 
   String _formatDuration(Duration duration) {

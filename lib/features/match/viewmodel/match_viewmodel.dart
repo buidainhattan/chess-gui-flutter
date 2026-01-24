@@ -72,7 +72,9 @@ class MatchViewmodel extends ChangeNotifier {
     });
   }
 
-  void delegateUnMakeMove() {
+  void relayUnMakeSignal() {
+    if (!_matchManagerService.botEnabled) return;
+    
     _matchManagerService.proceedUnMakeMove();
 
     notifyListeners();

@@ -169,6 +169,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     _boardState = _boardState.copyWith(
       pieceList: {..._boardState.pieceList, pieceKey: newPieceModel},
     );
+    _matchManagerService.updatePieceCaptured(newPieceModel.type);
   }
 
   // EnPassant

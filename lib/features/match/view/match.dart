@@ -349,7 +349,7 @@ class _MenuBar extends StatelessWidget {
             SizedBox(width: 25),
             InMatchIconButton(
               onPressed: () {
-                matchViewmodel.delegateUnMakeMove();
+                matchViewmodel.relayUnMakeSignal();
               },
               svgIconPath: "assets/icons/redo.svg",
               tooltip: "Redo",
