@@ -17,6 +17,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   final MatchManagerService _matchManagerService;
 
   late final StreamSubscription _redoSignalSubscription;
+  late final StreamSubscription _isMatchEndSubscription;
 
   // <--- State to control GUI --->
   late BoardState _boardState;
@@ -25,6 +26,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
+
+  GameResultType result = GameResultType.ongoing;
 
   ChessBoardViewmodel(this._matchManagerService);
 
@@ -54,6 +57,14 @@ class ChessBoardViewmodel extends ChangeNotifier {
       newState,
     ) async {
       await _unMakeMove(newState);
+    });
+
+    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
+      newState,
+    ) {
+      result = newState;
+
+      notifyListeners();
     });
 
     _isInitialized = true;
@@ -131,11 +142,11 @@ class ChessBoardViewmodel extends ChangeNotifier {
     await _endTurn(pieceToMove.type, move);
   }
 
-  Future<void> _unMakeMove(int loop) async {
+  Future<void> _unMakeMove(int loopCount) async {
     _boardStateHistory.removeLast();
     _boardState = _boardStateHistory.last;
 
-    if (loop <= 1) {
+    if (loopCount <= 1) {
       await _startTurn(isUnMake: true);
     }
 
@@ -211,14 +222,11 @@ class ChessBoardViewmodel extends ChangeNotifier {
     _matchManagerService.updatePieceCaptured(capturedPiece);
     await _matchManagerService.switchSide();
 
-    int? checkedKingSquare;
-    if (_matchManagerService.matchState.isChecking) {
-      checkedKingSquare = await _engineBridge.getKingSquare(
-        _matchManagerService.matchState.activeSide,
-      );
-    } else {
-      checkedKingSquare = null;
-    }
+    final checkedKingSquare = _matchManagerService.matchState.isChecking
+        ? await _engineBridge.getKingSquare(
+            _matchManagerService.matchState.activeSide,
+          )
+        : null;
     _boardState = _boardState.copyWith(
       activeSide: _matchManagerService.matchState.activeSide,
       checkedKingSquare: checkedKingSquare,
@@ -289,7 +297,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   // <===== Chess Bot Behaviors Logic =====>
   Future<void> _startBotBehavior() async {
-    MoveModel bestMove = await _engineBridge.getBestMove(5);
+    MoveModel bestMove = await _engineBridge.getBestMove(6);
     _makeMove(bestMove);
   }
 
@@ -391,6 +399,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   @override
   void dispose() {
     _redoSignalSubscription.cancel();
+    _isMatchEndSubscription.cancel();
     super.dispose();
   }
 }

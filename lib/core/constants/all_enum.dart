@@ -85,6 +85,7 @@ enum SoundFXs {
 /// Represents the final result of the game.
 enum GameResultType {
   win,
+  lose,
   draw,
   ongoing,
 }

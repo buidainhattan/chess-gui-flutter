@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:chess_app/core/styles/color.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +12,6 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -31,32 +29,17 @@ class _MainMenuState extends State<MainMenu> {
                 onPressed: () {
                   context.push("/gamemode");
                 },
-                child: Text(
-                  "START",
-                  style: AppTextStyles.menu(
-                    color: AppCustomColors.purple,
-                    screenWidth: screenWidth,
-                  ),
-                ),
+                child: Text("START", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {},
-                child: Text(
-                  "LOAD",
-                  style: AppTextStyles.menu(
-                    color: Colors.black,
-                    screenWidth: screenWidth,
-                  ),
-                ),
+                child: Text("LOAD", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {},
                 child: Text(
                   "SETTINGS",
-                  style: AppTextStyles.menu(
-                    color: AppCustomColors.purple,
-                    screenWidth: screenWidth,
-                  ),
+                  style: context.menuText(color: Colors.black),
                 ),
               ),
               SizedBox(height: (screenHeight / 19.2)),
@@ -66,10 +49,7 @@ class _MainMenuState extends State<MainMenu> {
                 },
                 child: Text(
                   "QUIT",
-                  style: AppTextStyles.menu(
-                    color: AppCustomColors.red,
-                    screenWidth: screenWidth,
-                  ),
+                  style: context.menuText(color: Colors.red),
                 ),
               ),
             ],

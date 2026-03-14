@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:chess_app/core/styles/color.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -25,25 +24,13 @@ class GameModeMenu extends StatelessWidget {
                 onPressed: () {
                   context.push("/pvp/match");
                 },
-                child: Text(
-                  "PVP",
-                  style: AppTextStyles.menu(
-                    color: AppCustomColors.purple,
-                    screenWidth: screenWidth,
-                  ),
-                ),
+                child: Text("PVP", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {
                   context.push("/pve/match");
                 },
-                child: Text(
-                  "PVE",
-                  style: AppTextStyles.menu(
-                    color: Colors.black,
-                    screenWidth: screenWidth,
-                  ),
-                ),
+                child: Text("PVE", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {
@@ -51,10 +38,7 @@ class GameModeMenu extends StatelessWidget {
                 },
                 child: Text(
                   "BACK",
-                  style: AppTextStyles.menu(
-                    color: AppCustomColors.purple,
-                    screenWidth: screenWidth,
-                  ),
+                  style: context.menuText(color: Colors.black),
                 ),
               ),
               SizedBox(height: (screenHeight / 19.2)),
@@ -64,10 +48,7 @@ class GameModeMenu extends StatelessWidget {
                 },
                 child: Text(
                   "QUIT",
-                  style: AppTextStyles.menu(
-                    color: AppCustomColors.red,
-                    screenWidth: screenWidth,
-                  ),
+                  style: context.menuText(color: Colors.red),
                 ),
               ),
             ],

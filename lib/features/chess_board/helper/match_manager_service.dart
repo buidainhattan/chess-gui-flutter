@@ -62,6 +62,7 @@ class MatchManagerService {
     );
     _matchStateHistory = [];
     _algebraicHistory = [];
+    _isMatchEndController.add(GameResultType.ongoing);
   }
 
   Future<void> switchSide({bool isCheckmate = false}) async {
@@ -107,7 +108,12 @@ class MatchManagerService {
   void updatePieceCaptured(PieceTypes piece) {
     if (piece == PieceTypes.pieceType_NB) return;
 
-    _matchState.capturedPieces[_matchState.activeSide]!.add(piece);
+    final activeSide = _matchState.activeSide;
+    final updated = {
+      ..._matchState.capturedPieces,
+      activeSide: [..._matchState.capturedPieces[activeSide]!, piece],
+    };
+    _matchState = _matchState.copyWith(capturedPieces: updated);
   }
 
   void setEnPassantTarget(int? index) {
@@ -154,7 +160,11 @@ class MatchManagerService {
   void noLegalMoveToMake() {
     if (_matchState.isChecking) {
       _matchState = _matchState.copyWith(isChecking: false, isCheckmate: true);
-      _matchEnd(GameResultType.win);
+      if (_matchState.activeSide == playerOneSide) {
+        _matchEnd(GameResultType.lose);
+      } else {
+        _matchEnd(GameResultType.win);
+      }
     } else {
       _matchEnd(GameResultType.draw);
     }
@@ -164,6 +174,7 @@ class MatchManagerService {
     _stateController.close();
     _algebraicHistoryController.close();
     _isMatchEndController.close();
+    _redoSignalController.close();
   }
 
   void _matchEnd(GameResultType result) {

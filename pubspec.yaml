@@ -19,6 +19,7 @@ dependencies:
   flutter_soloud: ^3.3.3
   ffi: ^2.1.4
   dart_mappable: ^4.6.1
+  auto_size_text_plus: ^3.0.2
 
 dev_dependencies:
   flutter_test:
