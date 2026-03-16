@@ -39,7 +39,6 @@ class Match extends StatelessWidget {
                 return const SizedBox.shrink();
               },
             ),
-
             // ── Main layout ──
             LayoutBuilder(
               builder: (context, constraints) {
@@ -217,7 +216,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
             width: _tabWidth,
             decoration: BoxDecoration(
               color: AppCustomColors.surface,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(4),
               border: Border.all(
                 color: _isOpen ? AppCustomColors.dark : AppCustomColors.border,
                 width: _isOpen ? 1.5 : 1.0,

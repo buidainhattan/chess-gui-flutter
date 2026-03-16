@@ -56,8 +56,8 @@ class PlayerCard extends StatelessWidget {
           builder: (context, constraints) {
             return Container(
               padding: EdgeInsets.symmetric(
-                horizontal: constraints.maxWidth * 0.012,
-                vertical: constraints.maxHeight * 0.08,
+                horizontal: constraints.maxWidth * 0.02,
+                vertical: constraints.maxHeight * 0.1,
               ),
               decoration: BoxDecoration(
                 color: cardBackground,

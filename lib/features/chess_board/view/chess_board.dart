@@ -60,13 +60,13 @@ class ChessBoard extends StatelessWidget {
                   children: List.generate(9, (colIndex) {
                     int loopIndex = (8 - rowIndex) * 9 + colIndex;
                     int squareIndex = loopIndex - 17 + rowIndex;
-        
+
                     // Generate board black and white squares
                     if (loopIndex % 9 != 0 && loopIndex > 8) {
                       Sides squareColor = (rowIndex + colIndex) % 2 == 0
                           ? Sides.black
                           : Sides.white;
-        
+
                       return Square(
                         chessBoardViewmodel: chessBoardViewmodel,
                         tileSize: tileSize,
@@ -106,14 +106,14 @@ class ChessBoard extends StatelessWidget {
             ...chessBoardViewmodel.boardState.pieceList.entries.map(
               (entry) => Selector<ChessBoardViewmodel, PieceModel?>(
                 key: ValueKey(entry.key),
-        
+
                 selector: (context, viewModel) =>
                     viewModel.boardState.pieceList[entry.key],
                 builder: (context, pieceModel, child) {
                   if (pieceModel == null || pieceModel.isCaptured) {
                     return SizedBox.shrink();
                   }
-        
+
                   int index = pieceModel.index;
                   int rowIndex = (7 - index ~/ 8);
                   int colIndex = (index % 8 + 1);
@@ -123,7 +123,7 @@ class ChessBoard extends StatelessWidget {
                       (((colIndex - 1) * tileSize) +
                       rankOffset +
                       (tileSize - pieceSize) / 2);
-        
+
                   return Piece(
                     piece: pieceModel,
                     pieceSize: pieceSize,
@@ -140,7 +140,7 @@ class ChessBoard extends StatelessWidget {
                 if (result != GameResultType.ongoing) {
                   return AbsorbPointer(
                     absorbing: true,
-                    child: SizedBox.expand(),
+                    child: SizedBox(width: size, height: size),
                   );
                 }
                 return SizedBox.shrink();
