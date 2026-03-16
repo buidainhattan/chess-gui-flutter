@@ -13,18 +13,14 @@ class PlayerCard extends StatelessWidget {
   final String playerName;
   final String playerSide;
   final bool isPlayerOne;
-  final double pieceSize;
   final bool isBot;
-  final double? height;
 
   const PlayerCard({
     super.key,
     required this.playerName,
     required this.playerSide,
     required this.isPlayerOne,
-    required this.pieceSize,
     required this.isBot,
-    this.height,
   });
 
   @override
@@ -56,73 +52,72 @@ class PlayerCard extends StatelessWidget {
       selector: (context, matchViewmodel) =>
           matchViewmodel.sideToMove == playerSide,
       builder: (context, isActive, child) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          height: height,
-          decoration: BoxDecoration(
-            color: cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive ? borderActive : AppCustomColors.border,
-              width: isActive ? 1.5 : 1.0,
-            ),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: AppCustomColors.dark.withValues(alpha: 0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Flex(
-            direction: Axis.horizontal,
-            children: [
-              _PlayerAvatar(
-                isBot: isBot,
-                backgroundColor: avatarBackground,
-                borderColor: avatarBorder,
-                iconColor: text,
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: constraints.maxWidth * 0.012,
+                vertical: constraints.maxHeight * 0.08,
               ),
+              decoration: BoxDecoration(
+                color: cardBackground,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: isActive ? borderActive : AppCustomColors.border,
+                  width: isActive ? 1.5 : 1.0,
+                ),
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: AppCustomColors.dark.withValues(alpha: 0.12),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Flex(
+                direction: Axis.horizontal,
+                children: [
+                  _PlayerAvatar(
+                    isBot: isBot,
+                    backgroundColor: avatarBackground,
+                    borderColor: avatarBorder,
+                    iconColor: text,
+                  ),
 
-              const SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
-              Selector<MatchViewmodel, List<PieceTypes>>(
-                selector: (context, matchViewmodel) => isPlayerOne
-                    ? matchViewmodel.playerOnePieceCaptured
-                    : matchViewmodel.playerTwoPieceCaptured,
-                builder: (context, piecesCaptured, child) {
-                  return Expanded(
-                    child: _PlayerIndentity(
+                  Selector<MatchViewmodel, List<PieceTypes>>(
+                    selector: (context, matchViewmodel) => isPlayerOne
+                        ? matchViewmodel.playerOnePieceCaptured
+                        : matchViewmodel.playerTwoPieceCaptured,
+                    builder: (context, piecesCaptured, child) {
+                      return Expanded(
+                        child: _PlayerIndentity(
+                          name: playerName,
+                          nameColor: text,
+                          side: playerSide,
+                        ),
+                      );
+                    },
+                  ),
+
+                  FractionallySizedBox(
+                    heightFactor: 0.6,
+                    child: _PlayerTimer(
                       isActive: isActive,
-                      name: playerName,
-                      nameColor: text,
-                      side: playerSide,
-                      pieceSize: pieceSize,
-                      piecesCaptured: piecesCaptured,
+                      isPlayerOne: isPlayerOne,
+                      background: clockBackground,
+                      activeColor: clockText,
+                      inactiveColor: textDim,
+                      borderColor: AppCustomColors.border,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-
-              Selector<TimerViewmodel, String>(
-                selector: (context, timerViewmodel) => isPlayerOne
-                    ? timerViewmodel.playerOneTime
-                    : timerViewmodel.playerTwoTime,
-                builder: (context, timeString, child) {
-                  return _PlayerTimer(
-                    isActive: isActive,
-                    timerText: timeString,
-                    background: clockBackground,
-                    activeColor: clockText,
-                    inactiveColor: textDim,
-                    borderColor: AppCustomColors.border,
-                  );
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -146,74 +141,92 @@ class _PlayerAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 3 / 4,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final size = constraints.maxHeight;
-          return Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: backgroundColor,
-              border: Border.all(color: borderColor, width: 1.5),
-            ),
-            child: Center(
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: backgroundColor,
+          border: Border.all(color: borderColor, width: 1.5),
+        ),
+        child: Center(
+          child: FractionallySizedBox(
+            widthFactor: 0.8,
+            heightFactor: 0.5,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
               child: Text(
                 isBot ? '🤖' : '♟',
-                style: TextStyle(fontSize: size * 0.45, color: iconColor),
+                style: TextStyle(fontSize: 100, color: iconColor),
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
 
 class _PlayerIndentity extends StatelessWidget {
-  final bool isActive;
   final String name;
   final Color nameColor;
   final dynamic side;
-  final double pieceSize;
-  final List<PieceTypes> piecesCaptured;
 
   const _PlayerIndentity({
-    required this.isActive,
     required this.name,
     required this.nameColor,
     required this.side,
-    required this.pieceSize,
-    required this.piecesCaptured,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Flex(
-      direction: Axis.vertical,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: AppTheme.spaceS,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Flexible(
+        Expanded(
           child: Row(
             children: [
-              if (isActive) ...[
-                _PulsingDot(color: nameColor),
-                const SizedBox(width: 5),
-              ],
-              AutoSizeText(name, style: context.playerNameText(nameColor), minFontSize: 10,),
+              Selector<MatchViewmodel, bool>(
+                selector: (context, matchViewmodel) =>
+                    side == matchViewmodel.sideToMove,
+                builder: (context, isActive, child) {
+                  if (isActive) {
+                    return Row(
+                      children: [
+                        FractionallySizedBox(
+                          heightFactor: 0.25,
+                          child: _PulsingDot(color: nameColor),
+                        ),
+                        const SizedBox(width: AppTheme.spaceXS),
+                      ],
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
+              ),
+              AutoSizeText(
+                name,
+                style: context.playerNameText(nameColor),
+                minFontSize: 10,
+              ),
             ],
           ),
         ),
-        if (piecesCaptured.isEmpty)
-          Flexible(child: SizedBox(height: pieceSize,))
-        else
-          Flexible(
-            child: _CapturedPiecesDisplayer(
-              side: side,
-              piecesCaptured: piecesCaptured,
-              pieceSize: pieceSize,
-            ),
-          ),
+        Selector<MatchViewmodel, List<PieceTypes>>(
+          selector: (context, matchViewmodel) =>
+              side == matchViewmodel.playerOneSide
+              ? matchViewmodel.playerOnePieceCaptured
+              : matchViewmodel.playerTwoPieceCaptured,
+          builder: (context, piecesCaptured, child) {
+            if (piecesCaptured.isEmpty) {
+              return const Spacer(flex: 1);
+            }
+            return Expanded(
+              child: _CapturedPiecesDisplayer(
+                side: side,
+                piecesCaptured: piecesCaptured,
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -221,7 +234,7 @@ class _PlayerIndentity extends StatelessWidget {
 
 class _PlayerTimer extends StatelessWidget {
   final bool isActive;
-  final String timerText;
+  final bool isPlayerOne;
   final Color background;
   final Color activeColor;
   final Color inactiveColor;
@@ -229,7 +242,7 @@ class _PlayerTimer extends StatelessWidget {
 
   const _PlayerTimer({
     required this.isActive,
-    required this.timerText,
+    required this.isPlayerOne,
     required this.background,
     required this.activeColor,
     required this.inactiveColor,
@@ -238,27 +251,37 @@ class _PlayerTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTime = timerText.length > 5
-        ? timerText.substring(0, 5)
-        : timerText;
-
-    return Center(
+    return AspectRatio(
+      aspectRatio: 2 / 1,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isActive ? background : borderColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
         ),
-        child: AutoSizeText(
-          displayTime,
-          style: context.timerText(isActive ? activeColor : inactiveColor),
+        child: Selector<TimerViewmodel, String>(
+          selector: (context, timerViewmodel) => isPlayerOne
+              ? timerViewmodel.playerOneTime
+              : timerViewmodel.playerTwoTime,
+          builder: (context, timerText, child) {
+            final formattedTimerText = timerText.length > 5
+                ? timerText.substring(0, 5)
+                : timerText;
+      
+            return Center(
+              child: AutoSizeText(
+                formattedTimerText,
+                maxLines: 1,
+                style: context.timerText(
+                  isActive ? activeColor : inactiveColor,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
-
-// ── Pulsing Dot ───────────────────────────────────────────────────────────────
 
 class _PulsingDot extends StatefulWidget {
   final Color color;
@@ -270,25 +293,25 @@ class _PulsingDot extends StatefulWidget {
 
 class _PulsingDotState extends State<_PulsingDot>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
+  late final AnimationController _controller;
   late final Animation<double> _opacity;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
     _opacity = Tween(
       begin: 1.0,
       end: 0.3,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -296,26 +319,26 @@ class _PulsingDotState extends State<_PulsingDot>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: Container(
-        width: 7,
-        height: 7,
-        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+      child: AspectRatio(
+        aspectRatio: 1 / 1,
+        child: Container(
+          decoration: BoxDecoration(
+            color: widget.color,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }
 }
 
-// ── Captured Pieces ───────────────────────────────────────────────────────────
-
 class _CapturedPiecesDisplayer extends StatelessWidget {
   final String side;
   final List<PieceTypes> piecesCaptured;
-  final double pieceSize;
 
   const _CapturedPiecesDisplayer({
     required this.side,
     required this.piecesCaptured,
-    required this.pieceSize,
   });
 
   String get capturedSide =>
@@ -323,18 +346,26 @@ class _CapturedPiecesDisplayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: pieceSize,
-      child: Stack(
-        children: piecesCaptured.asMap().entries.map((entry) {
-          return Positioned(
-            left: (pieceSize * entry.key) / 2,
-            child: SvgPicture.asset(
-              'assets/images/chess_pieces/$capturedSide/${entry.value.name}.svg',
-              width: pieceSize,
-            ),
-          );
-        }).toList(),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: FractionallySizedBox(
+        heightFactor: 0.7,
+        child: Stack(
+          children: piecesCaptured.asMap().entries.map((entry) {
+            final int index = entry.key;
+            final PieceTypes piece = entry.value;
+
+            return Align(
+              widthFactor: 0.5 + index * 0.8,
+              child: AspectRatio(
+                aspectRatio: 1 / 1,
+                child: SvgPicture.asset(
+                  'assets/images/chess_pieces/$capturedSide/${piece.name}.svg',
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

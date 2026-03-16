@@ -32,13 +32,6 @@ extension AppTextContext on BuildContext {
     );
   }
 
-  TextStyle get bodyText {
-    return AppTextStyles._base(
-      size: responsive(s: 14, l: 18),
-      weight: FontWeight.normal,
-    );
-  }
-
   TextStyle playerNameText(Color? color) {
     return AppTextStyles._base(
       size: 18,
@@ -58,7 +51,7 @@ extension AppTextContext on BuildContext {
 
   TextStyle turnStripText({Color? color = AppCustomColors.textMid}) {
     return AppTextStyles._base(
-      size: responsive(s: 6, l: 8, xxl: 10),
+      size: 14,
       weight: FontWeight.w600,
       color: color,
       letterSpacing: 1.1,

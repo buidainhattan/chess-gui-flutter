@@ -1,6 +1,7 @@
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/swiping_shader.dart';
 import 'package:chess_app/core/widgets/player_card.dart';
 import 'package:chess_app/features/chess_board/view/chess_board.dart';
 import 'package:chess_app/features/match/view/match_end.dart';
@@ -9,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
-// ── Match ─────────────────────────────────────────────────────────────────────
 
 class Match extends StatelessWidget {
   final bool enableBot;
@@ -24,13 +23,14 @@ class Match extends StatelessWidget {
       backgroundColor: AppCustomColors.background,
       bottomNavigationBar: _BottomBar(enableBot: enableBot),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        padding: const EdgeInsetsDirectional.symmetric(
+          vertical: AppTheme.spaceS,
+        ),
         child: Stack(
           children: [
-            // Game-end listener
             Selector<MatchViewmodel, GameResultType>(
               selector: (context, viewmodel) => viewmodel.result,
-              builder: (context, result, _) {
+              builder: (context, result, child) {
                 if (result != GameResultType.ongoing) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     MatchEndDialog.show(context, result);
@@ -42,7 +42,7 @@ class Match extends StatelessWidget {
 
             // ── Main layout ──
             LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
+              builder: (context, constraints) {
                 return _MatchLayout(
                   enableBot: enableBot,
                   matchViewmodel: matchViewmodel,
@@ -57,8 +57,6 @@ class Match extends StatelessWidget {
     );
   }
 }
-
-// ── Match Layout ──────────────────────────────────────────────────────────────
 
 class _MatchLayout extends StatelessWidget {
   final bool enableBot;
@@ -76,7 +74,7 @@ class _MatchLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double columnSpacing = AppTheme.spaceXS;
-    final double stripHeight = maxHeight * 0.02;
+    final double stripHeight = maxHeight * 0.025;
     final double cardHeight = maxHeight * 0.1;
 
     final double totalSpacing = columnSpacing * 4;
@@ -87,6 +85,7 @@ class _MatchLayout extends StatelessWidget {
 
     return SizedBox(
       width: maxWidth,
+      height: maxHeight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -97,42 +96,45 @@ class _MatchLayout extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: columnSpacing,
               children: [
-                PlayerCard(
-                  playerName: enableBot ? 'Bot · Easy' : 'Player 2',
-                  playerSide: matchViewmodel.playerTwoSide,
-                  isPlayerOne: false,
-                  pieceSize: 24,
-                  isBot: enableBot,
-                  height: cardHeight,
+                Flexible(
+                  child: PlayerCard(
+                    playerName: enableBot ? 'Bot · Easy' : 'Player 2',
+                    playerSide: matchViewmodel.playerTwoSide,
+                    isPlayerOne: false,
+                    isBot: enableBot,
+                  ),
                 ),
 
-                _TurnStrip(targetSide: matchViewmodel.playerTwoSide),
-                        
-                ChessBoard(enableBot: enableBot),
-                        
-                _TurnStrip(targetSide: matchViewmodel.playerOneSide),
+                SizedBox(
+                  height: stripHeight,
+                  child: _TurnStrip(targetSide: matchViewmodel.playerTwoSide),
+                ),
 
-                PlayerCard(
-                  playerName: 'You',
-                  playerSide: matchViewmodel.playerOneSide,
-                  isPlayerOne: true,
-                  pieceSize: 24,
-                  isBot: false,
-                  height: cardHeight,
+                ChessBoard(enableBot: enableBot),
+
+                SizedBox(
+                  height: stripHeight,
+                  child: _TurnStrip(targetSide: matchViewmodel.playerOneSide),
+                ),
+
+                Flexible(
+                  child: PlayerCard(
+                    playerName: 'You',
+                    playerSide: matchViewmodel.playerOneSide,
+                    isPlayerOne: true,
+                    isBot: false,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppTheme.spaceM),
+          const SizedBox(width: AppTheme.spaceS),
           _MovesSidebar(maxPanelWidth: boardWidth),
         ],
       ),
     );
   }
 }
-
-// ── Turn Strip ────────────────────────────────────────────────────────────────
-// A slim animated bar that appears only when it's this side's turn.
 
 class _TurnStrip extends StatelessWidget {
   final String targetSide;
@@ -162,10 +164,12 @@ class _TurnStrip extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppTheme.spaceS),
-                Text(
-                  targetSide == 'white' ? 'Your turn' : "Opponent's turn",
-                  style: 
-                   context.turnStripText(),
+                FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(
+                    targetSide == 'white' ? 'Your turn' : "Opponent's turn",
+                    style: context.turnStripText(),
+                  ),
                 ),
                 const SizedBox(width: AppTheme.spaceS),
                 Expanded(
@@ -186,11 +190,6 @@ class _TurnStrip extends StatelessWidget {
   }
 }
 
-// ── Moves Sidebar ─────────────────────────────────────────────────────────────
-// Persistent vertical tab to the right of the board. Tapping it slides the
-// history panel open. Panel width is capped at [maxPanelWidth] (≤ board width)
-// and fills all available space up to that cap.
-
 class _MovesSidebar extends StatefulWidget {
   final double maxPanelWidth;
   const _MovesSidebar({required this.maxPanelWidth});
@@ -207,9 +206,6 @@ class _MovesSidebarState extends State<_MovesSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    // Panel width = all remaining screen space after board + gap + tab,
-    // but never wider than the board itself.
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -294,13 +290,10 @@ class _MovesSidebarState extends State<_MovesSidebar> {
         // ── Sliding history panel ──
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut, // Smoother than just .ease
+          curve: Curves.easeInOut,
           width: _isOpen ? widget.maxPanelWidth : 0,
-          // This is the "Secret Sauce":
           child: ClipRect(
-            // Prevents the child from "bleeding" out while narrow
             child: OverflowBox(
-              // Allows the child to maintain its full width while being clipped
               minWidth: widget.maxPanelWidth,
               maxWidth: widget.maxPanelWidth,
               alignment: Alignment.centerLeft,
@@ -315,8 +308,6 @@ class _MovesSidebarState extends State<_MovesSidebar> {
     );
   }
 }
-
-// ── Move History Panel ────────────────────────────────────────────────────────
 
 class _MoveHistoryPanel extends StatelessWidget {
   const _MoveHistoryPanel();
@@ -447,95 +438,6 @@ class _MoveHistoryPanel extends StatelessWidget {
   }
 }
 
-class SwipingShaderWrapper extends StatefulWidget {
-  final Widget child;
-  final Color activeColor;
-  final Color inactiveColor;
-  final Duration duration;
-
-  const SwipingShaderWrapper({
-    super.key,
-    required this.child,
-    this.activeColor = Colors.blue,
-    this.inactiveColor = const Color(0x33FFFFFF),
-    this.duration = const Duration(milliseconds: 2000),
-  });
-
-  @override
-  State<SwipingShaderWrapper> createState() => _SwipingShaderWrapperState();
-}
-
-class _SwipingShaderWrapperState extends State<SwipingShaderWrapper>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _tailAnimation;
-  late final Animation<double> _headAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration)
-      ..repeat();
-    _tailAnimation = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
-      ),
-    );
-    _headAnimation = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.75, curve: Curves.easeInOut),
-      ),
-    );
-  }
-
-  @override
-  void didUpdateWidget(SwipingShaderWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.duration != oldWidget.duration) {
-      _controller.duration = widget.duration;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        double tail = _tailAnimation.value;
-        double head = _headAnimation.value;
-
-        return ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) {
-            return LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                widget.inactiveColor,
-                widget.activeColor,
-                widget.activeColor,
-                widget.inactiveColor,
-              ],
-              stops: [tail, tail, head, head],
-            ).createShader(bounds);
-          },
-          child: widget.child,
-        );
-      },
-    );
-  }
-}
-
-// ── Bottom Bar ────────────────────────────────────────────────────────────────
-
 class _BottomBar extends StatelessWidget {
   final bool enableBot;
   const _BottomBar({required this.enableBot});
@@ -598,8 +500,6 @@ class _BottomBar extends StatelessWidget {
     );
   }
 }
-
-// ── Bar Button ────────────────────────────────────────────────────────────────
 
 class _BarButton extends StatelessWidget {
   final String svgPath;
