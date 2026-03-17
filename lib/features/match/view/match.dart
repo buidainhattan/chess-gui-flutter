@@ -21,10 +21,10 @@ class Match extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppCustomColors.background,
-      bottomNavigationBar: _BottomBar(enableBot: enableBot),
       body: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           vertical: AppTheme.spaceS,
+          horizontal: AppTheme.spaceS,
         ),
         child: Stack(
           children: [
@@ -50,6 +50,18 @@ class Match extends StatelessWidget {
                 );
               },
             ),
+            Align(alignment: Alignment.topRight, child: _MenuButton()),
+            enableBot
+                ? Align(
+                    alignment: Alignment.bottomLeft,
+                    child: _BarButton(
+                      icon: Icons.redo_sharp,
+                      label: 'Undo',
+                      tooltip: 'Undo last move',
+                      onPressed: () => matchViewmodel.relayUnMakeSignal(),
+                    ),
+                  )
+                : SizedBox.shrink(),
           ],
         ),
       ),
@@ -437,83 +449,88 @@ class _MoveHistoryPanel extends StatelessWidget {
   }
 }
 
-class _BottomBar extends StatelessWidget {
-  final bool enableBot;
-  const _BottomBar({required this.enableBot});
+class _MenuButton extends StatefulWidget {
+  const _MenuButton();
+
+  @override
+  State<_MenuButton> createState() => _MenuButtonState();
+}
+
+class _MenuButtonState extends State<_MenuButton> {
+  bool _isOpen = false;
+
+  void _openMenu() {
+    setState(() {
+      _isOpen = !_isOpen;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final matchVm = Provider.of<MatchViewmodel>(context, listen: false);
-
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        color: AppCustomColors.surface,
-        border: Border(top: BorderSide(color: AppCustomColors.border)),
-        boxShadow: [
-          BoxShadow(
-            color: AppCustomColors.dark.withValues(alpha: 0.05),
-            blurRadius: 6,
-            offset: const Offset(0, -1),
+    return IntrinsicWidth(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            child: _BarButton(
+              icon: Icons.menu,
+              label: "Menu",
+              tooltip: "Open menu",
+              onPressed: _openMenu,
+            ),
+          ),
+          AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            child: _isOpen
+                ? ClipRect(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _BarButton(
+                          svgPath: 'assets/icons/home.svg',
+                          label: 'Home',
+                          tooltip: 'Back to home',
+                          onPressed: () => context.go('/'),
+                        ),
+                        _BarButton(
+                          svgPath: 'assets/icons/resign.svg',
+                          label: 'Resign',
+                          tooltip: 'Resign the game',
+                          onPressed: () {},
+                          isDanger: true,
+                        ),
+                      ],
+                    ),
+                  )
+                : SizedBox.shrink(),
           ),
         ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // ── Left: game actions ──
-            Row(
-              children: [
-                _BarButton(
-                  svgPath: 'assets/icons/redo.svg',
-                  label: 'Undo',
-                  tooltip: 'Undo last move',
-                  onPressed: () => matchVm.relayUnMakeSignal(),
-                ),
-                const SizedBox(width: 8),
-                _BarButton(
-                  svgPath: 'assets/icons/resign.svg',
-                  label: 'Resign',
-                  tooltip: 'Resign the game',
-                  onPressed: () {},
-                  isDanger: true,
-                ),
-              ],
-            ),
-            // ── Right: app actions ──
-            Row(
-              children: [
-                _BarButton(
-                  svgPath: 'assets/icons/home.svg',
-                  label: 'Home',
-                  tooltip: 'Back to home',
-                  onPressed: () => context.go('/'),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
 }
 
 class _BarButton extends StatelessWidget {
-  final String svgPath;
+  final IconData? icon;
+  final String? svgPath;
   final String label;
   final String tooltip;
   final VoidCallback onPressed;
   final bool isDanger;
 
   const _BarButton({
-    required this.svgPath,
+    this.icon,
+    this.svgPath,
     required this.label,
-    required this.tooltip,
+    this.tooltip = "",
     required this.onPressed,
     this.isDanger = false,
-  });
+  }) : assert(
+         (icon == null) != (svgPath == null),
+         "Only either icon or svgPath can be provided!",
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -528,23 +545,25 @@ class _BarButton extends StatelessWidget {
       message: tooltip,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(4),
         hoverColor: hoverBg,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             border: Border.all(color: AppCustomColors.border),
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(4),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(
-                svgPath,
-                width: 15,
-                height: 15,
-                colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
-              ),
+              icon != null
+                  ? Icon(icon)
+                  : SvgPicture.asset(
+                      svgPath!,
+                      width: 15,
+                      height: 15,
+                      colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
+                    ),
               const SizedBox(width: 6),
               Text(
                 label,
