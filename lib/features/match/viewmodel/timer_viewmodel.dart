@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
+import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/widgets.dart';
 
 class TimerViewmodel extends ChangeNotifier {
@@ -10,8 +11,8 @@ class TimerViewmodel extends ChangeNotifier {
   Timer? _timer;
   DateTime? _lastTickTime;
   bool _isTimerRunning = false;
-  Duration _playerOneRemainingTime = const Duration(minutes: 10);
-  Duration _playerTwoRemainingTime = const Duration(minutes: 10);
+  late Duration _playerOneRemainingTime;
+  late Duration _playerTwoRemainingTime;
   late String playerOneTime;
   late String playerTwoTime;
 
@@ -26,11 +27,6 @@ class TimerViewmodel extends ChangeNotifier {
     _playerOneSide = _matchManagerService.playerOneSide;
     _playerTwoSide = _matchManagerService.playerTwoSide;
     _sideToMove = _matchManagerService.matchState.activeSide;
-
-    playerOneTime = _formatDuration(_playerOneRemainingTime);
-    playerTwoTime = _formatDuration(_playerTwoRemainingTime);
-
-    _startTimer();
 
     _matchStateSubscription = _matchManagerService.stateStream.listen((
       newState,
@@ -59,8 +55,25 @@ class TimerViewmodel extends ChangeNotifier {
     super.dispose();
   }
 
+  void setAndStartTimer({TimeSetting? setting}) {
+    if (setting == null) {
+      _playerOneRemainingTime = _playerTwoRemainingTime = const Duration(
+        minutes: 10,
+      );
+    } else {
+      Duration duration = setting.timeDuration;
+      _playerOneRemainingTime = _playerTwoRemainingTime = duration;
+    }
+
+    playerOneTime = _formatDuration(_playerOneRemainingTime);
+    playerTwoTime = _formatDuration(_playerTwoRemainingTime);
+
+    _startTimer();
+  }
+
   void _startTimer() {
     if (_isTimerRunning) return;
+
     _isTimerRunning = true;
     _lastTickTime = DateTime.now();
     _timer = Timer.periodic(const Duration(milliseconds: 100), _tick);
@@ -94,6 +107,13 @@ class TimerViewmodel extends ChangeNotifier {
     }
     _lastTickTime = now;
 
+    if (_playerOneRemainingTime <= Duration.zero) {
+      _matchManagerService.timerEnd(_playerOneSide);
+    }
+    if (_playerTwoRemainingTime <= Duration.zero) {
+      _matchManagerService.timerEnd(_playerTwoSide);
+    }
+
     notifyListeners();
   }
 
@@ -104,12 +124,10 @@ class TimerViewmodel extends ChangeNotifier {
   String _formatDuration(Duration duration) {
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    final miliseconds = duration.inMilliseconds.remainder(1000);
 
     final formattedMinutes = minutes.toString().padLeft(2, '0');
     final formattedSeconds = seconds.toString().padLeft(2, '0');
-    final formattedMiliseconds = miliseconds.toString().padLeft(4, '0');
 
-    return '$formattedMinutes:$formattedSeconds:$formattedMiliseconds';
+    return '$formattedMinutes:$formattedSeconds';
   }
 }

@@ -1,8 +1,11 @@
+import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
+import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:chess_app/features/main_menu/view/game_mode_menu.dart';
 import 'package:chess_app/features/main_menu/view/main_menu.dart';
+import 'package:chess_app/features/main_menu/view/time_mode_menu.dart';
 import 'package:chess_app/features/match/view/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -32,6 +35,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final GoRouter router = GoRouter(
       initialLocation: "/",
+      debugLogDiagnostics: true,
       routes: [
         ShellRoute(
           builder: (context, state, child) {
@@ -43,18 +47,41 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               path: "/gamemode",
               builder: (context, state) => GameModeMenu(),
             ),
+            GoRoute(
+              path: "/:gamemode(pvp|pve)",
+              builder: (context, state) {
+                final String? gameMode = state.pathParameters["gamemode"];
+                return TimeModeMenu(gameMode: gameMode);
+              },
+            ),
             ShellRoute(
               builder: (context, state, child) {
                 return BackgroundMatch(child: child);
               },
               routes: [
                 GoRoute(
-                  path: "/pvp/match",
-                  builder: (context, state) => Loading(),
+                  path: "/pvp/:timemode(blitz|rapid|normal)/:time/match",
+                  builder: (context, state) {
+                    String? timeMode = state.pathParameters["timemode"];
+                    String? time = state.pathParameters["time"];
+                    TimeSetting? timeSetting = TimeDuration.fromName(
+                      timeMode!,
+                    )?.options[time];
+
+                    return Loading(timeSetting: timeSetting);
+                  },
                 ),
                 GoRoute(
-                  path: "/pve/match",
-                  builder: (context, state) => Loading(enableBot: true),
+                  path: "/pve/:timemode(blitz|rapid|normal)/:time/match",
+                  builder: (context, state) {
+                    String? timeMode = state.pathParameters["timemode"];
+                    String? time = state.pathParameters["time"];
+                    TimeSetting? timeSetting = TimeDuration.fromName(
+                      timeMode!,
+                    )?.options[time];
+
+                    return Loading(enableBot: true, timeSetting: timeSetting);
+                  },
                 ),
               ],
             ),

@@ -37,6 +37,7 @@ class MatchManagerService {
   Sides get playerOneSide => _playerOneSide;
   late final Sides _playerTwoSide;
   Sides get playerTwoSide => _playerTwoSide;
+
   late int? _checkedKingSquare;
   int? get checkedKingSquare => _checkedKingSquare;
 
@@ -167,6 +168,14 @@ class MatchManagerService {
       }
     } else {
       _matchEnd(GameResultType.draw);
+    }
+  }
+
+  void timerEnd(Sides endedSide) {
+    if (endedSide == playerOneSide) {
+      _matchEnd(GameResultType.lose);
+    } else {
+      _matchEnd(GameResultType.win);
     }
   }
 

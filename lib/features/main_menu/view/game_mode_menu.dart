@@ -22,13 +22,13 @@ class GameModeMenu extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: () {
-                  context.push("/pvp/match");
+                  context.push("/pvp");
                 },
                 child: Text("PVP", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {
-                  context.push("/pve/match");
+                  context.push("/pve");
                 },
                 child: Text("PVE", style: context.menuText()),
               ),
