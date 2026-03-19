@@ -15,6 +15,7 @@ class TimerViewmodel extends ChangeNotifier {
   late Duration _playerTwoRemainingTime;
   late String playerOneTime;
   late String playerTwoTime;
+  late Duration _increment;
 
   late Sides _playerOneSide;
   late Sides _playerTwoSide;
@@ -31,6 +32,7 @@ class TimerViewmodel extends ChangeNotifier {
     _matchStateSubscription = _matchManagerService.stateStream.listen((
       newState,
     ) {
+      _increaseTimer(_sideToMove);
       if (_sideToMove == newState.activeSide) {
         return;
       } else {
@@ -60,15 +62,24 @@ class TimerViewmodel extends ChangeNotifier {
       _playerOneRemainingTime = _playerTwoRemainingTime = const Duration(
         minutes: 10,
       );
+      _increment = const Duration(seconds: 0);
     } else {
-      Duration duration = setting.timeDuration;
-      _playerOneRemainingTime = _playerTwoRemainingTime = duration;
+      _playerOneRemainingTime = _playerTwoRemainingTime = setting.timeDuration;
+      _increment = Duration(seconds: setting.increment);
     }
 
     playerOneTime = _formatDuration(_playerOneRemainingTime);
     playerTwoTime = _formatDuration(_playerTwoRemainingTime);
 
     _startTimer();
+  }
+
+  void _increaseTimer(Sides endTurnSide) {
+    if (endTurnSide == _playerOneSide) {
+      playerOneTime = _formatDuration(_playerOneRemainingTime + _increment);
+    } else {
+      playerTwoTime = _formatDuration(_playerTwoRemainingTime + _increment);
+    }
   }
 
   void _startTimer() {
