@@ -1,7 +1,7 @@
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/session_data.dart';
 import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
-import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:chess_app/features/match/view/match.dart';
 import 'package:chess_app/features/match/viewmodel/match_viewmodel.dart';
 import 'package:chess_app/features/match/viewmodel/timer_viewmodel.dart';
@@ -12,14 +12,12 @@ class Loading extends StatefulWidget {
   final bool enableBot;
   final String fen;
   final Sides playerSide;
-  final TimeSetting? timeSetting;
 
   const Loading({
     super.key,
     this.enableBot = false,
     this.fen = "",
     this.playerSide = Sides.white,
-    this.timeSetting,
   });
 
   @override
@@ -32,10 +30,12 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-    _initAll = _initializeAll();
+    final SessionDataService sessionDataService =
+        Provider.of<SessionDataService>(context, listen: false);
+    _initAll = _initializeAll(sessionDataService);
   }
 
-  Future<_InitializedData> _initializeAll() async {
+  Future<_InitializedData> _initializeAll(SessionDataService service) async {
     final MatchManagerService matchManagerService = MatchManagerService();
     matchManagerService.initialSet(widget.fen, widget.playerSide);
     final chessBoardViewmodel = ChessBoardViewmodel(matchManagerService);
@@ -44,7 +44,7 @@ class _LoadingState extends State<Loading> {
 
     await chessBoardViewmodel.initializeChessBoard();
 
-    timerViewmodel.setAndStartTimer(setting: widget.timeSetting);
+    timerViewmodel.setAndStartTimer(setting: service.timeSetting);
 
     return _InitializedData(
       matchManagerService: matchManagerService,

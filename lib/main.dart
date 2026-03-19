@@ -1,24 +1,27 @@
 import 'dart:io' show Platform;
+import 'package:chess_app/core/session_data.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:chess_app/app.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await AudioController().initialize();
 
   // Check for Desktop Platform (Windows, macOS, Linux)
-  bool isDesktop = !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+  bool isDesktop =
+      !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 
   if (isDesktop) {
     await windowManager.ensureInitialized();
-    
+
     // Set up Window Manager Listeners for Dispose
     WindowManager.instance.addListener(_AudioDisposeListener());
-    
+
     // Configure Window Settings
     await windowManager.waitUntilReadyToShow().then((_) async {
       await windowManager.setAspectRatio(16 / 9);
@@ -28,7 +31,12 @@ void main() async {
     });
   }
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => SessionDataService(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class _AudioDisposeListener extends WindowListener {

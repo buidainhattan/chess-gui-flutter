@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/session_data.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class TimeModeMenu extends StatefulWidget {
-  final String? gameMode;
-
-  const TimeModeMenu({super.key, required this.gameMode});
+  const TimeModeMenu({super.key});
 
   @override
   State<TimeModeMenu> createState() => _TimeModeMenuState();
@@ -20,8 +20,16 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   String? _selectedMode;
   String? _selectedTime;
 
-  void _toMatchScreen(BuildContext context) {
-    context.go("/${widget.gameMode}/$_selectedMode/$_selectedTime/match");
+  void _toMatchScreen(BuildContext context, SessionDataService service) {
+    String? mode = _selectedMode;
+    String? time = _selectedTime;
+    if (mode == null || time == null) return;
+
+    TimeSetting timeSetting = TimeMode.fromName(mode)!.settings[time]!;
+    service.updateTimeMode(mode);
+    service.updateTimeSetting(timeSetting);
+
+    context.go("/${service.gameMode}/$_selectedMode/match");
   }
 
   TableRow _buildOptionRow(
@@ -69,6 +77,9 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final SessionDataService sessionDataService =
+        Provider.of<SessionDataService>(context);
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -95,18 +106,18 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
                 children: [
                   _buildOptionRow(
                     context,
-                    TimeDuration.blitz.name,
-                    TimeDuration.blitz.options,
+                    TimeMode.blitz.name,
+                    TimeMode.blitz.settings,
                   ),
                   _buildOptionRow(
                     context,
-                    TimeDuration.rapid.name,
-                    TimeDuration.rapid.options,
+                    TimeMode.rapid.name,
+                    TimeMode.rapid.settings,
                   ),
                   _buildOptionRow(
                     context,
-                    TimeDuration.normal.name,
-                    TimeDuration.normal.options,
+                    TimeMode.normal.name,
+                    TimeMode.normal.settings,
                   ),
                 ],
               ),
@@ -115,8 +126,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
 
               TextButton(
                 onPressed: () {
-                  if (_selectedMode == null || _selectedTime == null) return;
-                  _toMatchScreen(context);
+                  _toMatchScreen(context, sessionDataService);
                 },
                 child: Text(
                   "START GAME",

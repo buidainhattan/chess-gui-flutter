@@ -1,14 +1,19 @@
 import 'dart:io';
 
+import 'package:chess_app/core/session_data.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class GameModeMenu extends StatelessWidget {
   const GameModeMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final SessionDataService sessionDataService =
+        Provider.of<SessionDataService>(context);
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -22,12 +27,14 @@ class GameModeMenu extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: () {
+                  sessionDataService.updateGameMode("pvp");
                   context.push("/pvp");
                 },
                 child: Text("PVP", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {
+                  sessionDataService.updateGameMode("pve");
                   context.push("/pve");
                 },
                 child: Text("PVE", style: context.menuText()),
@@ -46,10 +53,7 @@ class GameModeMenu extends StatelessWidget {
                 onPressed: () {
                   exit(0);
                 },
-                child: Text(
-                  "QUIT",
-                  style: context.menuText(color: Colors.red),
-                ),
+                child: Text("QUIT", style: context.menuText(color: Colors.red)),
               ),
             ],
           ),

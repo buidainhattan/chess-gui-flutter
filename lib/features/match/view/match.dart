@@ -17,7 +17,10 @@ class Match extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final matchViewmodel = Provider.of<MatchViewmodel>(context, listen: false);
+    final MatchViewmodel matchViewmodel = Provider.of<MatchViewmodel>(
+      context,
+      listen: false,
+    );
 
     return Scaffold(
       backgroundColor: AppCustomColors.background,
