@@ -18,16 +18,15 @@ class TimeModeMenu extends StatefulWidget {
 
 class _TimeModeMenuState extends State<TimeModeMenu> {
   String? _selectedMode;
-  String? _selectedTime;
+  String? _selectedSetting;
 
   void _toMatchScreen(BuildContext context, SessionDataService service) {
     String? mode = _selectedMode;
-    String? time = _selectedTime;
-    if (mode == null || time == null) return;
+    String? setting = _selectedSetting;
+    if (mode == null || setting == null) return;
 
-    TimeSetting timeSetting = TimeMode.fromName(mode)!.settings[time]!;
     service.updateTimeMode(mode);
-    service.updateTimeSetting(timeSetting);
+    service.updateTimeSetting(setting);
 
     context.go("/${service.gameMode}/$_selectedMode/match");
   }
@@ -47,9 +46,8 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
           ),
         ),
         ...settings.entries.map((entry) {
-          String displayText = entry.value.label;
-          String value = entry.key;
-          bool isSelected = _selectedTime == value;
+          String displayText = entry.key;
+          bool isSelected = _selectedSetting == displayText;
 
           return Center(
             child: Padding(
@@ -64,7 +62,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
                 onPressed: () {
                   setState(() {
                     _selectedMode = buttonText.toLowerCase();
-                    _selectedTime = value;
+                    _selectedSetting = displayText;
                   });
                 },
               ),
@@ -76,9 +74,22 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    final SessionDataService sessionDataService =
+        Provider.of<SessionDataService>(context, listen: false);
+    _initializeDefaultChoice(sessionDataService);
+  }
+
+  void _initializeDefaultChoice(SessionDataService service) {
+    _selectedMode = service.timeMode;
+    _selectedSetting = service.timeSetting;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final SessionDataService sessionDataService =
-        Provider.of<SessionDataService>(context);
+        Provider.of<SessionDataService>(context, listen: false);
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;

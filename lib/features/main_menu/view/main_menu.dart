@@ -29,7 +29,7 @@ class _MainMenuState extends State<MainMenu> {
                 onPressed: () {
                   context.push("/gamemode");
                 },
-                child: Text("START", style: context.menuText()),
+                child: Text("NEW GAME", style: context.menuText()),
               ),
               TextButton(
                 onPressed: () {},

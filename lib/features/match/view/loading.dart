@@ -44,7 +44,7 @@ class _LoadingState extends State<Loading> {
 
     await chessBoardViewmodel.initializeChessBoard();
 
-    timerViewmodel.setAndStartTimer(setting: service.timeSetting);
+    timerViewmodel.setAndStartTimer(setting: service.getSelectedSetting());
 
     return _InitializedData(
       matchManagerService: matchManagerService,

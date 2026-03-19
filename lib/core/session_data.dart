@@ -3,13 +3,13 @@ import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';
 
 class SessionDataService extends ChangeNotifier {
-  String _gameMode = 'pvp';
-  String _timeMode = 'normal';
-  TimeSetting _timeSetting = TimeMode.normal.settings["10-0"]!;
+  String _gameMode = "pvp";
+  String _timeMode = "normal";
+  String _timeSetting = "10 min";
 
   String get gameMode => _gameMode;
   String get timeMode => _timeMode;
-  TimeSetting get timeSetting => _timeSetting;
+  String get timeSetting => _timeSetting;
 
   void updateGameMode(String mode) {
     _gameMode = mode;
@@ -19,7 +19,11 @@ class SessionDataService extends ChangeNotifier {
     _timeMode = mode;
   }
 
-  void updateTimeSetting(TimeSetting setting) {
+  void updateTimeSetting(String setting) {
     _timeSetting = setting;
+  }
+
+  TimeSetting getSelectedSetting() {
+    return TimeMode.fromName(_timeMode)!.settings[_timeSetting]!;
   }
 }
