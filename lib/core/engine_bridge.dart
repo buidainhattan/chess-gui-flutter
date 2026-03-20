@@ -147,7 +147,10 @@ class EngineBridge {
       libraryPath = 'ChessEnginex64.so';
     } else if (Platform.isMacOS) {
       libraryPath = 'ChessEnginex64.dylib';
-    } else {
+    } else if (Platform.isAndroid) {
+      libraryPath = 'libChessEnginex64.so';
+    }
+     else {
       throw UnsupportedError('Unsupported platform');
     }
 
