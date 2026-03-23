@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -9,15 +11,62 @@ class BackgroundMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SvgPicture.asset(
-            "assets/images/backgrounds/main_menu_bg.svg",
-            fit: BoxFit.fill,
-          ),
-          child,
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double size =
+              math.min(constraints.maxWidth, constraints.maxHeight) * 0.15;
+
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildIcon(
+                          const Alignment(0, 0),
+                          'assets/images/backgrounds/pieces/pawn.svg',
+                          size,
+                        ),
+                        Text(
+                          "Chess",
+                          style: TextStyle(
+                            height: 0.9,
+                            fontSize: size,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF32343D),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      "Games",
+                      style: TextStyle(
+                        height: 0.9,
+                        fontSize: size,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF8B7EFE),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: size),
+                child,
+              ],
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+Widget _buildIcon(Alignment alignment, String asset, double size) {
+  return Align(
+    alignment: alignment,
+    child: SvgPicture.asset(asset, width: size),
+  );
 }

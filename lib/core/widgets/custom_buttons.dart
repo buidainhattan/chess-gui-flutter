@@ -1,5 +1,48 @@
+import 'package:chess_app/core/styles/text.dart';
+import 'package:chess_app/core/styles/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+
+class MenuNavButton extends StatelessWidget {
+  final String label;
+  final String route;
+  final VoidCallback? onPressed;
+  final Color? textColor;
+
+  const MenuNavButton({
+    super.key,
+    required this.label,
+    this.route = "",
+    this.onPressed,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed:
+          onPressed ??
+          () {
+            if (route.isNotEmpty) {
+              context.push(route);
+            }
+          },
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.symmetric(
+          vertical: context.responsive(s: AppTheme.spaceXS, m: AppTheme.spaceM),
+          horizontal: context.responsive(
+            s: AppTheme.spaceS,
+            m: AppTheme.spaceM,
+          ),
+        ),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(label, style: context.menuText(color: textColor)),
+    );
+  }
+}
 
 class InMatchIconButton extends StatelessWidget {
   // Change the type to String for the SVG asset path

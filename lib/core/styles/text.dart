@@ -9,6 +9,7 @@ class AppTextStyles {
     required double size,
     FontWeight weight = FontWeight.w400,
     Color? color,
+    double? height,
     List<FontFeature>? fontFeature,
     double? letterSpacing,
   }) {
@@ -17,6 +18,7 @@ class AppTextStyles {
       fontSize: size,
       fontWeight: weight,
       color: color,
+      height: height,
       fontFeatures: fontFeature,
       letterSpacing: letterSpacing ?? 0.2,
     );
@@ -24,20 +26,17 @@ class AppTextStyles {
 }
 
 extension AppTextContext on BuildContext {
-  TextStyle menuText({Color color = AppCustomColors.purple}) {
+  TextStyle menuText({Color? color}) {
     return AppTextStyles._base(
-      size: responsive(s: 16, l: 24, xxl: 32),
+      size: responsive(s: 18, l: 24, xxl: 30),
       weight: FontWeight.w600,
-      color: color,
+      color: color ?? AppCustomColors.purple,
+      height: 0.9,
     );
   }
 
   TextStyle playerNameText(Color? color) {
-    return AppTextStyles._base(
-      size: 18,
-      weight: FontWeight.w600,
-      color: color,
-    );
+    return AppTextStyles._base(size: 18, weight: FontWeight.w600, color: color);
   }
 
   TextStyle timerText(Color? color) {

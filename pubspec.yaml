@@ -33,7 +33,7 @@ flutter:
 
   assets:
     - assets/icons/
-    - assets/images/backgrounds/
+    - assets/images/backgrounds/pieces/
     - assets/images/chess_pieces/white/
     - assets/images/chess_pieces/black/
     - assets/images/tiles/

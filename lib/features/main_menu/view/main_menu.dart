@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:chess_app/core/styles/text.dart';
+import 'package:chess_app/core/styles/theme.dart';
+import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
@@ -14,46 +14,20 @@ class MainMenu extends StatefulWidget {
 class _MainMenuState extends State<MainMenu> {
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    return Stack(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: AppTheme.spaceS,
       children: [
-        Positioned(
-          top: (screenHeight / 1.7),
-          width: (6 / 11 * screenWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  context.push("/gamemode");
-                },
-                child: Text("NEW GAME", style: context.menuText()),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text("LOAD", style: context.menuText()),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  "SETTINGS",
-                  style: context.menuText(color: Colors.black),
-                ),
-              ),
-              SizedBox(height: (screenHeight / 19.2)),
-              TextButton(
-                onPressed: () {
-                  exit(0);
-                },
-                child: Text(
-                  "QUIT",
-                  style: context.menuText(color: Colors.red),
-                ),
-              ),
-            ],
-          ),
+        MenuNavButton(label: "NEW GAME", route: "/gamemode"),
+        MenuNavButton(label: "LOAD"),
+        MenuNavButton(label: "SETTINGS", textColor: Colors.black),
+        MenuNavButton(
+          label: "QUIT",
+          onPressed: () {
+            exit(0);
+          },
+          textColor: Colors.red,
         ),
       ],
     );
