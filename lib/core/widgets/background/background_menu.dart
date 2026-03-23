@@ -16,46 +16,54 @@ class BackgroundMenu extends StatelessWidget {
           final double size =
               math.min(constraints.maxWidth, constraints.maxHeight) * 0.15;
 
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildIcon(
-                          const Alignment(0, 0),
-                          'assets/images/backgrounds/pieces/pawn.svg',
-                          size,
-                        ),
-                        Text(
-                          "Chess",
-                          style: TextStyle(
-                            height: 0.9,
-                            fontSize: size,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF32343D),
+          return Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                radius: 1.1,
+                colors: [Colors.white, Colors.grey.shade400],
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildIcon(
+                            const Alignment(0, 0),
+                            'assets/images/backgrounds/pieces/pawn.svg',
+                            size,
                           ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      "Games",
-                      style: TextStyle(
-                        height: 0.9,
-                        fontSize: size,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF8B7EFE),
+                          Text(
+                            "Chess",
+                            style: TextStyle(
+                              height: 0.9,
+                              fontSize: size,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF32343D),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: size),
-                child,
-              ],
+                      Text(
+                        "Games",
+                        style: TextStyle(
+                          height: 0.9,
+                          fontSize: size,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF8B7EFE),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: size),
+                  child,
+                ],
+              ),
             ),
           );
         },
