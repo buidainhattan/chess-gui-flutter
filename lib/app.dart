@@ -50,24 +50,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 return TimeModeMenu();
               },
             ),
-            ShellRoute(
-              builder: (context, state, child) {
-                return BackgroundMatch(child: child);
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) {
+            return BackgroundMatch(child: child);
+          },
+          routes: [
+            GoRoute(
+              path: "/pvp/:timemode(blitz|rapid|normal)/match",
+              builder: (context, state) {
+                return Loading();
               },
-              routes: [
-                GoRoute(
-                  path: "/pvp/:timemode(blitz|rapid|normal)/match",
-                  builder: (context, state) {
-                    return Loading();
-                  },
-                ),
-                GoRoute(
-                  path: "/pve/:timemode(blitz|rapid|normal)/match",
-                  builder: (context, state) {
-                    return Loading(enableBot: true);
-                  },
-                ),
-              ],
+            ),
+            GoRoute(
+              path: "/pve/:timemode(blitz|rapid|normal)/match",
+              builder: (context, state) {
+                return Loading(enableBot: true);
+              },
             ),
           ],
         ),

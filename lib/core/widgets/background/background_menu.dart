@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:chess_app/core/styles/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -27,41 +28,46 @@ class BackgroundMenu extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
+                  Expanded(
+                    flex: context.responsive(s: 1, m: 3),
+                    child: Align(
+                      alignment: Alignment(0, context.responsive(s: 0.3, m: 0)),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildIcon(
-                            const Alignment(0, 0),
-                            'assets/images/backgrounds/pieces/pawn.svg',
-                            size,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildIcon(
+                                const Alignment(0, 0),
+                                'assets/images/backgrounds/pieces/pawn.svg',
+                                size,
+                              ),
+                              Text(
+                                "Chess",
+                                style: TextStyle(
+                                  height: 0.9,
+                                  fontSize: size,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF32343D),
+                                ),
+                              ),
+                            ],
                           ),
                           Text(
-                            "Chess",
+                            "Games",
                             style: TextStyle(
                               height: 0.9,
                               fontSize: size,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF32343D),
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF8B7EFE),
                             ),
                           ),
                         ],
                       ),
-                      Text(
-                        "Games",
-                        style: TextStyle(
-                          height: 0.9,
-                          fontSize: size,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF8B7EFE),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  SizedBox(height: size),
-                  child,
+                  Expanded(flex: context.responsive(s: 1, m: 2), child: child),
                 ],
               ),
             ),

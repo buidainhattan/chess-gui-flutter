@@ -4,6 +4,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/session_data.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
+import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -52,19 +53,15 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceS),
-              child: TextButton(
-                child: Text(
-                  displayText,
-                  style: context.menuText(
-                    color: isSelected ? Colors.green : Colors.black,
-                  ),
-                ),
+              child: MenuNavButton(
+                label: displayText,
                 onPressed: () {
                   setState(() {
                     _selectedMode = buttonText.toLowerCase();
                     _selectedSetting = displayText;
                   });
                 },
+                textColor: isSelected ? Colors.green : Colors.black,
               ),
             ),
           );
@@ -91,80 +88,58 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
     final SessionDataService sessionDataService =
         Provider.of<SessionDataService>(context, listen: false);
 
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Positioned(
-          top: (screenHeight / 2),
-          width: (6 / 12 * screenWidth),
-          left: screenWidth * 0.02,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Table(
-                columnWidths: const <int, TableColumnWidth>{
-                  0: IntrinsicColumnWidth(),
-                  1: FlexColumnWidth(),
-                  2: FlexColumnWidth(),
-                  3: FlexColumnWidth(),
-                },
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                border: TableBorder(
-                  horizontalInside: BorderSide(color: Colors.black, width: 2),
-                ),
-                children: [
-                  _buildOptionRow(
-                    context,
-                    TimeMode.blitz.name,
-                    TimeMode.blitz.settings,
-                  ),
-                  _buildOptionRow(
-                    context,
-                    TimeMode.rapid.name,
-                    TimeMode.rapid.settings,
-                  ),
-                  _buildOptionRow(
-                    context,
-                    TimeMode.normal.name,
-                    TimeMode.normal.settings,
-                  ),
-                ],
-              ),
-
-              SizedBox(height: screenHeight / 96),
-
-              TextButton(
-                onPressed: () {
-                  _toMatchScreen(context, sessionDataService);
-                },
-                child: Text(
-                  "START GAME",
-                  style: context.menuText(color: Colors.green),
-                ),
-              ),
-
-              SizedBox(height: screenHeight / 48),
-
-              TextButton(
-                onPressed: () {
-                  context.pop();
-                },
-                child: Text(
-                  "BACK",
-                  style: context.menuText(color: Colors.black),
-                ),
-              ),
-
-              TextButton(
-                onPressed: () {
-                  exit(0);
-                },
-                child: Text("QUIT", style: context.menuText(color: Colors.red)),
-              ),
-            ],
+        Table(
+          columnWidths: const <int, TableColumnWidth>{
+            0: IntrinsicColumnWidth(),
+            1: FlexColumnWidth(),
+            2: FlexColumnWidth(),
+            3: FlexColumnWidth(),
+          },
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          border: TableBorder(
+            horizontalInside: BorderSide(color: Colors.black, width: 2),
           ),
+          children: [
+            _buildOptionRow(
+              context,
+              TimeMode.blitz.name,
+              TimeMode.blitz.settings,
+            ),
+            _buildOptionRow(
+              context,
+              TimeMode.rapid.name,
+              TimeMode.rapid.settings,
+            ),
+            _buildOptionRow(
+              context,
+              TimeMode.normal.name,
+              TimeMode.normal.settings,
+            ),
+          ],
+        ),
+
+        SizedBox(height: AppTheme.spaceS),
+
+        MenuNavButton(
+          label: "START GAME",
+          onPressed: () => _toMatchScreen(context, sessionDataService),
+          textColor: Colors.green,
+        ),
+        MenuNavButton(
+          label: "BACK",
+          onPressed: () => context.pop(),
+          textColor: Colors.black,
+        ),
+
+        SizedBox(height: AppTheme.spaceS),
+
+        MenuNavButton(
+          label: "QUIT",
+          onPressed: () => exit(0),
+          textColor: Colors.red,
         ),
       ],
     );
