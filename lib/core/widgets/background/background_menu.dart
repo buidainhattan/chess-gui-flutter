@@ -29,7 +29,6 @@ class BackgroundMenu extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    flex: context.responsive(s: 1, m: 3),
                     child: Align(
                       alignment: Alignment(0, context.responsive(s: 0.3, m: 0)),
                       child: Column(
@@ -67,7 +66,7 @@ class BackgroundMenu extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Expanded(flex: context.responsive(s: 1, m: 2), child: child),
+                  Expanded(child: child),
                 ],
               ),
             ),

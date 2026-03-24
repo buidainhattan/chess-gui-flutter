@@ -22,51 +22,48 @@ class Match extends StatelessWidget {
       listen: false,
     );
 
-    return Scaffold(
-      backgroundColor: AppCustomColors.background,
-      body: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(
-          vertical: AppTheme.spaceS,
-          horizontal: AppTheme.spaceS,
-        ),
-        child: Stack(
-          children: [
-            Selector<MatchViewmodel, GameResultType>(
-              selector: (context, viewmodel) => viewmodel.result,
-              builder: (context, result, child) {
-                if (result != GameResultType.ongoing) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    MatchEndDialog.show(context, result);
-                  });
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            // ── Main layout ──
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return _MatchLayout(
-                  enableBot: enableBot,
-                  matchViewmodel: matchViewmodel,
-                  maxHeight: constraints.maxHeight,
-                  maxWidth: constraints.maxWidth,
-                );
-              },
-            ),
-            Align(alignment: Alignment.topRight, child: _MenuButton()),
-            enableBot
-                ? Align(
-                    alignment: Alignment.bottomLeft,
-                    child: _BarButton(
-                      icon: Icons.redo_sharp,
-                      label: 'Undo',
-                      tooltip: 'Undo last move',
-                      onPressed: () => matchViewmodel.relayUnMakeSignal(),
-                    ),
-                  )
-                : SizedBox.shrink(),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: AppTheme.spaceS,
+        horizontal: AppTheme.spaceS,
+      ),
+      child: Stack(
+        children: [
+          Selector<MatchViewmodel, GameResultType>(
+            selector: (context, viewmodel) => viewmodel.result,
+            builder: (context, result, child) {
+              if (result != GameResultType.ongoing) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  MatchEndDialog.show(context, result);
+                });
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          // ── Main layout ──
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return _MatchLayout(
+                enableBot: enableBot,
+                matchViewmodel: matchViewmodel,
+                maxHeight: constraints.maxHeight,
+                maxWidth: constraints.maxWidth,
+              );
+            },
+          ),
+          Align(alignment: Alignment.topRight, child: _MenuButton()),
+          enableBot
+              ? Align(
+                  alignment: Alignment.bottomLeft,
+                  child: _BarButton(
+                    icon: Icons.redo_sharp,
+                    label: 'Undo',
+                    tooltip: 'Undo last move',
+                    onPressed: () => matchViewmodel.relayUnMakeSignal(),
+                  ),
+                )
+              : SizedBox.shrink(),
+        ],
       ),
     );
   }
@@ -87,15 +84,28 @@ class _MatchLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     const double columnSpacing = AppTheme.spaceXS;
-    final double stripHeight = maxHeight * 0.025;
-    final double cardHeight = maxHeight * 0.1;
 
-    final double totalSpacing = columnSpacing * 4;
-    final double occupiedVerticalSpace =
-        (cardHeight * 2) + (stripHeight * 2) + totalSpacing;
+    double stripHeight,
+        cardHeight,
+        totalSpacing,
+        occupiedVerticalSpace,
+        boardWidth;
 
-    final double boardWidth = maxHeight - occupiedVerticalSpace;
+    stripHeight = maxHeight * 0.025;
+    cardHeight = maxHeight * 0.1;
+    totalSpacing = columnSpacing * 4;
+
+    if (isLandscape) {
+      occupiedVerticalSpace =
+          (cardHeight * 2) + (stripHeight * 2) + totalSpacing;
+      boardWidth = maxHeight - occupiedVerticalSpace;
+    } else {
+      boardWidth = maxWidth;
+    }
 
     return SizedBox(
       width: maxWidth,
@@ -107,10 +117,12 @@ class _MatchLayout extends StatelessWidget {
             width: boardWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: columnSpacing,
               children: [
-                Flexible(
+                SizedBox(
+                  height: cardHeight,
                   child: PlayerCard(
                     playerName: enableBot ? 'Bot · Easy' : 'Player 2',
                     playerSide: matchViewmodel.playerTwoSide,
@@ -131,7 +143,8 @@ class _MatchLayout extends StatelessWidget {
                   child: _TurnStrip(targetSide: matchViewmodel.playerOneSide),
                 ),
 
-                Flexible(
+                SizedBox(
+                  height: cardHeight,
                   child: PlayerCard(
                     playerName: 'You',
                     playerSide: matchViewmodel.playerOneSide,

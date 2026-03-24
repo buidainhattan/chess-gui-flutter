@@ -10,7 +10,15 @@ class BackgroundMatch extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          child,
+          Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                radius: 1.1,
+                colors: [Colors.white, Colors.grey.shade400],
+              ),
+            ),
+            child: child,
+          ),
         ],
       ),
     );
