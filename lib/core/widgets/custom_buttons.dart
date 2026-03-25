@@ -44,54 +44,70 @@ class MenuNavButton extends StatelessWidget {
   }
 }
 
-class InMatchIconButton extends StatelessWidget {
-  // Change the type to String for the SVG asset path
-  final String svgIconPath;
+class BarButton extends StatelessWidget {
+  final IconData? icon;
+  final String? svgPath;
+  final String label;
+  final String tooltip;
   final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color iconColor;
-  final double buttonSize;
-  final double iconToButtonScale;
-  final double borderRadius;
-  final String? tooltip;
+  final bool isDanger;
 
-  const InMatchIconButton({
+  const BarButton({
     super.key,
-    required this.svgIconPath, // The path to your SVG file (e.g., 'assets/icons/flag_icon.svg')
+    this.icon,
+    this.svgPath,
+    required this.label,
+    this.tooltip = "",
     required this.onPressed,
-    this.backgroundColor = const Color(0xFFD0D0E8),
-    this.iconColor = const Color(0xFF3E4158),
-    this.buttonSize = 56.0,
-    this.iconToButtonScale = 0.5,
-    this.borderRadius = 12.0,
-    this.tooltip,
-  });
+    this.isDanger = false,
+  }) : assert(
+         (icon == null) != (svgPath == null),
+         "Only either icon or svgPath can be provided!",
+       );
 
   @override
   Widget build(BuildContext context) {
+    final Color fg = isDanger
+        ? const Color(0xFFC0392B)
+        : AppCustomColors.textMid;
+    final Color hoverBg = isDanger
+        ? const Color(0xFFFDF1F0)
+        : AppCustomColors.activeBg;
+
     return Tooltip(
       message: tooltip,
-      child: SizedBox(
-        width: buttonSize,
-        height: buttonSize,
-        child: Material(
-          color: backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(4),
+        hoverColor: hoverBg,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppCustomColors.border),
+            borderRadius: BorderRadius.circular(4),
+            color: AppCustomColors.surface,
           ),
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: Center(
-              // Use SvgPicture.asset instead of Icon
-              child: SvgPicture.asset(
-                svgIconPath,
-                // Set the color and size for the SVG
-                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-                width: buttonSize * iconToButtonScale,
-                height: buttonSize * iconToButtonScale,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon != null
+                  ? Icon(icon)
+                  : SvgPicture.asset(
+                      svgPath!,
+                      width: 15,
+                      height: 15,
+                      colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
+                    ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                  color: fg,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

@@ -2,12 +2,12 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/swiping_shader.dart';
+import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/core/widgets/player_card.dart';
 import 'package:chess_app/features/chess_board/view/chess_board.dart';
 import 'package:chess_app/features/match/view/match_end.dart';
 import 'package:chess_app/features/match/viewmodel/match_viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -22,48 +22,43 @@ class Match extends StatelessWidget {
       listen: false,
     );
 
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        vertical: AppTheme.spaceS,
-        horizontal: AppTheme.spaceS,
-      ),
-      child: Stack(
-        children: [
-          Selector<MatchViewmodel, GameResultType>(
-            selector: (context, viewmodel) => viewmodel.result,
-            builder: (context, result, child) {
-              if (result != GameResultType.ongoing) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  MatchEndDialog.show(context, result);
-                });
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-          // ── Main layout ──
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return _MatchLayout(
-                enableBot: enableBot,
-                matchViewmodel: matchViewmodel,
-                maxHeight: constraints.maxHeight,
-                maxWidth: constraints.maxWidth,
-              );
-            },
-          ),
-          Align(alignment: Alignment.topRight, child: _MenuButton()),
-          enableBot
-              ? Align(
-                  alignment: Alignment.bottomLeft,
-                  child: _BarButton(
-                    icon: Icons.redo_sharp,
-                    label: 'Undo',
-                    tooltip: 'Undo last move',
-                    onPressed: () => matchViewmodel.relayUnMakeSignal(),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          vertical: AppTheme.spaceS,
+          horizontal: AppTheme.spaceS,
+        ),
+        child: Stack(
+          children: [
+            Selector<MatchViewmodel, GameResultType>(
+              selector: (context, viewmodel) => viewmodel.result,
+              builder: (context, result, child) {
+                if (result != GameResultType.ongoing) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    MatchEndDialog.show(context, result);
+                  });
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // ── Main layout ──
+            _MatchLayout(enableBot: enableBot, matchViewmodel: matchViewmodel),
+
+            Align(alignment: Alignment.topRight, child: _Menu()),
+            enableBot
+                ? Align(
+                    alignment: Alignment.bottomLeft,
+                    child: BarButton(
+                      icon: Icons.redo_sharp,
+                      label: 'Undo',
+                      tooltip: 'Undo last move',
+                      onPressed: () => matchViewmodel.relayUnMakeSignal(),
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ],
+        ),
       ),
     );
   }
@@ -72,93 +67,79 @@ class Match extends StatelessWidget {
 class _MatchLayout extends StatelessWidget {
   final bool enableBot;
   final MatchViewmodel matchViewmodel;
-  final double maxHeight;
-  final double maxWidth;
 
-  const _MatchLayout({
-    required this.enableBot,
-    required this.matchViewmodel,
-    required this.maxHeight,
-    required this.maxWidth,
-  });
+  const _MatchLayout({required this.enableBot, required this.matchViewmodel});
 
   @override
   Widget build(BuildContext context) {
-    bool isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double columnSpacing = AppTheme.spaceXS;
 
-    const double columnSpacing = AppTheme.spaceXS;
+        double stripHeight, cardHeight, occupiedVerticalSpace, boardWidth;
 
-    double stripHeight,
-        cardHeight,
-        totalSpacing,
-        occupiedVerticalSpace,
-        boardWidth;
+        stripHeight = constraints.maxHeight * 0.025;
+        cardHeight = constraints.maxHeight * 0.1;
 
-    stripHeight = maxHeight * 0.025;
-    cardHeight = maxHeight * 0.1;
-    totalSpacing = columnSpacing * 4;
+        if (context.isLandscape) {
+          occupiedVerticalSpace =
+              (cardHeight * 2) + (stripHeight * 2) + columnSpacing * 4;
+          boardWidth = constraints.maxHeight - occupiedVerticalSpace;
+        } else {
+          boardWidth = constraints.maxWidth;
+        }
 
-    if (isLandscape) {
-      occupiedVerticalSpace =
-          (cardHeight * 2) + (stripHeight * 2) + totalSpacing;
-      boardWidth = maxHeight - occupiedVerticalSpace;
-    } else {
-      boardWidth = maxWidth;
-    }
-
-    return SizedBox(
-      width: maxWidth,
-      height: maxHeight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: boardWidth,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: columnSpacing,
-              children: [
-                SizedBox(
-                  height: cardHeight,
-                  child: PlayerCard(
-                    playerName: enableBot ? 'Bot · Easy' : 'Player 2',
-                    playerSide: matchViewmodel.playerTwoSide,
-                    isPlayerOne: false,
-                    isBot: enableBot,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: boardWidth,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: columnSpacing,
+                children: [
+                  SizedBox(
+                    height: cardHeight,
+                    child: PlayerCard(
+                      playerName: enableBot ? 'Bot · Easy' : 'Player 2',
+                      playerSide: matchViewmodel.playerTwoSide,
+                      isPlayerOne: false,
+                      isBot: enableBot,
+                    ),
                   ),
-                ),
 
-                SizedBox(
-                  height: stripHeight,
-                  child: _TurnStrip(targetSide: matchViewmodel.playerTwoSide),
-                ),
-
-                ChessBoard(enableBot: enableBot),
-
-                SizedBox(
-                  height: stripHeight,
-                  child: _TurnStrip(targetSide: matchViewmodel.playerOneSide),
-                ),
-
-                SizedBox(
-                  height: cardHeight,
-                  child: PlayerCard(
-                    playerName: 'You',
-                    playerSide: matchViewmodel.playerOneSide,
-                    isPlayerOne: true,
-                    isBot: false,
+                  SizedBox(
+                    height: stripHeight,
+                    child: _TurnStrip(targetSide: matchViewmodel.playerTwoSide),
                   ),
-                ),
-              ],
+
+                  ChessBoard(enableBot: enableBot),
+
+                  SizedBox(
+                    height: stripHeight,
+                    child: _TurnStrip(targetSide: matchViewmodel.playerOneSide),
+                  ),
+
+                  SizedBox(
+                    height: cardHeight,
+                    child: PlayerCard(
+                      playerName: 'You',
+                      playerSide: matchViewmodel.playerOneSide,
+                      isPlayerOne: true,
+                      isBot: false,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: AppTheme.spaceS),
-          _MovesSidebar(maxPanelWidth: boardWidth),
-        ],
-      ),
+            if (constraints.maxWidth > boardWidth * 2) ...[
+              const SizedBox(width: AppTheme.spaceS),
+              _MovesSidebar(maxPanelWidth: boardWidth),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -218,15 +199,15 @@ class _TurnStrip extends StatelessWidget {
 }
 
 class _MovesSidebar extends StatefulWidget {
-  final double maxPanelWidth;
-  const _MovesSidebar({required this.maxPanelWidth});
+  final double? maxPanelWidth;
+
+  const _MovesSidebar({this.maxPanelWidth});
 
   @override
   State<_MovesSidebar> createState() => _MovesSidebarState();
 }
 
 class _MovesSidebarState extends State<_MovesSidebar> {
-  static const double _tabWidth = 32;
   bool _isOpen = false;
 
   void _toggle() => setState(() => _isOpen = !_isOpen);
@@ -234,14 +215,16 @@ class _MovesSidebarState extends State<_MovesSidebar> {
   @override
   Widget build(BuildContext context) {
     return Row(
+      // Ensure the sidebar takes full height if isVertical is true
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // ── Vertical tab (always visible, full column height) ──
+        // ── Toggle Button ──
         GestureDetector(
           onTap: _toggle,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: _tabWidth,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             decoration: BoxDecoration(
               color: AppCustomColors.surface,
               borderRadius: BorderRadius.circular(4),
@@ -249,62 +232,46 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                 color: _isOpen ? AppCustomColors.dark : AppCustomColors.border,
                 width: _isOpen ? 1.5 : 1.0,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppCustomColors.dark.withValues(alpha: 0.06),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
               children: [
                 AnimatedRotation(
                   turns: _isOpen ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 260),
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18,
-                    color: _isOpen
-                        ? AppCustomColors.dark
-                        : AppCustomColors.textMid,
-                  ),
+                  child: const Icon(Icons.chevron_right_rounded, size: 18),
                 ),
-                const SizedBox(height: 10),
                 RotatedBox(
                   quarterTurns: 1,
-                  child: Text(
+                  child: const Text(
                     'MOVES',
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1.2,
-                      color: _isOpen
-                          ? AppCustomColors.dark
-                          : AppCustomColors.textMid,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                // Simplified Move Counter
                 Selector<MatchViewmodel, int>(
-                  selector: (context, matchViewmodel) =>
-                      matchViewmodel.algebraicHistory.length,
-                  builder: (context, count, widget) => Container(
+                  selector: (_, vm) => vm.algebraicHistory.length,
+                  builder: (_, count, _) => Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
+                      horizontal: 5,
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: AppCustomColors.dark,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       '$count',
                       style: const TextStyle(
                         color: AppCustomColors.surface,
                         fontSize: 9,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -318,16 +285,14 @@ class _MovesSidebarState extends State<_MovesSidebar> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          width: _isOpen ? widget.maxPanelWidth : 0,
+          // If maxPanelWidth is null, it expands to available space (infinity)
+          width: _isOpen
+              ? (widget.maxPanelWidth ?? context.screenWidth / 2)
+              : 0,
           child: ClipRect(
-            child: OverflowBox(
-              minWidth: widget.maxPanelWidth,
-              maxWidth: widget.maxPanelWidth,
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: const _MoveHistoryPanel(),
-              ),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: _MoveHistoryPanel(),
             ),
           ),
         ),
@@ -344,7 +309,7 @@ class _MoveHistoryPanel extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppCustomColors.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: AppCustomColors.border),
         boxShadow: [
           BoxShadow(
@@ -414,7 +379,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                         color: isLast
                             ? AppCustomColors.activeBg
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                       child: Row(
                         children: [
@@ -465,14 +430,14 @@ class _MoveHistoryPanel extends StatelessWidget {
   }
 }
 
-class _MenuButton extends StatefulWidget {
-  const _MenuButton();
+class _Menu extends StatefulWidget {
+  const _Menu();
 
   @override
-  State<_MenuButton> createState() => _MenuButtonState();
+  State<_Menu> createState() => _MenuState();
 }
 
-class _MenuButtonState extends State<_MenuButton> {
+class _MenuState extends State<_Menu> {
   bool _isOpen = false;
 
   void _openMenu() {
@@ -490,7 +455,7 @@ class _MenuButtonState extends State<_MenuButton> {
         children: [
           AnimatedSize(
             duration: Duration(milliseconds: 200),
-            child: _BarButton(
+            child: BarButton(
               icon: Icons.menu,
               label: "Menu",
               tooltip: "Open menu",
@@ -504,13 +469,13 @@ class _MenuButtonState extends State<_MenuButton> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _BarButton(
+                        BarButton(
                           svgPath: 'assets/icons/home.svg',
                           label: 'Home',
                           tooltip: 'Back to home',
                           onPressed: () => context.go('/'),
                         ),
-                        _BarButton(
+                        BarButton(
                           svgPath: 'assets/icons/resign.svg',
                           label: 'Resign',
                           tooltip: 'Resign the game',
@@ -523,75 +488,6 @@ class _MenuButtonState extends State<_MenuButton> {
                 : SizedBox.shrink(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _BarButton extends StatelessWidget {
-  final IconData? icon;
-  final String? svgPath;
-  final String label;
-  final String tooltip;
-  final VoidCallback onPressed;
-  final bool isDanger;
-
-  const _BarButton({
-    this.icon,
-    this.svgPath,
-    required this.label,
-    this.tooltip = "",
-    required this.onPressed,
-    this.isDanger = false,
-  }) : assert(
-         (icon == null) != (svgPath == null),
-         "Only either icon or svgPath can be provided!",
-       );
-
-  @override
-  Widget build(BuildContext context) {
-    final Color fg = isDanger
-        ? const Color(0xFFC0392B)
-        : AppCustomColors.textMid;
-    final Color hoverBg = isDanger
-        ? const Color(0xFFFDF1F0)
-        : AppCustomColors.activeBg;
-
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4),
-        hoverColor: hoverBg,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppCustomColors.border),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              icon != null
-                  ? Icon(icon)
-                  : SvgPicture.asset(
-                      svgPath!,
-                      width: 15,
-                      height: 15,
-                      colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
-                    ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
-                  color: fg,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

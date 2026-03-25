@@ -46,18 +46,17 @@ extension ResponsiveScaling on BuildContext {
   // Returns a percentage of the height
   double h(double percent) => screenHeight * percent;
 
-  // Check current window state
-  bool get isMaximized => screenWidth > AppTheme.mBreakpoint;
-  bool get isCompact => screenWidth < AppTheme.sBreakPoint;
+  bool get isLandscape =>
+      MediaQuery.of(this).orientation == Orientation.landscape;
 }
 
 extension ScreenSizeExtension on BuildContext {
   ScreenSize get screenSize {
-    if (screenWidth < AppTheme.sBreakPoint) return ScreenSize.s;
-    if (screenWidth < AppTheme.mBreakpoint) return ScreenSize.m;
-    if (screenWidth < AppTheme.lBreakpoint) return ScreenSize.l;
-    if (screenWidth < AppTheme.xlBreakpoint) return ScreenSize.xl;
-    return ScreenSize.xxl;
+    if (screenWidth > AppTheme.xxlBreakPoint) return ScreenSize.xxl;
+    if (screenWidth > AppTheme.xlBreakpoint) return ScreenSize.xl;
+    if (screenWidth > AppTheme.lBreakpoint) return ScreenSize.l;
+    if (screenWidth > AppTheme.mBreakpoint) return ScreenSize.m;
+    return ScreenSize.s;
   }
 }
 
