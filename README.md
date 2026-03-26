@@ -12,11 +12,10 @@ A chess GUI made with Flutter to interact with my chess engine.
 - Save and load ongoing match
 - Theme customization
 - Background music
-- Redo move (in PVE only)
 
 # Future Plan
 
-- Extend PVP mode, allow LAN connection to play\
+- Extend PVP mode, allow LAN connection to play
 - Bot levels selection.
 
 # Demo
