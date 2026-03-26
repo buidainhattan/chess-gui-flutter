@@ -10,9 +10,10 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: context.isLandscape
+      mainAxisAlignment: (context.isMobile && context.isLandscape)
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
+      spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
         MenuNavButton(label: "NEW GAME", route: "/gamemode"),
         MenuNavButton(label: "LOAD"),

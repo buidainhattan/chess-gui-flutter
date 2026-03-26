@@ -87,6 +87,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         Provider.of<SessionDataService>(context, listen: false);
 
     return Column(
+      spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
         Table(
           columnWidths: const <int, TableColumnWidth>{

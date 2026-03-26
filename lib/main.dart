@@ -15,7 +15,8 @@ void main() async {
 
   // Check for Desktop Platform (Windows, macOS, Linux)
   bool isDesktop =
-      !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+      !(Platform.isAndroid || Platform.isIOS || kIsWeb) &&
+      (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 
   if (isDesktop) {
     await windowManager.ensureInitialized();

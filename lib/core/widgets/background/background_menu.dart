@@ -27,7 +27,7 @@ class BackgroundMenu extends StatelessWidget {
             return Column(
               children: [
                 Expanded(
-                  flex: context.isLandscape ? 2 : 1,
+                  flex: (context.isMobile && context.isLandscape) ? 2 : 1,
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -65,7 +65,7 @@ class BackgroundMenu extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  flex: context.isLandscape ? 3 : 1,
+                  flex: (context.isMobile && context.isLandscape) ? 3 : 1,
                   child: child,
                 ),
               ],

@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 
 enum ScreenSize { s, m, l, xl, xxl }
@@ -45,6 +47,8 @@ extension ResponsiveScaling on BuildContext {
 
   // Returns a percentage of the height
   double h(double percent) => screenHeight * percent;
+
+  bool get isMobile => Platform.isAndroid || Platform.isIOS;
 
   bool get isLandscape =>
       MediaQuery.of(this).orientation == Orientation.landscape;

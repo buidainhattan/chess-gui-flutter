@@ -16,9 +16,10 @@ class GameModeMenu extends StatelessWidget {
         Provider.of<SessionDataService>(context);
 
     return Column(
-      mainAxisAlignment: context.isLandscape
+      mainAxisAlignment: (context.isMobile && context.isLandscape)
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
+      spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
         MenuNavButton(
           label: "PVP",
