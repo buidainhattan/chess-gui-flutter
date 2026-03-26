@@ -16,8 +16,9 @@ class GameModeMenu extends StatelessWidget {
         Provider.of<SessionDataService>(context);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      spacing: AppTheme.spaceS,
+      mainAxisAlignment: context.isLandscape
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
       children: [
         MenuNavButton(
           label: "PVP",
@@ -38,7 +39,7 @@ class GameModeMenu extends StatelessWidget {
           onPressed: () => context.pop(),
           textColor: Colors.black,
         ),
-        SizedBox(height: AppTheme.spaceS),
+        SizedBox(height: AppTheme.spaceM),
         MenuNavButton(
           label: "QUIT",
           onPressed: () => exit(0),

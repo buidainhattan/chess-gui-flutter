@@ -30,11 +30,8 @@ class MenuNavButton extends StatelessWidget {
           },
       style: TextButton.styleFrom(
         padding: EdgeInsets.symmetric(
-          vertical: context.responsive(s: AppTheme.spaceXS, m: AppTheme.spaceM),
-          horizontal: context.responsive(
-            s: AppTheme.spaceS,
-            m: AppTheme.spaceM,
-          ),
+          horizontal: AppTheme.spaceS,
+          vertical: AppTheme.spaceS,
         ),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
