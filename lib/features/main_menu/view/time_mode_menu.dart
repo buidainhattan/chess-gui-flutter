@@ -41,7 +41,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
           alignment: Alignment.centerLeft,
           child: Text(
             buttonText.toUpperCase(),
-            style: context.menuText(color: AppCustomColors.purple),
+            style: context.menuText(),
           ),
         ),
         ...settings.entries.map((entry) {
@@ -129,7 +129,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         MenuNavButton(
           label: "BACK",
           onPressed: () => context.pop(),
-          textColor: Colors.black,
+          textColor: Theme.of(context).colorScheme.onSurface,
         ),
       ],
     );

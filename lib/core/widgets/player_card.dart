@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 // ── Player Card ───────────────────────────────────────────────────────────────
 class PlayerCard extends StatelessWidget {
   final String playerName;
-  final String playerSide;
+  final Sides playerSide;
   final bool isPlayerOne;
   final bool isBot;
 
@@ -25,64 +25,47 @@ class PlayerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWhite = playerSide == Sides.white.name;
-    final Color cardBackground,
-        text,
-        textDim,
-        borderActive,
-        avatarBackground,
-        avatarBorder,
-        clockBackground,
-        clockText;
-    if (isWhite) {
-      cardBackground = clockText = AppCustomColors.surface;
-      text = borderActive = clockBackground = AppCustomColors.dark;
-      textDim = AppCustomColors.textDim;
-      avatarBackground = AppCustomColors.border;
-      avatarBorder = AppCustomColors.dark.withValues(alpha: 0.2);
+    final MatchViewmodel matchViewmodel = Provider.of<MatchViewmodel>(context);
+
+    final bool isActive = playerSide == matchViewmodel.sideToMove;
+    final Color background, border, text, containerBackground, containerText;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    if (playerSide == Sides.white) {
+      background = colorScheme.primaryContainer;
+      border = colorScheme.secondary;
+      text = colorScheme.onPrimaryContainer;
+      containerBackground = colorScheme.primary;
+      containerText = colorScheme.onPrimary;
     } else {
-      cardBackground = clockText = AppCustomColors.dark;
-      text = clockBackground = AppCustomColors.surface;
-      textDim = AppCustomColors.surface.withValues(alpha: 0.55);
-      borderActive = avatarBorder = AppCustomColors.border;
-      avatarBackground = AppCustomColors.surface.withValues(alpha: 0.12);
+      background = colorScheme.primary;
+      border = colorScheme.secondaryContainer;
+      text = colorScheme.onPrimary;
+      containerBackground = colorScheme.primaryContainer;
+      containerText = colorScheme.onPrimaryContainer;
     }
 
-    return Selector<MatchViewmodel, bool>(
-      selector: (context, matchViewmodel) =>
-          matchViewmodel.sideToMove == playerSide,
-      builder: (context, isActive, child) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return Container(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            Container(
               padding: EdgeInsets.symmetric(
                 horizontal: constraints.maxWidth * 0.02,
                 vertical: constraints.maxHeight * 0.1,
               ),
               decoration: BoxDecoration(
-                color: cardBackground,
+                color: background,
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: isActive ? borderActive : AppCustomColors.border,
-                  width: isActive ? 1.5 : 1.0,
-                ),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                          color: AppCustomColors.dark.withValues(alpha: 0.12),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                border: Border.all(color: border, width: isActive ? 1.5 : 1.0),
               ),
               child: Flex(
                 direction: Axis.horizontal,
                 children: [
                   _PlayerAvatar(
                     isBot: isBot,
-                    backgroundColor: avatarBackground,
-                    borderColor: avatarBorder,
+                    backgroundColor: background,
+                    borderColor: border,
                     iconColor: text,
                   ),
 
@@ -108,16 +91,18 @@ class PlayerCard extends StatelessWidget {
                     child: _PlayerTimer(
                       isActive: isActive,
                       isPlayerOne: isPlayerOne,
-                      background: clockBackground,
-                      activeColor: clockText,
-                      inactiveColor: textDim,
-                      borderColor: AppCustomColors.border,
+                      textColor: containerText,
+                      background: containerBackground,
+                      borderColor: Theme.of(context).secondaryHeaderColor,
                     ),
                   ),
                 ],
               ),
-            );
-          },
+            ),
+            !isActive
+                ? Container(color: Colors.black.withValues(alpha: 0.15))
+                : SizedBox.shrink(),
+          ],
         );
       },
     );
@@ -153,10 +138,15 @@ class _PlayerAvatar extends StatelessWidget {
             heightFactor: 0.5,
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text(
-                isBot ? '🤖' : '♟',
-                style: TextStyle(fontSize: 100, color: iconColor),
-              ),
+              child: isBot
+                  ? Text(
+                      '🤖',
+                      style: TextStyle(fontSize: 100, color: iconColor),
+                    )
+                  : SvgPicture.asset(
+                      "assets/images/chess_pieces/black/pawn.svg",
+                      colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                    ),
             ),
           ),
         ),
@@ -235,27 +225,25 @@ class _PlayerIndentity extends StatelessWidget {
 class _PlayerTimer extends StatelessWidget {
   final bool isActive;
   final bool isPlayerOne;
+  final Color textColor;
   final Color background;
-  final Color activeColor;
-  final Color inactiveColor;
   final Color borderColor;
 
   const _PlayerTimer({
     required this.isActive,
     required this.isPlayerOne,
+    required this.textColor,
     required this.background,
-    required this.activeColor,
-    required this.inactiveColor,
     required this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 2 / 1,
+      aspectRatio: context.isMobile ? 5 / 2 : 16 / 7,
       child: Container(
         decoration: BoxDecoration(
-          color: isActive ? background : borderColor,
+          color: background,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Selector<TimerViewmodel, String>(
@@ -266,14 +254,12 @@ class _PlayerTimer extends StatelessWidget {
             final formattedTimerText = timerText.length > 5
                 ? timerText.substring(0, 5)
                 : timerText;
-      
+
             return Center(
               child: AutoSizeText(
                 formattedTimerText,
                 maxLines: 1,
-                style: context.timerText(
-                  isActive ? activeColor : inactiveColor,
-                ),
+                style: context.timerText(textColor),
               ),
             );
           },
@@ -333,7 +319,7 @@ class _PulsingDotState extends State<_PulsingDot>
 }
 
 class _CapturedPiecesDisplayer extends StatelessWidget {
-  final String side;
+  final Sides side;
   final List<PieceTypes> piecesCaptured;
 
   const _CapturedPiecesDisplayer({
@@ -342,7 +328,7 @@ class _CapturedPiecesDisplayer extends StatelessWidget {
   });
 
   String get capturedSide =>
-      side == Sides.white.name ? Sides.black.name : Sides.white.name;
+      side == Sides.white ? Sides.black.name : Sides.white.name;
 
   @override
   Widget build(BuildContext context) {

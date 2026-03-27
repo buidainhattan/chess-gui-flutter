@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 class MatchViewmodel extends ChangeNotifier {
   final MatchManagerService _matchManagerService;
 
-  late final String playerOneSide;
-  late final String playerTwoSide;
-  late String sideToMove;
+  late final Sides playerOneSide;
+  late final Sides playerTwoSide;
+  late Sides sideToMove;
   late String playerOneCastlingRight;
   late String playerTwoCastlingRight;
   late int halfMoveClock;
@@ -27,16 +27,16 @@ class MatchViewmodel extends ChangeNotifier {
   late final StreamSubscription _isMatchEndSubscription;
 
   MatchViewmodel(this._matchManagerService) {
-    playerOneSide = _matchManagerService.playerOneSide.name;
-    playerTwoSide = _matchManagerService.playerTwoSide.name;
+    playerOneSide = _matchManagerService.playerOneSide;
+    playerTwoSide = _matchManagerService.playerTwoSide;
     playerOnePieceCaptured = _matchManagerService
         .matchState
-        .capturedPieces[Sides.fromName(playerOneSide)]!;
+        .capturedPieces[playerOneSide]!;
     playerTwoPieceCaptured = _matchManagerService
         .matchState
-        .capturedPieces[Sides.fromName(playerTwoSide)]!;
+        .capturedPieces[playerTwoSide]!;
 
-    sideToMove = _matchManagerService.matchState.activeSide.name;
+    sideToMove = _matchManagerService.matchState.activeSide;
     halfMoveClock = _matchManagerService.matchState.halfMoveClock;
     fullMoveCount = _matchManagerService.matchState.fullMoveNumber;
 
@@ -45,13 +45,13 @@ class MatchViewmodel extends ChangeNotifier {
     _matchStateSubscription = _matchManagerService.stateStream.listen((
       newState,
     ) {
-      sideToMove = newState.activeSide.name;
+      sideToMove = newState.activeSide;
       halfMoveClock = newState.halfMoveClock;
       fullMoveCount = newState.fullMoveNumber;
       playerOnePieceCaptured =
-          newState.capturedPieces[Sides.fromName(playerOneSide)]!;
+          newState.capturedPieces[playerOneSide]!;
       playerTwoPieceCaptured =
-          newState.capturedPieces[Sides.fromName(playerTwoSide)]!;
+          newState.capturedPieces[playerTwoSide]!;
 
       notifyListeners();
     });

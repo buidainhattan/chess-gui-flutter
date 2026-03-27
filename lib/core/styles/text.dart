@@ -30,7 +30,7 @@ extension AppTextContext on BuildContext {
     return AppTextStyles._base(
       size: responsive(s: 18, l: 24, xxl: 30),
       weight: FontWeight.w600,
-      color: color ?? AppCustomColors.purple,
+      color: color ?? Theme.of(this).colorScheme.primary,
       height: 0.9,
     );
   }
@@ -48,11 +48,11 @@ extension AppTextContext on BuildContext {
     );
   }
 
-  TextStyle turnStripText({Color? color = AppCustomColors.textMid}) {
+  TextStyle turnStripText({Color? color}) {
     return AppTextStyles._base(
       size: 14,
       weight: FontWeight.w600,
-      color: color,
+      color: color ?? Theme.of(this).colorScheme.onPrimary,
       letterSpacing: 1.1,
     );
   }

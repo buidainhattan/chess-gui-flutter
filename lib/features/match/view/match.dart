@@ -145,11 +145,13 @@ class _MatchLayout extends StatelessWidget {
 }
 
 class _TurnStrip extends StatelessWidget {
-  final String targetSide;
+  final Sides targetSide;
   const _TurnStrip({required this.targetSide});
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Selector<MatchViewmodel, bool>(
       selector: (context, matchViewmodel) =>
           matchViewmodel.sideToMove == targetSide,
@@ -158,15 +160,15 @@ class _TurnStrip extends StatelessWidget {
           opacity: isActive ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 300),
           child: SwipingShaderWrapper(
-            activeColor: Colors.deepPurpleAccent,
-            inactiveColor: AppCustomColors.border,
+            activeColor: colorScheme.primary,
+            inactiveColor: colorScheme.onPrimary,
             child: Row(
               children: [
                 Expanded(
                   child: Container(
                     height: 2,
                     decoration: BoxDecoration(
-                      color: AppCustomColors.border,
+                      color: colorScheme.onPrimary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -175,7 +177,7 @@ class _TurnStrip extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.contain,
                   child: Text(
-                    targetSide == 'white' ? 'Your turn' : "Opponent's turn",
+                    targetSide == Sides.white ? 'Your turn' : "Opponent's turn",
                     style: context.turnStripText(),
                   ),
                 ),
@@ -184,7 +186,7 @@ class _TurnStrip extends StatelessWidget {
                   child: Container(
                     height: 2,
                     decoration: BoxDecoration(
-                      color: AppCustomColors.border,
+                      color: colorScheme.onPrimary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -214,6 +216,8 @@ class _MovesSidebarState extends State<_MovesSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       // Ensure the sidebar takes full height if isVertical is true
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,10 +230,10 @@ class _MovesSidebarState extends State<_MovesSidebar> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             decoration: BoxDecoration(
-              color: AppCustomColors.surface,
+              color: colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: _isOpen ? AppCustomColors.dark : AppCustomColors.border,
+                color: _isOpen ? colorScheme.primary : colorScheme.secondary,
                 width: _isOpen ? 1.5 : 1.0,
               ),
             ),
@@ -241,16 +245,21 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                 AnimatedRotation(
                   turns: _isOpen ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 260),
-                  child: const Icon(Icons.chevron_right_rounded, size: 18),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: colorScheme.onSecondaryContainer,
+                  ),
                 ),
                 RotatedBox(
                   quarterTurns: 1,
-                  child: const Text(
+                  child: Text(
                     'MOVES',
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1.2,
+                      color: colorScheme.onSecondaryContainer,
                     ),
                   ),
                 ),
@@ -263,13 +272,17 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppCustomColors.dark,
-                      borderRadius: BorderRadius.circular(10),
+                      color: colorScheme.secondaryContainer,
+                      border: Border.all(
+                        color: colorScheme.onSecondaryContainer,
+                        strokeAlign: BorderSide.strokeAlignCenter,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '$count',
-                      style: const TextStyle(
-                        color: AppCustomColors.surface,
+                      style: TextStyle(
+                        color: colorScheme.onSecondaryContainer,
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
@@ -306,18 +319,13 @@ class _MoveHistoryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppCustomColors.surface,
+        color: colorScheme.primaryContainer,
+        border: Border.all(color: colorScheme.primary),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppCustomColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppCustomColors.dark.withValues(alpha: 0.06),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -328,14 +336,14 @@ class _MoveHistoryPanel extends StatelessWidget {
             child: Text(
               'MOVE HISTORY',
               style: TextStyle(
-                color: AppCustomColors.textDim,
+                color: colorScheme.primary,
                 fontSize: 10.5,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          Divider(height: 1, color: AppCustomColors.border),
+          Divider(height: 1, color: colorScheme.primary),
           // List
           Expanded(
             child: Selector<MatchViewmodel, List<String>>(
@@ -347,7 +355,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                     child: Text(
                       'No moves yet',
                       style: TextStyle(
-                        color: AppCustomColors.textDim,
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 13,
                       ),
                     ),
@@ -377,7 +385,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: isLast
-                            ? AppCustomColors.activeBg
+                            ? colorScheme.primary.withValues(alpha: 0.25)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -388,7 +396,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                             child: Text(
                               '${i + 1}.',
                               style: TextStyle(
-                                color: AppCustomColors.textDim,
+                                color: colorScheme.primary,
                                 fontSize: 11,
                               ),
                             ),
@@ -397,7 +405,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                             child: Text(
                               white,
                               style: TextStyle(
-                                color: AppCustomColors.dark,
+                                color: colorScheme.primary,
                                 fontSize: 12,
                                 fontWeight: isLast
                                     ? FontWeight.w700
@@ -410,7 +418,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                                 ? Text(
                                     black,
                                     style: TextStyle(
-                                      color: AppCustomColors.textMid,
+                                      color: colorScheme.primary,
                                       fontSize: 12,
                                     ),
                                   )
@@ -448,46 +456,52 @@ class _MenuState extends State<_Menu> {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicWidth(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AnimatedSize(
-            duration: Duration(milliseconds: 200),
-            child: BarButton(
-              icon: Icons.menu,
-              label: "Menu",
-              tooltip: "Open menu",
-              onPressed: _openMenu,
-            ),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      width: _isOpen ? 150 : 100,
+      height: _isOpen ? 150 : 50,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        border: Border.all(color: Theme.of(context).colorScheme.primary),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 50,
+                child: BarButton(
+                  icon: Icons.menu,
+                  label: "Menu",
+                  tooltip: "Expand menu",
+                  onPressed: () => _openMenu(),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: BarButton(
+                  svgPath: 'assets/icons/home.svg',
+                  label: 'Home',
+                  tooltip: 'Back to home',
+                  onPressed: () => context.go('/'),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: BarButton(
+                  svgPath: 'assets/icons/resign.svg',
+                  label: 'Resign',
+                  tooltip: 'Resign the game',
+                  onPressed: () {},
+                ),
+              ),
+            ],
           ),
-          AnimatedSize(
-            duration: Duration(milliseconds: 200),
-            child: _isOpen
-                ? ClipRect(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        BarButton(
-                          svgPath: 'assets/icons/home.svg',
-                          label: 'Home',
-                          tooltip: 'Back to home',
-                          onPressed: () => context.go('/'),
-                        ),
-                        BarButton(
-                          svgPath: 'assets/icons/resign.svg',
-                          label: 'Resign',
-                          tooltip: 'Resign the game',
-                          onPressed: () {},
-                          isDanger: true,
-                        ),
-                      ],
-                    ),
-                  )
-                : SizedBox.shrink(),
-          ),
-        ],
+        ),
       ),
     );
   }

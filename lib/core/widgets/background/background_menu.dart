@@ -16,7 +16,10 @@ class BackgroundMenu extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: RadialGradient(
             radius: 1.1,
-            colors: [Colors.white, Colors.grey.shade400],
+            colors: [
+              Theme.of(context).colorScheme.inversePrimary,
+              Theme.of(context).colorScheme.primary,
+            ],
           ),
         ),
         child: LayoutBuilder(
@@ -46,7 +49,7 @@ class BackgroundMenu extends StatelessWidget {
                                 height: 0.9,
                                 fontSize: size,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF32343D),
+                                color: const Color(0xFF34364C),
                               ),
                             ),
                           ],
@@ -57,7 +60,7 @@ class BackgroundMenu extends StatelessWidget {
                             height: 0.9,
                             fontSize: size,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF8B7EFE),
+                            color: const Color(0xFF7B61FF),
                           ),
                         ),
                       ],

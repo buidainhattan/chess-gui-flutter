@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final GoRouter router = GoRouter(
-      initialLocation: "/",
+      initialLocation: "/pvp/blitz/match",
       routes: [
         ShellRoute(
           builder: (context, state, child) {
@@ -79,7 +79,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       title: 'Chess Game',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xff7B61FF),
+          brightness: Brightness.light,
+        ),
         fontFamily: "Roboto",
       ),
     );
