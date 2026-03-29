@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final GoRouter router = GoRouter(
-      initialLocation: "/pvp/blitz/match",
+      initialLocation: "/",
       routes: [
         ShellRoute(
           builder: (context, state, child) {

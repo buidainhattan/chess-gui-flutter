@@ -49,11 +49,15 @@ class Match extends StatelessWidget {
             enableBot
                 ? Align(
                     alignment: Alignment.bottomLeft,
-                    child: BarButton(
-                      icon: Icons.redo_sharp,
-                      label: 'Undo',
-                      tooltip: 'Undo last move',
-                      onPressed: () => matchViewmodel.relayUnMakeSignal(),
+                    child: SizedBox(
+                      width: 100,
+                      height: 50,
+                      child: BarButton(
+                        icon: Icons.redo_sharp,
+                        label: 'Undo',
+                        tooltip: 'Undo last move',
+                        onPressed: () => matchViewmodel.relayUnMakeSignal(),
+                      ),
                     ),
                   )
                 : SizedBox.shrink(),
