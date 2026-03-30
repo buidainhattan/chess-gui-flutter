@@ -14,7 +14,10 @@ class BackgroundMatch extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 radius: 1.1,
-                colors: [Colors.white, Colors.grey.shade400],
+                colors: [
+                  Theme.of(context).colorScheme.inversePrimary,
+                  Theme.of(context).colorScheme.primary,
+                ],
               ),
             ),
             child: child,

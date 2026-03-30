@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/session_data.dart';
 import 'package:chess_app/core/styles/text.dart';
@@ -43,7 +41,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
           alignment: Alignment.centerLeft,
           child: Text(
             buttonText.toUpperCase(),
-            style: context.menuText(color: AppCustomColors.purple),
+            style: context.menuText(),
           ),
         ),
         ...settings.entries.map((entry) {
@@ -89,7 +87,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         Provider.of<SessionDataService>(context, listen: false);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
         Table(
           columnWidths: const <int, TableColumnWidth>{
@@ -131,15 +129,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         MenuNavButton(
           label: "BACK",
           onPressed: () => context.pop(),
-          textColor: Colors.black,
-        ),
-
-        SizedBox(height: AppTheme.spaceS),
-
-        MenuNavButton(
-          label: "QUIT",
-          onPressed: () => exit(0),
-          textColor: Colors.red,
+          textColor: Theme.of(context).colorScheme.onSurface,
         ),
       ],
     );

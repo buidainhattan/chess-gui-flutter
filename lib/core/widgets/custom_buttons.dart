@@ -30,11 +30,8 @@ class MenuNavButton extends StatelessWidget {
           },
       style: TextButton.styleFrom(
         padding: EdgeInsets.symmetric(
-          vertical: context.responsive(s: AppTheme.spaceXS, m: AppTheme.spaceM),
-          horizontal: context.responsive(
-            s: AppTheme.spaceS,
-            m: AppTheme.spaceM,
-          ),
+          horizontal: AppTheme.spaceS,
+          vertical: AppTheme.spaceS,
         ),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -49,8 +46,8 @@ class BarButton extends StatelessWidget {
   final String? svgPath;
   final String label;
   final String tooltip;
+  final Decoration? decoration;
   final VoidCallback onPressed;
-  final bool isDanger;
 
   const BarButton({
     super.key,
@@ -58,8 +55,8 @@ class BarButton extends StatelessWidget {
     this.svgPath,
     required this.label,
     this.tooltip = "",
+    this.decoration,
     required this.onPressed,
-    this.isDanger = false,
   }) : assert(
          (icon == null) != (svgPath == null),
          "Only either icon or svgPath can be provided!",
@@ -67,47 +64,34 @@ class BarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color fg = isDanger
-        ? const Color(0xFFC0392B)
-        : AppCustomColors.textMid;
-    final Color hoverBg = isDanger
-        ? const Color(0xFFFDF1F0)
-        : AppCustomColors.activeBg;
-
     return Tooltip(
       message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4),
-        hoverColor: hoverBg,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppCustomColors.border),
-            borderRadius: BorderRadius.circular(4),
-            color: AppCustomColors.surface,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              icon != null
-                  ? Icon(icon)
-                  : SvgPicture.asset(
-                      svgPath!,
-                      width: 15,
-                      height: 15,
-                      colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
-                    ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
-                  color: fg,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            decoration: decoration,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon != null
+                    ? Icon(icon)
+                    : SvgPicture.asset(
+                        svgPath!,
+                        width: 15,
+                        height: 15,
+                      ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

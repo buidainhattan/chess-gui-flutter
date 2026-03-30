@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 
 enum ScreenSize { s, m, l, xl, xxl }
@@ -16,24 +18,6 @@ class AppTheme {
   static const double spaceS = 8.0;
   static const double spaceM = 16.0;
   static const double spaceL = 32.0;
-
-  // 4. The Master Theme Data
-  static ThemeData get darkTheme {
-    return ThemeData(
-      brightness: Brightness.dark,
-      primaryColor: AppCustomColors.background,
-      scaffoldBackgroundColor: const Color(0xFF121212),
-      // Define a standard text theme that scales well
-      textTheme: const TextTheme(
-        headlineMedium: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        bodyMedium: TextStyle(fontSize: 14, color: AppCustomColors.textDim),
-      ),
-    );
-  }
 }
 
 extension ResponsiveScaling on BuildContext {
@@ -45,6 +29,8 @@ extension ResponsiveScaling on BuildContext {
 
   // Returns a percentage of the height
   double h(double percent) => screenHeight * percent;
+
+  bool get isMobile => Platform.isAndroid || Platform.isIOS;
 
   bool get isLandscape =>
       MediaQuery.of(this).orientation == Orientation.landscape;
@@ -78,14 +64,3 @@ extension ResponsivePicker on BuildContext {
   }
 }
 
-class AppCustomColors {
-  static const Color purple = Color.fromRGBO(123, 97, 255, 1);
-  static const Color red = Color.fromRGBO(220, 54, 46, 1);
-  static const Color background = Color(0xFFF4F7FA);
-  static const Color surface = Color(0xFFE8EDF9);
-  static const Color border = Color(0xFFB7C0D8);
-  static const Color dark = Color(0xFF34364C);
-  static const Color textDim = Color(0x8834364C);
-  static const Color textMid = Color(0xBB34364C);
-  static const Color activeBg = Color(0x1234364C);
-}

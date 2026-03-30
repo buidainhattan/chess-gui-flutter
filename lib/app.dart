@@ -78,7 +78,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routerConfig: router,
       title: 'Chess Game',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xff7B61FF),
+          brightness: Brightness.light,
+        ),
         fontFamily: "Roboto",
       ),
     );
