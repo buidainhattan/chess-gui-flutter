@@ -1,3 +1,4 @@
+import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
@@ -41,8 +42,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           routes: [
             GoRoute(path: "/", builder: (context, state) => MainMenu()),
             GoRoute(
-              path: "/gamemode",
-              builder: (context, state) => GameModeMenu(),
+              path: "/online",
+              builder: (context, state) =>
+                  GameModeMenu(connectionMode: ConnectionMode.online),
+            ),
+            GoRoute(
+              path: "/offline",
+              builder: (context, state) =>
+                  GameModeMenu(connectionMode: ConnectionMode.offline),
             ),
             GoRoute(
               path: "/:gamemode(pvp|pve)",

@@ -15,8 +15,8 @@ class MainMenu extends StatelessWidget {
           : MainAxisAlignment.start,
       spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
-        MenuNavButton(label: "NEW GAME", route: "/gamemode"),
-        MenuNavButton(label: "LOAD"),
+        MenuNavButton(label: "PLAY ONLINE", route: "/online"),
+        MenuNavButton(label: "PLAY OFFLINE", route: "/offline"),
         MenuNavButton(label: "SETTINGS", textColor: Colors.black),
         SizedBox(height: AppTheme.spaceM),
         MenuNavButton(

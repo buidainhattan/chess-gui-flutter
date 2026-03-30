@@ -1,5 +1,9 @@
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 
+enum ConnectionMode {
+  online, offline;
+}
+
 enum TimeMode {
   blitz({
     "1 min": TimeSetting(1, 0),
@@ -20,142 +24,52 @@ enum TimeMode {
   final Map<String, TimeSetting> settings;
   const TimeMode(this.settings);
 
-  static final Map<Map<String, TimeSetting>, TimeMode> _fromValue = {
-    for (var time in values) time.settings: time,
-  };
-
-  static final Map<String, TimeMode> _fromName = {
-    for (var time in values) time.name: time,
-  };
-
-  static TimeMode? fromValue(Map<String, TimeSetting> value) =>
-      _fromValue[value];
-
-  static TimeMode? fromName(String name) => _fromName[name];
+  static TimeMode? fromName(String name) => TimeMode.values.asNameMap()[name];
 }
 
 enum Sides {
-  // ignore: constant_identifier_names
   white(0),
   black(1),
-  color_NB(2);
+  color_NB(2); // ignore: constant_identifier_names
 
   final int value;
   const Sides(this.value);
 
-  static final Map<int, Sides> _fromValue = {
-    for (Sides side in values) side.value: side,
-  };
+  static Sides? fromValue(int value) => Sides.values.asMap()[value];
 
-  static final Map<String, Sides> _fromName = {
-    for (Sides side in values) side.name: side,
-  };
-
-  static Sides? fromValue(int value) => _fromValue[value];
-
-  static Sides? fromName(String name) => _fromName[name];
+  static Sides? fromName(String name) => Sides.values.asNameMap()[name];
 }
 
 enum PieceTypes {
-  // ignore: constant_identifier_names
   pawn(0),
   knight(1),
   bishop(2),
   rook(3),
   queen(4),
   king(5),
-  pieceType_NB(6);
+  pieceType_NB(6); // ignore: constant_identifier_names
 
   final int value;
   const PieceTypes(this.value);
 
-  static final Map<int, PieceTypes> _fromValue = {
-    for (PieceTypes piece in values) piece.value: piece,
-  };
-
-  static PieceTypes? fromValue(int value) => _fromValue[value];
+  static PieceTypes? fromValue(int value) => PieceTypes.values.asMap()[value];
 }
 
 enum Squares {
-  a8('a8'),
-  b8('b8'),
-  c8('c8'),
-  d8('d8'),
-  e8('e8'),
-  f8('f8'),
-  g8('g8'),
-  h8('h8'),
-  a7('a7'),
-  b7('b7'),
-  c7('c7'),
-  d7('d7'),
-  e7('e7'),
-  f7('f7'),
-  g7('g7'),
-  h7('h7'),
-  a6('a6'),
-  b6('b6'),
-  c6('c6'),
-  d6('d6'),
-  e6('e6'),
-  f6('f6'),
-  g6('g6'),
-  h6('h6'),
-  a5('a5'),
-  b5('b5'),
-  c5('c5'),
-  d5('d5'),
-  e5('e5'),
-  f5('f5'),
-  g5('g5'),
-  h5('h5'),
-  a4('a4'),
-  b4('b4'),
-  c4('c4'),
-  d4('d4'),
-  e4('e4'),
-  f4('f4'),
-  g4('g4'),
-  h4('h4'),
-  a3('a3'),
-  b3('b3'),
-  c3('c3'),
-  d3('d3'),
-  e3('e3'),
-  f3('f3'),
-  g3('g3'),
-  h3('h3'),
-  a2('a2'),
-  b2('b2'),
-  c2('c2'),
-  d2('d2'),
-  e2('e2'),
-  f2('f2'),
-  g2('g2'),
-  h2('h2'),
-  a1('a1'),
-  b1('b1'),
-  c1('c1'),
-  d1('d1'),
-  e1('e1'),
-  f1('f1'),
-  g1('g1'),
-  h1('h1');
+  a8("a8"), b8("b8"), c8("c8"), d8("d8"), e8("e8"), f8("f8"), g8("g8"), h8("h8"),
+  a7("a7"), b7("b7"), c7("c7"), d7("d7"), e7("e7"), f7("f7"), g7("g7"), h7("h7"),
+  a6("a6"), b6("b6"), c6("c6"), d6("d6"), e6("e6"), f6("f6"), g6("g6"), h6("h6"),
+  a5("a5"), b5("b5"), c5("c5"), d5("d5"), e5("e5"), f5("f5"), g5("g5"), h5("h5"),
+  a4("a4"), b4("b4"), c4("c4"), d4("d4"), e4("e4"), f4("f4"), g4("g4"), h4("h4"),
+  a3("a3"), b3("b3"), c3("c3"), d3("d3"), e3("e3"), f3("f3"), g3("g3"), h3("h3"),
+  a2("a2"), b2("b2"), c2("c2"), d2("d2"), e2("e2"), f2("f2"), g2("g2"), h2("h2"),
+  a1("a1"), b1("b1"), c1("c1"), d1("d1"), e1("e1"), f1("f1"), g1("g1"), h1("h1");
 
   final String notation;
   const Squares(this.notation);
 
-  static final Map<String, Squares> _fromNotation = {
-    for (Squares square in values) square.notation: square,
-  };
-
-  static final Map<int, Squares> _fromIndex = {
-    for (Squares square in values) square.index: square,
-  };
-
-  static Squares? fromNotation(String notation) => _fromNotation[notation];
-
-  static Squares? fromIndex(int index) => _fromIndex[index];
+  static Squares? fromNotation(String notation) => Squares.values.asNameMap()[notation];
+  static Squares? fromIndex(int index) => Squares.values.asMap()[index];
 }
 
 enum MoveFlags {
@@ -171,11 +85,7 @@ enum MoveFlags {
   final int value;
   const MoveFlags(this.value);
 
-  static final Map<int, MoveFlags> _fromValue = {
-    for (MoveFlags moveFlag in values) moveFlag.value: moveFlag,
-  };
-
-  static MoveFlags? fromValue(int value) => _fromValue[value];
+  static MoveFlags? fromValue(int value) => MoveFlags.values.asMap()[value];
 }
 
 enum SoundFXs { movePiece, capturePiece, castling }
