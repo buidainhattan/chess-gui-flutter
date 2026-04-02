@@ -1,5 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/session_data.dart';
+import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:chess_app/features/match/view/match.dart';
@@ -30,12 +30,12 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-    final SessionDataService sessionDataService =
-        Provider.of<SessionDataService>(context, listen: false);
+    final SessionManagerService sessionDataService =
+        Provider.of<SessionManagerService>(context, listen: false);
     _initAll = _initializeAll(sessionDataService);
   }
 
-  Future<_InitializedData> _initializeAll(SessionDataService service) async {
+  Future<_InitializedData> _initializeAll(SessionManagerService service) async {
     final MatchManagerService matchManagerService = MatchManagerService();
     matchManagerService.initialSet(widget.fen, widget.playerSide);
     final chessBoardViewmodel = ChessBoardViewmodel(matchManagerService);

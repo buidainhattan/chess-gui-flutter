@@ -1,5 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/session_data.dart';
+import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
@@ -19,7 +19,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   String? _selectedMode;
   String? _selectedSetting;
 
-  void _toMatchScreen(BuildContext context, SessionDataService service) {
+  void _toMatchScreen(BuildContext context, SessionManagerService service) {
     String? mode = _selectedMode;
     String? setting = _selectedSetting;
     if (mode == null || setting == null) return;
@@ -71,20 +71,20 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   @override
   void initState() {
     super.initState();
-    final SessionDataService sessionDataService =
-        Provider.of<SessionDataService>(context, listen: false);
+    final SessionManagerService sessionDataService =
+        Provider.of<SessionManagerService>(context, listen: false);
     _initializeDefaultChoice(sessionDataService);
   }
 
-  void _initializeDefaultChoice(SessionDataService service) {
+  void _initializeDefaultChoice(SessionManagerService service) {
     _selectedMode = service.timeMode;
     _selectedSetting = service.timeSetting;
   }
 
   @override
   Widget build(BuildContext context) {
-    final SessionDataService sessionDataService =
-        Provider.of<SessionDataService>(context, listen: false);
+    final SessionManagerService sessionDataService =
+        Provider.of<SessionManagerService>(context, listen: false);
 
     return Column(
       spacing: context.isMobile ? 0 : AppTheme.spaceM,

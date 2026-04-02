@@ -1,5 +1,5 @@
 import 'dart:io' show Platform;
-import 'package:chess_app/core/session_data.dart';
+import 'package:chess_app/core/session_manager.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:chess_app/app.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
@@ -36,7 +36,7 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(
     ChangeNotifierProvider(
-      create: (_) => SessionDataService(),
+      create: (_) => SessionManagerService(),
       child: const MyApp(),
     ),
   );

@@ -5,9 +5,13 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';
 
-class SessionDataService extends ChangeNotifier {
+class SessionManagerService extends ChangeNotifier {
   late IO.Socket _socket;
-  bool isOnline = false;
+
+  bool _isOnline = false;
+  bool get isOnline => _isOnline;
+  bool _isQueuing = false;
+  bool get isQueuing => _isQueuing;
 
   String _gameMode = "pvp";
   String _timeMode = "normal";
@@ -29,11 +33,11 @@ class SessionDataService extends ChangeNotifier {
     _socket.connect();
 
     _socket.onConnect((_) {
-      isOnline = true;
+      _isOnline = true;
     });
 
     _socket.onDisconnect((_) {
-      isOnline = false;
+      _isOnline = false;
     });
   }
 
@@ -42,10 +46,23 @@ class SessionDataService extends ChangeNotifier {
   }
 
   void joinMatchMaking() {
-    _socket.on("waiting", (data) {
-      print(data);
+    _socket.on("match_start", (data) {
+      if (data["status"] == "MATCH_FOUND") {
+        _isQueuing = false;
+        notifyListeners();
+      }
     });
+
     _socket.emit("join_match_making");
+
+    _isQueuing = true;
+    notifyListeners();
+  }
+
+  void leaveMatchMaking() {
+    _socket.clearListeners();
+    _socket.emit("leave_match_making");
+    _isQueuing = false;
   }
 
   void updateGameMode(String mode) {
@@ -62,5 +79,12 @@ class SessionDataService extends ChangeNotifier {
 
   TimeSetting getSelectedSetting() {
     return TimeMode.fromName(_timeMode)!.settings[_timeSetting]!;
+  }
+
+  @override
+  void dispose() {
+    _socket.disconnect();
+    _socket.dispose();
+    super.dispose();
   }
 }

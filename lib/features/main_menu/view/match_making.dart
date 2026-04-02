@@ -3,10 +3,7 @@ import 'package:go_router/go_router.dart';
 
 class MatchMakingDialog extends StatelessWidget {
   static Future<void> show(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (_) => MatchMakingDialog._(),
-    );
+    return showDialog(context: context, builder: (_) => MatchMakingDialog._());
   }
 
   const MatchMakingDialog._();
