@@ -10,15 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChessBoard extends StatelessWidget {
-  final bool enableBot;
-
-  const ChessBoard({super.key, required this.enableBot});
+  const ChessBoard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final ChessBoardViewmodel chessBoardViewmodel =
         Provider.of<ChessBoardViewmodel>(context, listen: false);
-    chessBoardViewmodel.toggleBot(enableBot, Sides.black);
+
+    final bool isPlayerOneWhite =
+        chessBoardViewmodel.playerOneSide == Sides.white;
 
     const List<String> files = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
@@ -59,7 +59,9 @@ class ChessBoard extends StatelessWidget {
                 return Row(
                   children: List.generate(9, (colIndex) {
                     int loopIndex = (8 - rowIndex) * 9 + colIndex;
-                    int squareIndex = loopIndex - 17 + rowIndex;
+                    int squareIndex = isPlayerOneWhite
+                        ? loopIndex - 17 + rowIndex
+                        : 63 - (loopIndex - 17 + rowIndex);
 
                     // Generate board black and white squares
                     if (loopIndex % 9 != 0 && loopIndex > 8) {
@@ -113,8 +115,8 @@ class ChessBoard extends StatelessWidget {
                   if (pieceModel == null || pieceModel.isCaptured) {
                     return SizedBox.shrink();
                   }
+                  int index = isPlayerOneWhite ? pieceModel.index : 63 - pieceModel.index;
 
-                  int index = pieceModel.index;
                   int rowIndex = (7 - index ~/ 8);
                   int colIndex = (index % 8 + 1);
                   double topPosition =

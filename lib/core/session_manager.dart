@@ -12,6 +12,8 @@ class SessionManagerService extends ChangeNotifier {
   bool get isOnline => _isOnline;
   bool _isQueuing = false;
   bool get isQueuing => _isQueuing;
+  bool _matchFound = false;
+  bool get matchFound => _matchFound;
 
   String _gameMode = "pvp";
   String _timeMode = "normal";
@@ -48,14 +50,15 @@ class SessionManagerService extends ChangeNotifier {
   void joinMatchMaking() {
     _socket.on("match_start", (data) {
       if (data["status"] == "MATCH_FOUND") {
+        _matchFound = true;
         _isQueuing = false;
         notifyListeners();
       }
     });
 
     _socket.emit("join_match_making");
-
     _isQueuing = true;
+
     notifyListeners();
   }
 
@@ -63,6 +66,10 @@ class SessionManagerService extends ChangeNotifier {
     _socket.clearListeners();
     _socket.emit("leave_match_making");
     _isQueuing = false;
+  }
+
+  void setMatchFound(bool found) {
+    _matchFound = found;
   }
 
   void updateGameMode(String mode) {

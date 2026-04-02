@@ -12,8 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class Match extends StatelessWidget {
-  final bool enableBot;
-  const Match({super.key, this.enableBot = false});
+  const Match({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +42,10 @@ class Match extends StatelessWidget {
             ),
 
             // ── Main layout ──
-            _MatchLayout(enableBot: enableBot, matchViewmodel: matchViewmodel),
+            _MatchLayout(matchViewmodel: matchViewmodel),
 
             Align(alignment: Alignment.topRight, child: _Menu()),
-            enableBot
+            matchViewmodel.botEnabled
                 ? Align(
                     alignment: Alignment.bottomLeft,
                     child: SizedBox(
@@ -69,10 +68,9 @@ class Match extends StatelessWidget {
 }
 
 class _MatchLayout extends StatelessWidget {
-  final bool enableBot;
   final MatchViewmodel matchViewmodel;
 
-  const _MatchLayout({required this.enableBot, required this.matchViewmodel});
+  const _MatchLayout({required this.matchViewmodel});
 
   @override
   Widget build(BuildContext context) {
@@ -106,10 +104,10 @@ class _MatchLayout extends StatelessWidget {
                   SizedBox(
                     height: cardHeight,
                     child: PlayerCard(
-                      playerName: enableBot ? 'Bot · Easy' : 'Player 2',
+                      playerName: matchViewmodel.botEnabled ? 'Bot · Easy' : 'Player 2',
                       playerSide: matchViewmodel.playerTwoSide,
                       isPlayerOne: false,
-                      isBot: enableBot,
+                      isBot: matchViewmodel.botEnabled,
                     ),
                   ),
 
@@ -118,7 +116,7 @@ class _MatchLayout extends StatelessWidget {
                     child: _TurnStrip(targetSide: matchViewmodel.playerTwoSide),
                   ),
 
-                  ChessBoard(enableBot: enableBot),
+                  ChessBoard(),
 
                   SizedBox(
                     height: stripHeight,

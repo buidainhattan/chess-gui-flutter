@@ -38,6 +38,8 @@ enum Sides {
   static Sides? fromValue(int value) => Sides.values.asMap()[value];
 
   static Sides? fromName(String name) => Sides.values.asNameMap()[name];
+
+  static Sides opposite(Sides color) => Sides.values[color.value ^ 1];
 }
 
 enum PieceTypes {

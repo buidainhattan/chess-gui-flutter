@@ -30,6 +30,9 @@ class MatchManagerService {
       StreamController<GameResultType>.broadcast();
   Stream<GameResultType> get isMatchEndStream => _isMatchEndController.stream;
 
+  bool _botEnabled = false;
+  bool get botEnabled => _botEnabled;
+
   late String _fen;
   String get fen => _fen;
 
@@ -47,13 +50,12 @@ class MatchManagerService {
   late List<String> _algebraicHistory;
   List<String> get algebraicHistory => _algebraicHistory;
 
-  bool botEnabled = false;
-
-  void initialSet(String fen, Sides playerOneSide) {
+  void initialSet(String fen, Sides playerOneSide, bool isBotEnabled) {
+    _botEnabled = isBotEnabled;
     _fen = fen.isEmpty ? FENHelper.startFEN : fen;
     _fenHelper = stringFENParser(_fen);
     _playerOneSide = playerOneSide;
-    _playerTwoSide = playerOneSide == Sides.white ? Sides.black : Sides.white;
+    _playerTwoSide = Sides.opposite(playerOneSide);
     _matchState = MatchState(
       activeSide: _fenHelper.activeColor,
       castlingRight: _fenHelper.castlingAvailability,
@@ -68,7 +70,7 @@ class MatchManagerService {
 
   Future<void> switchSide({bool isCheckmate = false}) async {
     int newFullMoveCount = _updateFullMoveNumber();
-    Sides activeSide = Sides.fromValue(_matchState.activeSide.value ^ 1)!;
+    Sides activeSide = Sides.opposite(_matchState.activeSide);
     bool isChecking = await _engineBridge.isKingInCheck(activeSide);
     _matchState = _matchState.copyWith(
       activeSide: activeSide,

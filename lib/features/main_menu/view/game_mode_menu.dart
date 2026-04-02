@@ -23,50 +23,44 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   bool isDialogOpen = false;
 
-  List<Widget> _buildOnlineButtons(
-    BuildContext context,
-    SessionManagerService service,
-  ) {
+  List<Widget> _buildOnlineButtons() {
     return [
       MenuNavButton(
         label: "ONLINE MATCH MAKING",
         onPressed: () {
-          service.joinMatchMaking();
+          sessionManagerService.joinMatchMaking();
         },
       ),
       MenuNavButton(
         label: "CREATE / JOIN ROOM",
         onPressed: () {
-          service.updateGameMode("pvp");
+          sessionManagerService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
       MenuNavButton(
         label: "LAN CONNECTION",
         onPressed: () {
-          service.updateGameMode("pvp");
+          sessionManagerService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
     ];
   }
 
-  List<Widget> _buildOfflineButtons(
-    BuildContext context,
-    SessionManagerService service,
-  ) {
+  List<Widget> _buildOfflineButtons() {
     return [
       MenuNavButton(
         label: "PASS & PLAY",
         onPressed: () {
-          service.updateGameMode("pve");
-          context.push("/pve");
+          sessionManagerService.updateGameMode("pvp");
+          context.push("/pvp");
         },
       ),
       MenuNavButton(
         label: "SOLO PLAY",
         onPressed: () {
-          service.updateGameMode("pve");
+          sessionManagerService.updateGameMode("pve");
           context.push("/pve");
         },
       ),
@@ -74,14 +68,14 @@ class _GameModeMenuState extends State<GameModeMenu> {
     ];
   }
 
-  void _onSessionChanged() {
-    final isWaiting = context.read<SessionManagerService>().isQueuing;
+  void _onQueuingChanged() {
+    final isQueuing = sessionManagerService.isQueuing;
 
-    if (isWaiting) {
+    if (isQueuing) {
       isDialogOpen = true;
       MatchMakingDialog.show(context).then((_) {
         isDialogOpen = false;
-        if (isWaiting) {
+        if (isQueuing) {
           sessionManagerService.leaveMatchMaking();
         }
       });
@@ -91,11 +85,21 @@ class _GameModeMenuState extends State<GameModeMenu> {
     }
   }
 
+  void _onMatchFound() {
+    final matchFound = sessionManagerService.matchFound;
+
+    if (matchFound) {
+      sessionManagerService.setMatchFound(false);
+      context.go("/pvp/normal/match");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     sessionManagerService = context.read<SessionManagerService>();
-    context.read<SessionManagerService>().addListener(_onSessionChanged);
+    sessionManagerService.addListener(_onQueuingChanged);
+    sessionManagerService.addListener(_onMatchFound);
   }
 
   @override
@@ -109,9 +113,9 @@ class _GameModeMenuState extends State<GameModeMenu> {
         spacing: context.isMobile ? 0 : AppTheme.spaceM,
         children: [
           if (widget.connectionMode == ConnectionMode.online)
-            ..._buildOnlineButtons(context, sessionManagerService)
+            ..._buildOnlineButtons()
           else
-            ..._buildOfflineButtons(context, sessionManagerService),
+            ..._buildOfflineButtons(),
 
           MenuNavButton(
             label: "BACK",
@@ -131,7 +135,8 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   @override
   void dispose() {
-    context.read<SessionManagerService>().removeListener(_onSessionChanged);
+    sessionManagerService.removeListener(_onQueuingChanged);
+    sessionManagerService.removeListener(_onMatchFound);
     super.dispose();
   }
 }

@@ -20,6 +20,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
   late final StreamSubscription _isMatchEndSubscription;
 
   // <--- State to control GUI --->
+  late Sides _playerOneSide;
+  Sides get playerOneSide => _playerOneSide;
+
   late BoardState _boardState;
   BoardState get boardState => _boardState;
   late final List<BoardState> _boardStateHistory;
@@ -30,12 +33,6 @@ class ChessBoardViewmodel extends ChangeNotifier {
   GameResultType result = GameResultType.ongoing;
 
   ChessBoardViewmodel(this._matchManagerService);
-
-  void toggleBot(bool toggleBot, Sides botSide) {
-    if (toggleBot) {
-      _matchManagerService.botEnabled = true;
-    }
-  }
 
   // <===== Initialize ChessBoard ====>
   Future<void> initializeChessBoard() async {
@@ -74,6 +71,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   Future<void> _parseFEN() async {
     String fen = _matchManagerService.fen;
     await _engineBridge.loadFromFEN(fen);
+    _playerOneSide = _matchManagerService.playerOneSide;
     Sides activeSide = _matchManagerService.matchState.activeSide;
     Map<String, PieceModel> pieceList =
         _matchManagerService.fenHelper.pieceList;

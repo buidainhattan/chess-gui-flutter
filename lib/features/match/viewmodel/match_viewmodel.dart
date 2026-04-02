@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 class MatchViewmodel extends ChangeNotifier {
   final MatchManagerService _matchManagerService;
 
+  late bool botEnabled;
+
   late final Sides playerOneSide;
   late final Sides playerTwoSide;
   late Sides sideToMove;
@@ -27,14 +29,13 @@ class MatchViewmodel extends ChangeNotifier {
   late final StreamSubscription _isMatchEndSubscription;
 
   MatchViewmodel(this._matchManagerService) {
+    botEnabled = _matchManagerService.botEnabled;
     playerOneSide = _matchManagerService.playerOneSide;
     playerTwoSide = _matchManagerService.playerTwoSide;
-    playerOnePieceCaptured = _matchManagerService
-        .matchState
-        .capturedPieces[playerOneSide]!;
-    playerTwoPieceCaptured = _matchManagerService
-        .matchState
-        .capturedPieces[playerTwoSide]!;
+    playerOnePieceCaptured =
+        _matchManagerService.matchState.capturedPieces[playerOneSide]!;
+    playerTwoPieceCaptured =
+        _matchManagerService.matchState.capturedPieces[playerTwoSide]!;
 
     sideToMove = _matchManagerService.matchState.activeSide;
     halfMoveClock = _matchManagerService.matchState.halfMoveClock;
@@ -48,10 +49,8 @@ class MatchViewmodel extends ChangeNotifier {
       sideToMove = newState.activeSide;
       halfMoveClock = newState.halfMoveClock;
       fullMoveCount = newState.fullMoveNumber;
-      playerOnePieceCaptured =
-          newState.capturedPieces[playerOneSide]!;
-      playerTwoPieceCaptured =
-          newState.capturedPieces[playerTwoSide]!;
+      playerOnePieceCaptured = newState.capturedPieces[playerOneSide]!;
+      playerTwoPieceCaptured = newState.capturedPieces[playerTwoSide]!;
 
       notifyListeners();
     });
@@ -74,7 +73,7 @@ class MatchViewmodel extends ChangeNotifier {
 
   void relayUnMakeSignal() {
     if (!_matchManagerService.botEnabled) return;
-    
+
     _matchManagerService.proceedUnMakeMove();
 
     notifyListeners();

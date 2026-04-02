@@ -37,7 +37,7 @@ class _LoadingState extends State<Loading> {
 
   Future<_InitializedData> _initializeAll(SessionManagerService service) async {
     final MatchManagerService matchManagerService = MatchManagerService();
-    matchManagerService.initialSet(widget.fen, widget.playerSide);
+    matchManagerService.initialSet(widget.fen, widget.playerSide, widget.enableBot);
     final chessBoardViewmodel = ChessBoardViewmodel(matchManagerService);
     final matchViewmodel = MatchViewmodel(matchManagerService);
     final timerViewmodel = TimerViewmodel(matchManagerService);
@@ -75,7 +75,7 @@ class _LoadingState extends State<Loading> {
               ChangeNotifierProvider.value(value: data.matchViewmodel),
               ChangeNotifierProvider.value(value: data.timerViewmodel),
             ],
-            child: Match(enableBot: widget.enableBot),
+            child: Match(),
           );
         }
 
