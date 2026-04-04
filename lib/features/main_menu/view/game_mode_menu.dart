@@ -68,28 +68,23 @@ class _GameModeMenuState extends State<GameModeMenu> {
     ];
   }
 
-  void _onQueuingChanged() {
-    final isQueuing = sessionManagerService.isQueuing;
+  void _onMatchMakingStatusChanges() {
+    final MatchMakingStatus? status = sessionManagerService.matchMakingStatus;
 
-    if (isQueuing) {
+    if (status == MatchMakingStatus.pending) {
       isDialogOpen = true;
-      MatchMakingDialog.show(context).then((_) {
+      MatchMakingDialog.show(context).then((result) {
         isDialogOpen = false;
-        if (isQueuing) {
+        if (result == MatchMakingStatus.cancelled || result == null) {
           sessionManagerService.leaveMatchMaking();
         }
       });
-    } else if (isDialogOpen) {
-      isDialogOpen = false;
-      context.pop();
-    }
-  }
+    } else if (status == MatchMakingStatus.matchFound) {
+      if (isDialogOpen) {
+        isDialogOpen = false;
+        context.pop(status);
+      }
 
-  void _onMatchFound() {
-    final matchFound = sessionManagerService.matchFound;
-
-    if (matchFound) {
-      sessionManagerService.setMatchFound(false);
       context.go("/pvp/normal/match");
     }
   }
@@ -98,8 +93,7 @@ class _GameModeMenuState extends State<GameModeMenu> {
   void initState() {
     super.initState();
     sessionManagerService = context.read<SessionManagerService>();
-    sessionManagerService.addListener(_onQueuingChanged);
-    sessionManagerService.addListener(_onMatchFound);
+    sessionManagerService.addListener(_onMatchMakingStatusChanges);
   }
 
   @override
@@ -135,8 +129,7 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   @override
   void dispose() {
-    sessionManagerService.removeListener(_onQueuingChanged);
-    sessionManagerService.removeListener(_onMatchFound);
+    sessionManagerService.removeListener(_onMatchMakingStatusChanges);
     super.dispose();
   }
 }

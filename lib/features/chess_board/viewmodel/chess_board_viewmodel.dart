@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:chess_app/core/basics/helper_methods.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/engine_bridge.dart';
+import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/features/chess_board/model/board_state_model.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
@@ -14,8 +16,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
   final AudioController _audioController = AudioController();
   final EngineBridge _engineBridge = EngineBridge();
   final MoveManager _moveManager = MoveManager();
+  final SessionManagerService _sessionManagerService;
   final MatchManagerService _matchManagerService;
 
+  late final StreamSubscription _opponentMoveSubscription;
   late final StreamSubscription _redoSignalSubscription;
   late final StreamSubscription _isMatchEndSubscription;
 
@@ -30,9 +34,13 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  GameResultType result = GameResultType.ongoing;
+  GameResultType _result = GameResultType.ongoing;
+  GameResultType get result => _result;
 
-  ChessBoardViewmodel(this._matchManagerService);
+  bool _lockBoard = false;
+  bool get lockBoard => _lockBoard;
+
+  ChessBoardViewmodel(this._matchManagerService, this._sessionManagerService);
 
   // <===== Initialize ChessBoard ====>
   Future<void> initializeChessBoard() async {
@@ -50,6 +58,14 @@ class ChessBoardViewmodel extends ChangeNotifier {
       _boardState.copyWith(pieceKeys: pieceKeys);
     }
 
+    if (_sessionManagerService.isOnline) {
+      _opponentMoveSubscription = _sessionManagerService.opponentMoveStream
+          .listen((newState) {
+            final (:from, :to) = moveStringToIndices(newState);
+            final MoveModel move = _moveManager.getMove(from, to);
+            _makeMove(move);
+          });
+    }
     _redoSignalSubscription = _matchManagerService.redoSignalStream.listen((
       newState,
     ) async {
@@ -59,7 +75,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
       newState,
     ) {
-      result = newState;
+      _result = newState;
 
       notifyListeners();
     });
@@ -86,6 +102,13 @@ class ChessBoardViewmodel extends ChangeNotifier {
     if (!isUnMake) {
       _boardStateHistory.add(_boardState);
       _matchManagerService.pushMatchStateHistory();
+    }
+
+    if (_sessionManagerService.isOnline) {
+      _lockBoard =
+          _matchManagerService.playerOneSide !=
+          _matchManagerService.matchState.activeSide;
+      notifyListeners();
     }
 
     if (_matchManagerService.botEnabled &&
@@ -251,6 +274,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     MoveModel move = _moveManager.getMove(from, to);
     _makeMove(move);
+
+    String moveString = toCustomMoveData(move);
+    _sessionManagerService.makeMove(moveString);
   }
 
   Future<void> _openPromotionDialog() async {
@@ -396,6 +422,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _opponentMoveSubscription.cancel();
     _redoSignalSubscription.cancel();
     _isMatchEndSubscription.cancel();
     super.dispose();

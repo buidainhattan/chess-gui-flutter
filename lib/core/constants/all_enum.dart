@@ -4,6 +4,10 @@ enum ConnectionMode {
   online, offline;
 }
 
+enum MatchMakingStatus {
+  pending, matchFound, cancelled;
+}
+
 enum TimeMode {
   blitz({
     "1 min": TimeSetting(1, 0),
@@ -36,9 +40,7 @@ enum Sides {
   const Sides(this.value);
 
   static Sides? fromValue(int value) => Sides.values.asMap()[value];
-
   static Sides? fromName(String name) => Sides.values.asNameMap()[name];
-
   static Sides opposite(Sides color) => Sides.values[color.value ^ 1];
 }
 

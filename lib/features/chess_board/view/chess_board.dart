@@ -14,8 +14,8 @@ class ChessBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChessBoardViewmodel chessBoardViewmodel =
-        Provider.of<ChessBoardViewmodel>(context, listen: false);
+    final ChessBoardViewmodel chessBoardViewmodel = context
+        .read<ChessBoardViewmodel>();
 
     final bool isPlayerOneWhite =
         chessBoardViewmodel.playerOneSide == Sides.white;
@@ -115,7 +115,9 @@ class ChessBoard extends StatelessWidget {
                   if (pieceModel == null || pieceModel.isCaptured) {
                     return SizedBox.shrink();
                   }
-                  int index = isPlayerOneWhite ? pieceModel.index : 63 - pieceModel.index;
+                  int index = isPlayerOneWhite
+                      ? pieceModel.index
+                      : 63 - pieceModel.index;
 
                   int rowIndex = (7 - index ~/ 8);
                   int colIndex = (index % 8 + 1);
@@ -134,6 +136,19 @@ class ChessBoard extends StatelessWidget {
                   );
                 },
               ),
+            ),
+            Selector<ChessBoardViewmodel, bool>(
+              selector: (context, chessBoardViewmodel) =>
+                  chessBoardViewmodel.lockBoard,
+              builder: (context, lockBoard, child) {
+                if (lockBoard) {
+                  return AbsorbPointer(
+                    absorbing: true,
+                    child: SizedBox(width: size, height: size),
+                  );
+                }
+                return SizedBox.shrink();
+              },
             ),
             Selector<ChessBoardViewmodel, GameResultType>(
               selector: (context, chessBoardViewmodel) =>

@@ -11,14 +11,8 @@ import 'package:provider/provider.dart';
 class Loading extends StatefulWidget {
   final bool enableBot;
   final String fen;
-  final Sides playerSide;
 
-  const Loading({
-    super.key,
-    this.enableBot = false,
-    this.fen = "",
-    this.playerSide = Sides.white,
-  });
+  const Loading({super.key, this.enableBot = false, this.fen = ""});
 
   @override
   State<Loading> createState() => _LoadingState();
@@ -30,21 +24,32 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-    final SessionManagerService sessionDataService =
-        Provider.of<SessionManagerService>(context, listen: false);
-    _initAll = _initializeAll(sessionDataService);
+    final SessionManagerService sessionManagerService = context
+        .read<SessionManagerService>();
+    _initAll = _initializeAll(sessionManagerService);
   }
 
-  Future<_InitializedData> _initializeAll(SessionManagerService service) async {
+  Future<_InitializedData> _initializeAll(
+    SessionManagerService sessionManagerService,
+  ) async {
     final MatchManagerService matchManagerService = MatchManagerService();
-    matchManagerService.initialSet(widget.fen, widget.playerSide, widget.enableBot);
-    final chessBoardViewmodel = ChessBoardViewmodel(matchManagerService);
+    matchManagerService.initialSet(
+      widget.fen,
+      sessionManagerService.isWhite ? Sides.white : Sides.black,
+      widget.enableBot,
+    );
+    final chessBoardViewmodel = ChessBoardViewmodel(
+      matchManagerService,
+      sessionManagerService,
+    );
     final matchViewmodel = MatchViewmodel(matchManagerService);
     final timerViewmodel = TimerViewmodel(matchManagerService);
 
     await chessBoardViewmodel.initializeChessBoard();
 
-    timerViewmodel.setAndStartTimer(setting: service.getSelectedSetting());
+    timerViewmodel.setAndStartTimer(
+      setting: sessionManagerService.getSelectedSetting(),
+    );
 
     return _InitializedData(
       matchManagerService: matchManagerService,

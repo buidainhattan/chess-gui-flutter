@@ -93,3 +93,20 @@ String toAlgebraic(
 
   return notation;
 }
+
+String toCustomMoveData(MoveModel move) {
+  String from = Squares.fromIndex(move.from)!.notation;
+  String to = Squares.fromIndex(move.to)!.notation;
+
+  return (from + to);
+}
+
+({int from, int to}) moveStringToIndices(String moveString) {
+  String fromString = moveString.substring(0, 2);
+  String toString = moveString.substring(2);
+
+  int from = Squares.fromNotation(fromString)!.index;
+  int to = Squares.fromNotation(toString)!.index;
+
+  return (from: from, to: to);
+}

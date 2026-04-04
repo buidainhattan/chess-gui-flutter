@@ -1,9 +1,13 @@
+import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class MatchMakingDialog extends StatelessWidget {
-  static Future<void> show(BuildContext context) {
-    return showDialog(context: context, builder: (_) => MatchMakingDialog._());
+  static Future<MatchMakingStatus?> show(BuildContext context) async {
+    return showDialog<MatchMakingStatus>(
+      context: context,
+      builder: (_) => MatchMakingDialog._(),
+    );
   }
 
   const MatchMakingDialog._();
@@ -16,7 +20,7 @@ class MatchMakingDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () {
-            context.pop();
+            context.pop(MatchMakingStatus.cancelled);
           },
           child: const Text("Cancel"),
         ),

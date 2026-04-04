@@ -21,7 +21,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path = File("D:/Code stuffs/Personal Projects/Packages/C++ chess engine/CMakeLists.txt")
+            path = File("D:/dev/chess/chess_engine/CMakeLists.txt")
         }
     }
 

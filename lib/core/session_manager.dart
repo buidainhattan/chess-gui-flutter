@@ -1,5 +1,8 @@
-// ignore: library_prefixes
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'dart:async';
+import 'dart:io';
+
+import 'package:socket_io_client/socket_io_client.dart'
+    as IO; // ignore: library_prefixes
 
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
@@ -10,10 +13,13 @@ class SessionManagerService extends ChangeNotifier {
 
   bool _isOnline = false;
   bool get isOnline => _isOnline;
-  bool _isQueuing = false;
-  bool get isQueuing => _isQueuing;
-  bool _matchFound = false;
-  bool get matchFound => _matchFound;
+  MatchMakingStatus? _matchMakingStatus;
+  MatchMakingStatus? get matchMakingStatus => _matchMakingStatus;
+
+  late final String _matchId;
+  bool isWhite = false;
+  late StreamController<String> _opponentMoveController;
+  Stream<String> get opponentMoveStream => _opponentMoveController.stream;
 
   String _gameMode = "pvp";
   String _timeMode = "normal";
@@ -24,13 +30,23 @@ class SessionManagerService extends ChangeNotifier {
   String get timeSetting => _timeSetting;
 
   void connectSocket() {
-    _socket = IO.io(
-      "http://localhost:3000",
-      IO.OptionBuilder()
-          .setTransports(["websocket"])
-          .disableAutoConnect()
-          .build(),
-    );
+    if (Platform.isAndroid) {
+      _socket = IO.io(
+        "http://192.168.1.13:3000",
+        IO.OptionBuilder()
+            .setTransports(["websocket"])
+            .disableAutoConnect()
+            .build(),
+      );
+    } else {
+      _socket = IO.io(
+        "http://localhost:3000",
+        IO.OptionBuilder()
+            .setTransports(["websocket"])
+            .disableAutoConnect()
+            .build(),
+      );
+    }
 
     _socket.connect();
 
@@ -48,28 +64,38 @@ class SessionManagerService extends ChangeNotifier {
   }
 
   void joinMatchMaking() {
+    _matchMakingStatus = MatchMakingStatus.pending;
+    notifyListeners();
+
     _socket.on("match_start", (data) {
-      if (data["status"] == "MATCH_FOUND") {
-        _matchFound = true;
-        _isQueuing = false;
-        notifyListeners();
+      _opponentMoveController = StreamController<String>.broadcast();
+      _matchId = data["id"];
+      if (_socket.id == data["playerWhiteId"]) {
+        isWhite = true;
       }
+      _matchMakingStatus = MatchMakingStatus.matchFound;
+      notifyListeners();
+
+      _socket.clearListeners();
+      _socket.on("opponent_move", (data) {
+        _opponentMoveController.add(data["move"]);
+      });
     });
 
     _socket.emit("join_match_making");
-    _isQueuing = true;
-
-    notifyListeners();
   }
 
   void leaveMatchMaking() {
+    _matchMakingStatus = MatchMakingStatus.cancelled;
+
     _socket.clearListeners();
     _socket.emit("leave_match_making");
-    _isQueuing = false;
   }
 
-  void setMatchFound(bool found) {
-    _matchFound = found;
+  void makeMove(String move) {
+    if (!_isOnline) return;
+
+    _socket.emit("make_move", {"matchId": _matchId, "move": move});
   }
 
   void updateGameMode(String mode) {
@@ -92,6 +118,7 @@ class SessionManagerService extends ChangeNotifier {
   void dispose() {
     _socket.disconnect();
     _socket.dispose();
+    _opponentMoveController.close();
     super.dispose();
   }
 }
