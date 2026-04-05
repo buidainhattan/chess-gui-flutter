@@ -83,7 +83,7 @@ class _LoadingState extends State<Loading> {
           );
         }
 
-        return Center(child: const Text('Something went wrong'));
+        return Center(child: Text('${asyncSnapshot.error}'));
       },
     );
   }

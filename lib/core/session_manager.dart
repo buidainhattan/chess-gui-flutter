@@ -17,7 +17,7 @@ class SessionManagerService extends ChangeNotifier {
   MatchMakingStatus? get matchMakingStatus => _matchMakingStatus;
 
   late final String _matchId;
-  late final Sides _playerSide;
+  Sides _playerSide =Sides.white;
   Sides get playerSide => _playerSide;
 
   late StreamController<String> _opponentMoveController;
