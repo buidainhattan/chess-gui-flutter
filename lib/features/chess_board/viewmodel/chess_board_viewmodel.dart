@@ -60,10 +60,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     if (_sessionManagerService.isOnline) {
       _opponentMoveSubscription = _sessionManagerService.opponentMoveStream
-          .listen((newState) {
+          .listen((newState) async {
             final (:from, :to) = moveStringToIndices(newState);
             final MoveModel move = _moveManager.getMove(from, to);
-            _makeMove(move);
+            await _makeMove(move);
           });
     }
     _redoSignalSubscription = _matchManagerService.redoSignalStream.listen((
@@ -262,7 +262,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   // <===== Player Interactions Handling Logic =====>
 
-  void onSquareTapped(int index) {
+  void onSquareTapped(int index) async {
     if (!_conditionCheck(index)) {
       notifyListeners();
       return;
@@ -273,7 +273,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     if (from == null || to == null) return;
 
     MoveModel move = _moveManager.getMove(from, to);
-    _makeMove(move);
+    await _makeMove(move);
 
     String moveString = toCustomMoveData(move);
     _sessionManagerService.makeMove(moveString);
@@ -322,7 +322,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   // <===== Chess Bot Behaviors Logic =====>
   Future<void> _startBotBehavior() async {
     MoveModel bestMove = await _engineBridge.getBestMove(6);
-    _makeMove(bestMove);
+    await _makeMove(bestMove);
   }
 
   void _botPromotePiece(int from, PieceTypes? piecePromotedTo) {

@@ -35,9 +35,8 @@ class TimerViewmodel extends ChangeNotifier {
       _increaseTimer(_sideToMove);
       if (_sideToMove == newState.activeSide) {
         return;
-      } else {
-        _sideToMove = newState.activeSide;
       }
+      _sideToMove = newState.activeSide;
     });
 
     _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
@@ -47,14 +46,6 @@ class TimerViewmodel extends ChangeNotifier {
         _stopTimer();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _matchStateSubscription.cancel();
-    _isMatchEndSubscription.cancel();
-    _timer?.cancel();
-    super.dispose();
   }
 
   void setAndStartTimer({TimeSetting? setting}) {
@@ -105,6 +96,7 @@ class TimerViewmodel extends ChangeNotifier {
         _playerOneRemainingTime -= elapsed;
       } else {
         _playerOneRemainingTime = Duration.zero;
+        _matchManagerService.timerEnd(_playerOneSide);
       }
       playerOneTime = _formatDuration(_playerOneRemainingTime);
     }
@@ -113,22 +105,17 @@ class TimerViewmodel extends ChangeNotifier {
         _playerTwoRemainingTime -= elapsed;
       } else {
         _playerTwoRemainingTime = Duration.zero;
+        _matchManagerService.timerEnd(_playerTwoSide);
       }
       playerTwoTime = _formatDuration(_playerTwoRemainingTime);
     }
     _lastTickTime = now;
 
-    if (_playerOneRemainingTime <= Duration.zero) {
-      _matchManagerService.timerEnd(_playerOneSide);
-    }
-    if (_playerTwoRemainingTime <= Duration.zero) {
-      _matchManagerService.timerEnd(_playerTwoSide);
-    }
-
     notifyListeners();
   }
 
   void _stopTimer() {
+    _isTimerRunning = false;
     _timer?.cancel();
   }
 
@@ -140,5 +127,13 @@ class TimerViewmodel extends ChangeNotifier {
     final formattedSeconds = seconds.toString().padLeft(2, '0');
 
     return '$formattedMinutes:$formattedSeconds';
+  }
+
+  @override
+  void dispose() {
+    _matchStateSubscription.cancel();
+    _isMatchEndSubscription.cancel();
+    _timer?.cancel();
+    super.dispose();
   }
 }

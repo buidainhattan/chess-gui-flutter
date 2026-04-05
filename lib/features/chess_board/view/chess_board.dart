@@ -62,6 +62,12 @@ class ChessBoard extends StatelessWidget {
                     int squareIndex = isPlayerOneWhite
                         ? loopIndex - 17 + rowIndex
                         : 63 - (loopIndex - 17 + rowIndex);
+                    int rank = isPlayerOneWhite
+                        ? (8 - rowIndex)
+                        : (rowIndex + 1);
+                    int file = isPlayerOneWhite
+                        ? (colIndex - 1)
+                        : (8 - colIndex);
 
                     // Generate board black and white squares
                     if (loopIndex % 9 != 0 && loopIndex > 8) {
@@ -81,9 +87,7 @@ class ChessBoard extends StatelessWidget {
                         return SizedBox(
                           width: rankOffset,
                           height: tileSize,
-                          child: Center(
-                            child: Text("${(8 - rowIndex).toInt()}"),
-                          ),
+                          child: Center(child: Text("${(rank).toInt()}")),
                         );
                       } else {
                         // Handle file alphabetical numbering
@@ -97,7 +101,7 @@ class ChessBoard extends StatelessWidget {
                         return SizedBox(
                           width: tileSize,
                           height: fileOffset,
-                          child: Center(child: Text((files[colIndex - 1]))),
+                          child: Center(child: Text((files[file]))),
                         );
                       }
                     }

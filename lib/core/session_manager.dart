@@ -17,7 +17,9 @@ class SessionManagerService extends ChangeNotifier {
   MatchMakingStatus? get matchMakingStatus => _matchMakingStatus;
 
   late final String _matchId;
-  bool isWhite = false;
+  late final Sides _playerSide;
+  Sides get playerSide => _playerSide;
+
   late StreamController<String> _opponentMoveController;
   Stream<String> get opponentMoveStream => _opponentMoveController.stream;
 
@@ -71,7 +73,9 @@ class SessionManagerService extends ChangeNotifier {
       _opponentMoveController = StreamController<String>.broadcast();
       _matchId = data["id"];
       if (_socket.id == data["playerWhiteId"]) {
-        isWhite = true;
+        _playerSide = Sides.white;
+      } else {
+        _playerSide = Sides.black;
       }
       _matchMakingStatus = MatchMakingStatus.matchFound;
       notifyListeners();

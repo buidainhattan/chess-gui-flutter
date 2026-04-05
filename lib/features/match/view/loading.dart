@@ -1,4 +1,3 @@
-import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
@@ -35,7 +34,7 @@ class _LoadingState extends State<Loading> {
     final MatchManagerService matchManagerService = MatchManagerService();
     matchManagerService.initialSet(
       widget.fen,
-      sessionManagerService.isWhite ? Sides.white : Sides.black,
+      sessionManagerService.playerSide,
       widget.enableBot,
     );
     final chessBoardViewmodel = ChessBoardViewmodel(
