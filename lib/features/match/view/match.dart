@@ -104,7 +104,9 @@ class _MatchLayout extends StatelessWidget {
                   SizedBox(
                     height: cardHeight,
                     child: PlayerCard(
-                      playerName: matchViewmodel.botEnabled ? 'Bot · Easy' : 'Player 2',
+                      playerName: matchViewmodel.botEnabled
+                          ? 'Bot · Easy'
+                          : 'Player 2',
                       playerSide: matchViewmodel.playerTwoSide,
                       isPlayerOne: false,
                       isBot: matchViewmodel.botEnabled,
@@ -113,14 +115,20 @@ class _MatchLayout extends StatelessWidget {
 
                   SizedBox(
                     height: stripHeight,
-                    child: _TurnStrip(targetSide: matchViewmodel.playerTwoSide),
+                    child: _TurnStrip(
+                      targetSide: matchViewmodel.playerTwoSide,
+                      playerOneSide: matchViewmodel.playerOneSide,
+                    ),
                   ),
 
                   ChessBoard(),
 
                   SizedBox(
                     height: stripHeight,
-                    child: _TurnStrip(targetSide: matchViewmodel.playerOneSide),
+                    child: _TurnStrip(
+                      targetSide: matchViewmodel.playerOneSide,
+                      playerOneSide: matchViewmodel.playerOneSide,
+                    ),
                   ),
 
                   SizedBox(
@@ -148,16 +156,19 @@ class _MatchLayout extends StatelessWidget {
 
 class _TurnStrip extends StatelessWidget {
   final Sides targetSide;
-  const _TurnStrip({required this.targetSide});
+  final Sides playerOneSide;
+  const _TurnStrip({required this.targetSide, required this.playerOneSide});
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return Selector<MatchViewmodel, bool>(
+    return Selector<MatchViewmodel, Sides>(
       selector: (context, matchViewmodel) =>
-          matchViewmodel.sideToMove == targetSide,
-      builder: (context, isActive, _) {
+          matchViewmodel.sideToMove,
+      builder: (context, sideToMove, _) {
+        final bool isActive = sideToMove == targetSide;
+
         return AnimatedOpacity(
           opacity: isActive ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 300),
@@ -179,7 +190,7 @@ class _TurnStrip extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.contain,
                   child: Text(
-                    targetSide == Sides.white ? 'Your turn' : "Opponent's turn",
+                    sideToMove == playerOneSide ? 'Your turn' : "Opponent's turn",
                     style: context.turnStripText(),
                   ),
                 ),

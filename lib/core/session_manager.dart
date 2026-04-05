@@ -34,7 +34,7 @@ class SessionManagerService extends ChangeNotifier {
   void connectSocket() {
     if (Platform.isAndroid) {
       _socket = IO.io(
-        "http://192.168.1.13:3000",
+        "http://192.168.0.102:3000",
         IO.OptionBuilder()
             .setTransports(["websocket"])
             .disableAutoConnect()
