@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:chess_app/core/basics/helper_methods.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/constants/game_end_constraint.dart';
-import 'package:chess_app/core/engine_bridge.dart';
+import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
+import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/match/model/match_state_model.dart';
@@ -11,7 +12,7 @@ import 'package:chess_app/features/match/model/match_state_model.dart';
 class MatchManagerService {
   late final FENHelper _fenHelper;
   FENHelper get fenHelper => _fenHelper;
-  final EngineBridge _engineBridge = EngineBridge();
+  final EngineBridgeInterface _engineBridge = getEngineBridge();
 
   final StreamController<int> _redoSignalController =
       StreamController<int>.broadcast();

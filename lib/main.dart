@@ -14,9 +14,12 @@ void main() async {
   await AudioController().initialize();
 
   // Check for Desktop Platform (Windows, macOS, Linux)
-  bool isDesktop =
-      !(Platform.isAndroid || Platform.isIOS || kIsWeb) &&
-      (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+  bool isDesktop;
+  if (kIsWeb) {
+    isDesktop = false;
+  } else {
+    isDesktop = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+  }
 
   if (isDesktop) {
     await windowManager.ensureInitialized();

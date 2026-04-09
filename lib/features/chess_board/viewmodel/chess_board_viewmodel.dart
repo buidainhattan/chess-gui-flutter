@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:chess_app/core/basics/helper_methods.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
-import 'package:chess_app/core/engine_bridge.dart';
+import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
+import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
 import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/features/chess_board/model/board_state_model.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
@@ -14,7 +15,7 @@ import 'package:flutter/material.dart';
 
 class ChessBoardViewmodel extends ChangeNotifier {
   final AudioController _audioController = AudioController();
-  final EngineBridge _engineBridge = EngineBridge();
+  final EngineBridgeInterface _engineBridge = getEngineBridge();
   final MoveManager _moveManager = MoveManager();
   final SessionManagerService _sessionManagerService;
   final MatchManagerService _matchManagerService;

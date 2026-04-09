@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/constants/c_style_struct.dart';
+import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:ffi/ffi.dart';
 
@@ -30,14 +31,14 @@ typedef IsRepetitionNative = Int32 Function();
 typedef IsRepetition = int Function();
 
 // Typedefs for the C function that returns the move list struct
-typedef GetLegalMovesNative = MoveListResult Function();
-typedef GetLegalMoves = MoveListResult Function();
+typedef GetLegalMovesNative = Pointer<MoveListResult> Function();
+typedef GetLegalMoves = Pointer<MoveListResult> Function();
 
 // Typedefs for the C function that returns the move data struct
-typedef GetBestMoveNative = MoveData Function(Int32 depth);
-typedef GetBestMove = MoveData Function(int depth);
+typedef GetBestMoveNative = Pointer<MoveData> Function(Int32 depth);
+typedef GetBestMove = Pointer<MoveData> Function(int depth);
 
-class EngineBridge {
+class EngineBridge implements EngineBridgeInterface {
   late Isolate _engineIsolate;
   late SendPort _sendPort;
   final ReceivePort _receivePort = ReceivePort();
@@ -54,6 +55,7 @@ class EngineBridge {
     _startFuture = _startEngineIsolate();
   }
 
+  @override
   Future<void> loadFromFEN(String fen) async {
     final Pointer<Utf8> stringPointer = fen.toNativeUtf8();
     try {
@@ -63,55 +65,67 @@ class EngineBridge {
     }
   }
 
+  @override
   Future<String> getSideToMove() async {
     return await _send("getSideToMove", "") as String;
   }
 
   /// Gets all legal moves for the current board state.
+  @override
   Future<List<MoveModel>> getLegalMoves() async {
-    final MoveListResult result =
-        await _send("getLegalMoves", "") as MoveListResult;
+    final Pointer<MoveListResult> resultPointer =
+        await _send("getLegalMoves", "") as Pointer<MoveListResult>;
+    final MoveListResult result = resultPointer.ref;
     final movesPtr = result.moves;
     final count = result.count;
 
     final moveList = <MoveModel>[];
     for (int i = 0; i < count; i++) {
-      moveList.add(MoveModel.fromFFI(movesPtr[i]));
+      moveList.add(_toMoveModel(movesPtr[i]));
     }
 
     return moveList;
   }
 
+  @override
   void makeMove(int moveIndex) async {
     await _send("makeMove", moveIndex);
   }
 
+  @override
   void unMakeMove() async {
     await _send("unMakeMove", "");
   }
 
+  @override
   Future<MoveModel> getBestMove(int depth) async {
-    final MoveData bestMove = await _send("getBestMove", depth) as MoveData;
-    return MoveModel.fromFFI(bestMove);
+    final Pointer<MoveData> bestMovePointer =
+        await _send("getBestMove", depth) as Pointer<MoveData>;
+    final MoveData bestMove = bestMovePointer.ref;
+    return _toMoveModel(bestMove);
   }
 
+  @override
   Future<int> getKingSquare(Sides kingSide) async {
     final int data = kingSide.value;
     final int kingSquare = await _send("getKingSquare", data);
     return kingSquare;
   }
 
+  @override
   Future<bool> isKingInCheck(Sides kingSide) async {
     final int data = kingSide.value;
     final bool isInCheck = await _send("isKingInCheck", data) == 1;
     return isInCheck;
   }
 
+  @override
   Future<bool> isRepetition() async {
     final bool isRepetition = await _send("isRepetition", "") == 1;
     return isRepetition;
   }
 
+  @override
   Future<String> disambiguating(Sides sideToMove, int moveIndex) async {
     final Map<String, int> data = {
       'sideToMove': sideToMove.value,
@@ -121,6 +135,7 @@ class EngineBridge {
   }
 
   // Clean up when done
+  @override
   void dispose() {
     _engineIsolate.kill(); // Terminate the isolate
     _receivePort.close(); // Close our receive port
@@ -149,8 +164,7 @@ class EngineBridge {
       libraryPath = 'ChessEnginex64.dylib';
     } else if (Platform.isAndroid) {
       libraryPath = 'libChessEnginex64.so';
-    }
-     else {
+    } else {
       throw UnsupportedError('Unsupported platform');
     }
 
@@ -246,4 +260,15 @@ class EngineBridge {
     // Wait for and return the result
     return await replyPort.first;
   }
+
+  // inside engine_bridge.dart only
+  MoveModel _toMoveModel(MoveData data) => MoveModel(
+    from: data.fromSquare,
+    to: data.toSquare,
+    piecePromotedTo: PieceTypes.fromValue(data.piecePromotedTo),
+    moveFlag: MoveFlags.fromValue(data.moveType)!,
+    index: data.moveIndex,
+  );
 }
+
+EngineBridgeInterface createEngineBridge() => EngineBridge();
