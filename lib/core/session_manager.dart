@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:socket_io_client/socket_io_client.dart'
     as IO; // ignore: library_prefixes
@@ -16,8 +15,8 @@ class SessionManagerService extends ChangeNotifier {
   MatchMakingStatus? _matchMakingStatus;
   MatchMakingStatus? get matchMakingStatus => _matchMakingStatus;
 
-  late final String _matchId;
-  Sides _playerSide =Sides.white;
+  String? _matchId;
+  Sides _playerSide = Sides.white;
   Sides get playerSide => _playerSide;
 
   late StreamController<String> _opponentMoveController;
@@ -32,23 +31,13 @@ class SessionManagerService extends ChangeNotifier {
   String get timeSetting => _timeSetting;
 
   void connectSocket() {
-    if (Platform.isAndroid) {
-      _socket = IO.io(
-        "http://192.168.0.102:3000",
-        IO.OptionBuilder()
-            .setTransports(["websocket"])
-            .disableAutoConnect()
-            .build(),
-      );
-    } else {
-      _socket = IO.io(
-        "http://localhost:3000",
-        IO.OptionBuilder()
-            .setTransports(["websocket"])
-            .disableAutoConnect()
-            .build(),
-      );
-    }
+    _socket = IO.io(
+      "http://localhost:3000",
+      IO.OptionBuilder()
+          .setTransports(["websocket"])
+          .disableAutoConnect()
+          .build(),
+    );
 
     _socket.connect();
 
@@ -62,6 +51,7 @@ class SessionManagerService extends ChangeNotifier {
   }
 
   void disconnectSocket() {
+    _matchId = null;
     _socket.disconnect();
   }
 
@@ -100,6 +90,23 @@ class SessionManagerService extends ChangeNotifier {
     if (!_isOnline) return;
 
     _socket.emit("make_move", {"matchId": _matchId, "move": move});
+  }
+
+  void endMatch(String winner, String result) {
+    if (!_isOnline) return;
+
+    _matchId = null;
+
+    _socket.emit("match_ended", {
+      "matchId": _matchId,
+      "winner": winner.toUpperCase(),
+      "result": result.toUpperCase(),
+    });
+  }
+
+  void abandonMatch() {
+    endMatch(Sides.opposite(_playerSide).name, MatchResult.resignation.name);
+    disconnectSocket();
   }
 
   void updateGameMode(String mode) {

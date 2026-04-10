@@ -42,7 +42,7 @@ class TimerViewmodel extends ChangeNotifier {
     _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
       newState,
     ) {
-      if (newState != GameResultType.ongoing) {
+      if (newState != FirstPlayerPOVResult.ongoing) {
         _stopTimer();
       }
     });
@@ -67,9 +67,11 @@ class TimerViewmodel extends ChangeNotifier {
 
   void _increaseTimer(Sides endTurnSide) {
     if (endTurnSide == _playerOneSide) {
-      playerOneTime = _formatDuration(_playerOneRemainingTime + _increment);
+      _playerOneRemainingTime += _increment;
+      playerOneTime = _formatDuration(_playerOneRemainingTime);
     } else {
-      playerTwoTime = _formatDuration(_playerTwoRemainingTime + _increment);
+      _playerTwoRemainingTime += _increment;
+      playerTwoTime = _formatDuration(_playerTwoRemainingTime);
     }
   }
 

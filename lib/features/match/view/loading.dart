@@ -31,7 +31,9 @@ class _LoadingState extends State<Loading> {
   Future<_InitializedData> _initializeAll(
     SessionManagerService sessionManagerService,
   ) async {
-    final MatchManagerService matchManagerService = MatchManagerService();
+    final MatchManagerService matchManagerService = MatchManagerService(
+      sessionManagerService,
+    );
     matchManagerService.initialSet(
       widget.fen,
       sessionManagerService.playerSide,

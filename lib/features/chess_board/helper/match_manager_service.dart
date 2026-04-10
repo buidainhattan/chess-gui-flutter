@@ -5,11 +5,14 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/constants/game_end_constraint.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
+import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/match/model/match_state_model.dart';
 
 class MatchManagerService {
+  final SessionManagerService _sessionManagerService;
+
   late final FENHelper _fenHelper;
   FENHelper get fenHelper => _fenHelper;
   final EngineBridgeInterface _engineBridge = getEngineBridge();
@@ -27,9 +30,10 @@ class MatchManagerService {
   Stream<List<String>> get algebraicHistoryStream =>
       _algebraicHistoryController.stream;
 
-  final StreamController<GameResultType> _isMatchEndController =
-      StreamController<GameResultType>.broadcast();
-  Stream<GameResultType> get isMatchEndStream => _isMatchEndController.stream;
+  final StreamController<FirstPlayerPOVResult> _isMatchEndController =
+      StreamController<FirstPlayerPOVResult>.broadcast();
+  Stream<FirstPlayerPOVResult> get isMatchEndStream =>
+      _isMatchEndController.stream;
 
   bool _botEnabled = false;
   bool get botEnabled => _botEnabled;
@@ -51,6 +55,8 @@ class MatchManagerService {
   late List<String> _algebraicHistory;
   List<String> get algebraicHistory => _algebraicHistory;
 
+  MatchManagerService(this._sessionManagerService);
+
   void initialSet(String fen, Sides playerOneSide, bool isBotEnabled) {
     _botEnabled = isBotEnabled;
     _fen = fen.isEmpty ? FENHelper.startFEN : fen;
@@ -66,7 +72,7 @@ class MatchManagerService {
     );
     _matchStateHistory = [];
     _algebraicHistory = [];
-    _isMatchEndController.add(GameResultType.ongoing);
+    _isMatchEndController.add(FirstPlayerPOVResult.ongoing);
   }
 
   Future<void> switchSide({bool isCheckmate = false}) async {
@@ -139,10 +145,10 @@ class MatchManagerService {
     }
 
     if (await _engineBridge.isRepetition()) {
-      _matchEnd(GameResultType.draw);
+      _endMatch(FirstPlayerPOVResult.draw, Sides.color_NB, MatchResult.draw);
     }
     if (_draw75MovesRule(_matchState.halfMoveClock)) {
-      _matchEnd(GameResultType.draw);
+      _endMatch(FirstPlayerPOVResult.draw, Sides.color_NB, MatchResult.draw);
     }
   }
 
@@ -164,33 +170,39 @@ class MatchManagerService {
   void noLegalMoveToMake() {
     if (_matchState.isChecking) {
       _matchState = _matchState.copyWith(isChecking: false, isCheckmate: true);
-      if (_matchState.activeSide == playerOneSide) {
-        _matchEnd(GameResultType.lose);
+      if (_matchState.activeSide == _playerOneSide) {
+        _endMatch(
+          FirstPlayerPOVResult.lose,
+          _playerTwoSide,
+          MatchResult.checkmate,
+        );
       } else {
-        _matchEnd(GameResultType.win);
+        _endMatch(
+          FirstPlayerPOVResult.win,
+          _playerOneSide,
+          MatchResult.checkmate,
+        );
       }
     } else {
-      _matchEnd(GameResultType.draw);
+      _endMatch(FirstPlayerPOVResult.draw, Sides.color_NB, MatchResult.draw);
     }
   }
 
   void timerEnd(Sides endedSide) {
-    if (endedSide == playerOneSide) {
-      _matchEnd(GameResultType.lose);
+    if (endedSide == _playerOneSide) {
+      _endMatch(FirstPlayerPOVResult.lose, _playerTwoSide, MatchResult.timeout);
     } else {
-      _matchEnd(GameResultType.win);
+      _endMatch(FirstPlayerPOVResult.win, _playerOneSide, MatchResult.timeout);
     }
   }
 
-  void dispose() {
-    _stateController.close();
-    _algebraicHistoryController.close();
-    _isMatchEndController.close();
-    _redoSignalController.close();
-  }
-
-  void _matchEnd(GameResultType result) {
-    _isMatchEndController.add(result);
+  void _endMatch(
+    FirstPlayerPOVResult resultPOV,
+    Sides winner,
+    MatchResult result,
+  ) {
+    _isMatchEndController.add(resultPOV);
+    _sessionManagerService.endMatch(winner.name, result.name);
   }
 
   int _updateFullMoveNumber() {
@@ -202,5 +214,12 @@ class MatchManagerService {
 
   bool _draw75MovesRule(int halfMoveClock) {
     return halfMoveClock == automaticDrawHalfMoves;
+  }
+
+  void dispose() {
+    _stateController.close();
+    _algebraicHistoryController.close();
+    _isMatchEndController.close();
+    _redoSignalController.close();
   }
 }

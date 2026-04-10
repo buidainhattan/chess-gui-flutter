@@ -22,7 +22,7 @@ class MatchViewmodel extends ChangeNotifier {
 
   late List<String> algebraicHistory;
 
-  GameResultType result = GameResultType.ongoing;
+  FirstPlayerPOVResult result = FirstPlayerPOVResult.ongoing;
 
   late final StreamSubscription _matchStateSubscription;
   late final StreamSubscription _algebraicHistorySubscription;

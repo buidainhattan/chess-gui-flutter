@@ -94,22 +94,8 @@ enum MoveFlags {
 
 enum SoundFXs { movePiece, capturePiece, castling }
 
-/// Represents the final result of the game.
-enum GameResultType { win, lose, draw, ongoing }
+enum FirstPlayerPOVResult { win, lose, draw, ongoing }
 
-/// Represents the specific reason for a draw (used for logging or UI).
-enum DrawReason {
-  // Automatic Draws
-  stalemate,
-  insufficientMaterial,
-  seventyFiveMoveRule, // 150 halfmoves
-  // Claimable Draws
-  fiftyMoveRule, // 100 halfmoves
-  threefoldRepetition,
-
-  // Mutual Draws
-  agreement,
-
-  // Time-based Draw
-  timeOutVsInsufficientMaterial,
+enum MatchResult {
+  checkmate, resignation, timeout, draw; 
 }

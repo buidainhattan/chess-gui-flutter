@@ -29,10 +29,10 @@ class Match extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            Selector<MatchViewmodel, GameResultType>(
+            Selector<MatchViewmodel, FirstPlayerPOVResult>(
               selector: (context, viewmodel) => viewmodel.result,
               builder: (context, result, child) {
-                if (result != GameResultType.ongoing) {
+                if (result != FirstPlayerPOVResult.ongoing) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     MatchEndDialog.show(context, result);
                   });
@@ -500,7 +500,7 @@ class _MenuState extends State<_Menu> {
                   svgPath: 'assets/icons/home.svg',
                   label: 'Home',
                   tooltip: 'Back to home',
-                  onPressed: () => context.go('/'),
+                  onPressed: () => context.go("/"),
                 ),
               ),
               SizedBox(

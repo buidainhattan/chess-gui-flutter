@@ -35,8 +35,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  GameResultType _result = GameResultType.ongoing;
-  GameResultType get result => _result;
+  FirstPlayerPOVResult _result = FirstPlayerPOVResult.ongoing;
+  FirstPlayerPOVResult get result => _result;
 
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;

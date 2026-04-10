@@ -1,5 +1,6 @@
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
+import 'package:chess_app/core/session_manager.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
 import 'package:chess_app/features/main_menu/view/game_mode_menu.dart';
@@ -8,6 +9,7 @@ import 'package:chess_app/features/main_menu/view/time_mode_menu.dart';
 import 'package:chess_app/features/match/view/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -32,6 +34,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final SessionManagerService _sessionManagerService = context
+        .read<SessionManagerService>();
+
     final GoRouter router = GoRouter(
       initialLocation: "/",
       routes: [
@@ -68,6 +73,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               path: "/pvp/:timemode(blitz|rapid|normal)/match",
               builder: (context, state) {
                 return Loading();
+              },
+              onExit: (context, state) {
+                _sessionManagerService.abandonMatch();
+                return true;
               },
             ),
             GoRoute(

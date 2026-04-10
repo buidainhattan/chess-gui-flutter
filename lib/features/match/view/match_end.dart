@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class MatchEndDialog extends StatelessWidget {
-  final GameResultType result;
+  final FirstPlayerPOVResult result;
 
-  static Future<void> show(BuildContext context, GameResultType result) {
+  static Future<void> show(BuildContext context, FirstPlayerPOVResult result) {
     return showDialog(
       context: context,
       builder: (_) => MatchEndDialog._(result : result),
