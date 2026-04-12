@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final SessionManagerService _sessionManagerService = context
+    final SessionManagerService sessionManagerService = context
         .read<SessionManagerService>();
 
     final GoRouter router = GoRouter(
@@ -75,7 +75,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 return Loading();
               },
               onExit: (context, state) {
-                _sessionManagerService.abandonMatch();
+                sessionManagerService.abandonMatch();
                 return true;
               },
             ),
