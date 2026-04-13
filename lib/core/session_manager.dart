@@ -14,6 +14,8 @@ class SessionManagerService extends ChangeNotifier {
   bool get isOnline => _isOnline;
   MatchMakingStatus? _matchMakingStatus;
   MatchMakingStatus? get matchMakingStatus => _matchMakingStatus;
+  bool _matchInProgress = false;
+  bool get matchInProgress => _matchInProgress;
 
   String? _matchId;
   Sides _playerSide = Sides.white;
@@ -60,6 +62,7 @@ class SessionManagerService extends ChangeNotifier {
     notifyListeners();
 
     _socket.on("match_start", (data) {
+      _matchInProgress = true;
       _opponentMoveController = StreamController<String>.broadcast();
       _matchId = data["id"];
       if (_socket.id == data["playerWhiteId"]) {
@@ -95,7 +98,7 @@ class SessionManagerService extends ChangeNotifier {
   void endMatch(String winner, String result) {
     if (!_isOnline) return;
 
-    _matchId = null;
+    _matchInProgress = false;
 
     _socket.emit("match_ended", {
       "matchId": _matchId,
@@ -105,7 +108,11 @@ class SessionManagerService extends ChangeNotifier {
   }
 
   void abandonMatch() {
-    endMatch(Sides.opposite(_playerSide).name, MatchResult.resignation.name);
+    if (_matchInProgress) {
+      endMatch(Sides.opposite(_playerSide).name, MatchResult.resignation.name);
+      _matchInProgress = false;
+    }
+
     disconnectSocket();
   }
 
