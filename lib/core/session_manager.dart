@@ -107,8 +107,8 @@ class SessionManagerService extends ChangeNotifier {
     });
   }
 
-  void abandonMatch() {
-    if (_matchInProgress) {
+  void leaveMatch() {
+    if (_isOnline && _matchInProgress) {
       endMatch(Sides.opposite(_playerSide).name, MatchResult.resignation.name);
       _matchInProgress = false;
     }

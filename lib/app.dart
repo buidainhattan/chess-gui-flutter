@@ -45,7 +45,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             return BackgroundMenu(child: child);
           },
           routes: [
-            GoRoute(path: "/", builder: (context, state) => MainMenu()),
+            GoRoute(
+              path: "/",
+              builder: (context, state) {
+                if (sessionManagerService.isOnline) {
+                  sessionManagerService.disconnectSocket();
+                }
+
+                return MainMenu();
+              },
+            ),
             GoRoute(
               path: "/online",
               builder: (context, state) =>
@@ -75,7 +84,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 return Loading();
               },
               onExit: (context, state) {
-                sessionManagerService.abandonMatch();
+                sessionManagerService.leaveMatch();
                 return true;
               },
             ),

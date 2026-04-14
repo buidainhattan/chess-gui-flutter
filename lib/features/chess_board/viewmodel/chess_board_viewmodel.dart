@@ -274,10 +274,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
     if (from == null || to == null) return;
 
     MoveModel move = _moveManager.getMove(from, to);
-    await _makeMove(move);
-
     String moveString = toCustomMoveData(move);
     _sessionManagerService.makeMove(moveString);
+    await _makeMove(move);
   }
 
   Future<void> _openPromotionDialog() async {
