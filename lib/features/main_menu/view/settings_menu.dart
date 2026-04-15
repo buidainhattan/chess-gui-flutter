@@ -1,3 +1,4 @@
+import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/main_menu/viewmodel/settings_menu_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -33,17 +34,16 @@ class SettingsMenu extends StatelessWidget {
                   border: Border.all(),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: optionWidth,
-                      child: ListView(
-                        children: [
-                          ...viewmodel.options.asMap().entries.map((entry) {
-                            return Selector<SettingsMenuViewmodel, int>(
-                              selector: (context, viewmodel) =>
-                                  viewmodel.selectedTabIndex,
-                              builder: (context, selectedIndex, child) {
+                child: Selector<SettingsMenuViewmodel, int>(
+                  selector: (context, viewmodel) => viewmodel.selectedTabIndex,
+                  builder: (context, selectedIndex, child) {
+                    return Row(
+                      children: [
+                        SizedBox(
+                          width: optionWidth,
+                          child: ListView(
+                            children: [
+                              ...viewmodel.options.asMap().entries.map((entry) {
                                 return _SettingTab(
                                   index: entry.key,
                                   selectedIndex: selectedIndex,
@@ -52,19 +52,24 @@ class SettingsMenu extends StatelessWidget {
                                   callBack: () => viewmodel
                                       .updateSelectedTabIndex(entry.key),
                                 );
-                              },
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      color: Colors.black,
-                      width: verticalStripWidth,
-                      height: double.infinity,
-                    ),
-                    Expanded(child: ListView()),
-                  ],
+                              }),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          color: Colors.black,
+                          width: verticalStripWidth,
+                          height: double.infinity,
+                        ),
+                        Expanded(
+                          child: switch (selectedIndex) {
+                            1 => _SecondTabSettings(),
+                            _ => _FirstTabSettings(viewmodel.playerName),
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               );
             },
@@ -119,9 +124,39 @@ class _SettingTab extends StatelessWidget {
         hoverColor: Colors.lightBlue,
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: vPadding),
-          child: Center(child: Text(text)),
+          child: Center(child: Text(text, style: context.menuText())),
         ),
       ),
     );
+  }
+}
+
+class _FirstTabSettings extends StatelessWidget {
+  final String playerName;
+
+  const _FirstTabSettings(this.playerName);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Your name: $playerName"),
+            IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SecondTabSettings extends StatelessWidget {
+  const _SecondTabSettings();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(children: [Center(child: Text("No setting yet!"))]);
   }
 }
