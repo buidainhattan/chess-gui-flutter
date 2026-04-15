@@ -1,4 +1,8 @@
-class TimeSetting {
+import 'package:dart_mappable/dart_mappable.dart';
+part 'time_setting_model.mapper.dart';
+
+@MappableClass()
+class TimeSetting with TimeSettingMappable {
   final int minutes;
   final int increment;
 

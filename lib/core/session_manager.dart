@@ -25,12 +25,11 @@ class SessionManagerService extends ChangeNotifier {
   Stream<String> get opponentMoveStream => _opponentMoveController.stream;
 
   String _gameMode = "pvp";
-  String _timeMode = "normal";
-  String _timeSetting = "10 min";
-
   String get gameMode => _gameMode;
-  String get timeMode => _timeMode;
-  String get timeSetting => _timeSetting;
+  TimeMode _timeMode = TimeMode.normal;
+  TimeMode get timeMode => _timeMode;
+  TimeSetting _timeSetting = TimeSetting(10, 0);
+  TimeSetting get timeSetting => _timeSetting;
 
   void connectSocket() {
     _socket = IO.io(
@@ -120,16 +119,12 @@ class SessionManagerService extends ChangeNotifier {
     _gameMode = mode;
   }
 
-  void updateTimeMode(String mode) {
+  void updateTimeMode(TimeMode mode) {
     _timeMode = mode;
   }
 
-  void updateTimeSetting(String setting) {
+  void updateTimeSetting(TimeSetting setting) {
     _timeSetting = setting;
-  }
-
-  TimeSetting getSelectedSetting() {
-    return TimeMode.fromName(_timeMode)!.settings[_timeSetting]!;
   }
 
   @override

@@ -11,71 +11,58 @@ class BackgroundMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            radius: 1.1,
-            colors: [
-              Theme.of(context).colorScheme.inversePrimary,
-              Theme.of(context).colorScheme.primary,
-            ],
-          ),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double size =
-                math.min(constraints.maxWidth, constraints.maxHeight) * 0.15;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double size =
+            math.min(constraints.maxWidth, constraints.maxHeight) * 0.15;
 
-            return Column(
-              children: [
-                Expanded(
-                  flex: (context.isMobile && context.isLandscape) ? 2 : 1,
-                  child: Center(
-                    child: Column(
+        return Column(
+          children: [
+            Expanded(
+              flex: (context.isMobile && context.isLandscape) ? 2 : 1,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildIcon(
-                              const Alignment(0, 0),
-                              'assets/images/backgrounds/pieces/pawn.svg',
-                              size,
-                            ),
-                            Text(
-                              "Chess",
-                              style: TextStyle(
-                                height: 0.9,
-                                fontSize: size,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF34364C),
-                              ),
-                            ),
-                          ],
+                        _buildIcon(
+                          const Alignment(0, 0),
+                          'assets/images/backgrounds/pieces/pawn.svg',
+                          size,
                         ),
                         Text(
-                          "Games",
+                          "Chess",
                           style: TextStyle(
                             height: 0.9,
                             fontSize: size,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF7B61FF),
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF34364C),
                           ),
                         ),
                       ],
                     ),
-                  ),
+                    Text(
+                      "Games",
+                      style: TextStyle(
+                        height: 0.9,
+                        fontSize: size,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF7B61FF),
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  flex: (context.isMobile && context.isLandscape) ? 3 : 1,
-                  child: child,
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+              ),
+            ),
+            Expanded(
+              flex: (context.isMobile && context.isLandscape) ? 3 : 1,
+              child: child,
+            ),
+          ],
+        );
+      },
     );
   }
 }

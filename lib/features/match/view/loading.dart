@@ -49,7 +49,7 @@ class _LoadingState extends State<Loading> {
     await chessBoardViewmodel.initializeChessBoard();
 
     timerViewmodel.setAndStartTimer(
-      setting: sessionManagerService.getSelectedSetting(),
+      setting: sessionManagerService.timeSetting,
     );
 
     return _InitializedData(

@@ -16,114 +16,89 @@ class TimeModeMenu extends StatefulWidget {
 }
 
 class _TimeModeMenuState extends State<TimeModeMenu> {
-  String? _selectedMode;
-  String? _selectedSetting;
+  TimeMode? selectedMode = TimeMode.normal;
+  TimeSetting? selectedSetting = TimeMode.normal.settings.values.first;
 
   void _toMatchScreen(BuildContext context, SessionManagerService service) {
-    String? mode = _selectedMode;
-    String? setting = _selectedSetting;
+    TimeMode? mode = selectedMode;
+    TimeSetting? setting = selectedSetting;
     if (mode == null || setting == null) return;
 
     service.updateTimeMode(mode);
     service.updateTimeSetting(setting);
 
-    context.go("/${service.gameMode}/$_selectedMode/match");
-  }
-
-  TableRow _buildOptionRow(
-    BuildContext context,
-    String buttonText,
-    Map<String, TimeSetting> settings,
-  ) {
-    return TableRow(
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            buttonText.toUpperCase(),
-            style: context.menuText(),
-          ),
-        ),
-        ...settings.entries.map((entry) {
-          String displayText = entry.key;
-          bool isSelected = _selectedSetting == displayText;
-
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceS),
-              child: MenuNavButton(
-                label: displayText,
-                onPressed: () {
-                  setState(() {
-                    _selectedMode = buttonText.toLowerCase();
-                    _selectedSetting = displayText;
-                  });
-                },
-                textColor: isSelected ? Colors.green : Colors.black,
-              ),
-            ),
-          );
-        }),
-      ],
-    );
+    context.go("/${service.gameMode}/${mode.name}/match");
   }
 
   @override
   void initState() {
     super.initState();
-    final SessionManagerService sessionDataService =
-        Provider.of<SessionManagerService>(context, listen: false);
-    _initializeDefaultChoice(sessionDataService);
-  }
-
-  void _initializeDefaultChoice(SessionManagerService service) {
-    _selectedMode = service.timeMode;
-    _selectedSetting = service.timeSetting;
+    final SessionManagerService sessionManagerService = context
+        .read<SessionManagerService>();
+    selectedMode = sessionManagerService.timeMode;
+    selectedSetting = sessionManagerService.timeSetting;
   }
 
   @override
   Widget build(BuildContext context) {
-    final SessionManagerService sessionDataService =
-        Provider.of<SessionManagerService>(context, listen: false);
+    final SessionManagerService sessionManagerService = context
+        .read<SessionManagerService>();
 
     return Column(
       spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
-        Table(
-          columnWidths: const <int, TableColumnWidth>{
-            0: IntrinsicColumnWidth(),
-            1: FlexColumnWidth(),
-            2: FlexColumnWidth(),
-            3: FlexColumnWidth(),
-          },
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          border: TableBorder(
-            horizontalInside: BorderSide(color: Colors.black, width: 2),
-          ),
-          children: [
-            _buildOptionRow(
-              context,
-              TimeMode.blitz.name,
-              TimeMode.blitz.settings,
+        DropdownButton(
+          value: selectedMode,
+          items: [
+            DropdownMenuItem<TimeMode>(
+              value: TimeMode.blitz,
+              child: Text(TimeMode.blitz.name.toUpperCase()),
             ),
-            _buildOptionRow(
-              context,
-              TimeMode.rapid.name,
-              TimeMode.rapid.settings,
+            DropdownMenuItem<TimeMode>(
+              value: TimeMode.rapid,
+              child: Text(TimeMode.rapid.name.toUpperCase()),
             ),
-            _buildOptionRow(
-              context,
-              TimeMode.normal.name,
-              TimeMode.normal.settings,
+            DropdownMenuItem<TimeMode>(
+              value: TimeMode.normal,
+              child: Text(TimeMode.normal.name.toUpperCase()),
             ),
           ],
+          onChanged: (TimeMode? value) {
+            setState(() {
+              selectedMode = value;
+              selectedSetting = selectedMode!.settings.values.first;
+            });
+          },
+          style: context.menuText(),
+          underline: Container(),
+          borderRadius: BorderRadius.circular(8),
+        ),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: selectedMode!.settings.entries.map((entry) {
+            bool isSelected = selectedSetting == entry.value;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceS),
+              child: MenuNavButton(
+                label: entry.key,
+                onPressed: () {
+                  setState(() {
+                    selectedSetting = entry.value;
+                  });
+                },
+                textColor: isSelected ? Colors.green : Colors.black,
+              ),
+            );
+          }).toList(),
         ),
 
         SizedBox(height: AppTheme.spaceS),
 
         MenuNavButton(
           label: "START GAME",
-          onPressed: () => _toMatchScreen(context, sessionDataService),
+          onPressed: () => _toMatchScreen(context, sessionManagerService),
           textColor: Colors.green,
         ),
         MenuNavButton(

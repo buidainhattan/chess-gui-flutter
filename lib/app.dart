@@ -1,11 +1,14 @@
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/widgets/background/background.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
 import 'package:chess_app/features/main_menu/view/game_mode_menu.dart';
 import 'package:chess_app/features/main_menu/view/main_menu.dart';
+import 'package:chess_app/features/main_menu/view/settings_menu.dart';
 import 'package:chess_app/features/main_menu/view/time_mode_menu.dart';
+import 'package:chess_app/features/main_menu/viewmodel/settings_menu_viewmodel.dart';
 import 'package:chess_app/features/match/view/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +45,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routes: [
         ShellRoute(
           builder: (context, state, child) {
-            return BackgroundMenu(child: child);
+            return Background(child: BackgroundMenu(child: child));
           },
           routes: [
             GoRoute(
@@ -75,7 +78,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
         ShellRoute(
           builder: (context, state, child) {
-            return BackgroundMatch(child: child);
+            return Background(child: BackgroundMatch(child: child));
           },
           routes: [
             GoRoute(
@@ -92,6 +95,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               path: "/pve/:timemode(blitz|rapid|normal)/match",
               builder: (context, state) {
                 return Loading(enableBot: true);
+              },
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) {
+            return Background(child: child);
+          },
+          routes: [
+            GoRoute(
+              path: "/settings",
+              builder: (context, state) {
+                return ChangeNotifierProvider(
+                  create: (_) => SettingsMenuViewmodel(),
+                  child: SettingsMenu(),
+                );
               },
             ),
           ],

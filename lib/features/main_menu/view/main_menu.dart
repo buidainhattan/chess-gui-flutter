@@ -29,7 +29,7 @@ class MainMenu extends StatelessWidget {
           },
         ),
         MenuNavButton(label: "PLAY OFFLINE", route: "/offline"),
-        MenuNavButton(label: "SETTINGS", textColor: Colors.black),
+        MenuNavButton(label: "SETTINGS", route: "/settings", textColor: Colors.black),
         SizedBox(height: AppTheme.spaceM),
         MenuNavButton(
           label: "QUIT",
