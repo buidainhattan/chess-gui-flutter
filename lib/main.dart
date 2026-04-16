@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
+import 'package:chess_app/core/settings_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:chess_app/app.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
@@ -12,6 +13,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await AudioController().initialize();
+
+  final SettingsService settingsService = SettingsService();
+  await settingsService.init();
 
   // Check for Desktop Platform (Windows, macOS, Linux)
   bool isDesktop;
@@ -38,8 +42,11 @@ void main() async {
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => SessionManagerService(),
+    MultiProvider(
+      providers: [
+        Provider.value(value: settingsService),
+        Provider(create: (_) => SessionService()),
+      ],
       child: const MyApp(),
     ),
   );

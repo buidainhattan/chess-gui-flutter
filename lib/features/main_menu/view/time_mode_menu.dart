@@ -1,5 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
@@ -19,7 +19,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   TimeMode? selectedMode = TimeMode.normal;
   TimeSetting? selectedSetting = TimeMode.normal.settings.values.first;
 
-  void _toMatchScreen(BuildContext context, SessionManagerService service) {
+  void _toMatchScreen(BuildContext context, SessionService service) {
     TimeMode? mode = selectedMode;
     TimeSetting? setting = selectedSetting;
     if (mode == null || setting == null) return;
@@ -33,16 +33,16 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   @override
   void initState() {
     super.initState();
-    final SessionManagerService sessionManagerService = context
-        .read<SessionManagerService>();
+    final SessionService sessionManagerService = context
+        .read<SessionService>();
     selectedMode = sessionManagerService.timeMode;
     selectedSetting = sessionManagerService.timeSetting;
   }
 
   @override
   Widget build(BuildContext context) {
-    final SessionManagerService sessionManagerService = context
-        .read<SessionManagerService>();
+    final SessionService sessionService = context
+        .read<SessionService>();
 
     return Column(
       spacing: context.isMobile ? 0 : AppTheme.spaceM,
@@ -98,7 +98,7 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
 
         MenuNavButton(
           label: "START GAME",
-          onPressed: () => _toMatchScreen(context, sessionManagerService),
+          onPressed: () => _toMatchScreen(context, sessionService),
           textColor: Colors.green,
         ),
         MenuNavButton(

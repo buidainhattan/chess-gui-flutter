@@ -5,7 +5,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/features/chess_board/model/board_state_model.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
@@ -17,7 +17,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   final AudioController _audioController = AudioController();
   final EngineBridgeInterface _engineBridge = getEngineBridge();
   final MoveManager _moveManager = MoveManager();
-  final SessionManagerService _sessionManagerService;
+  final SessionService _sessionService;
   final MatchManagerService _matchManagerService;
 
   late final StreamSubscription _opponentMoveSubscription;
@@ -41,7 +41,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;
 
-  ChessBoardViewmodel(this._matchManagerService, this._sessionManagerService);
+  ChessBoardViewmodel(this._matchManagerService, this._sessionService);
 
   // <===== Initialize ChessBoard ====>
   Future<void> initializeChessBoard() async {
@@ -59,8 +59,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
       _boardState.copyWith(pieceKeys: pieceKeys);
     }
 
-    if (_sessionManagerService.isOnline) {
-      _opponentMoveSubscription = _sessionManagerService.opponentMoveStream
+    if (_sessionService.isOnline) {
+      _opponentMoveSubscription = _sessionService.opponentMoveStream
           .listen((newState) async {
             final (:from, :to) = moveStringToIndices(newState);
             final MoveModel move = _moveManager.getMove(from, to);
@@ -105,7 +105,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
       _matchManagerService.pushMatchStateHistory();
     }
 
-    if (_sessionManagerService.isOnline) {
+    if (_sessionService.isOnline) {
       _lockBoard =
           _matchManagerService.playerOneSide !=
           _matchManagerService.matchState.activeSide;
@@ -275,7 +275,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     MoveModel move = _moveManager.getMove(from, to);
     String moveString = toCustomMoveData(move);
-    _sessionManagerService.makeMove(moveString);
+    _sessionService.makeMove(moveString);
     await _makeMove(move);
   }
 

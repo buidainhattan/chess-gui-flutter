@@ -1,6 +1,7 @@
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
+import 'package:chess_app/core/settings_service.dart';
 import 'package:chess_app/core/widgets/background/background.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
@@ -37,8 +38,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final SessionManagerService sessionManagerService = context
-        .read<SessionManagerService>();
+    final SettingsService settingsService = context.read<SettingsService>();
+    final SessionService sessionService = context.read<SessionService>();
 
     final GoRouter router = GoRouter(
       initialLocation: "/",
@@ -51,8 +52,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             GoRoute(
               path: "/",
               builder: (context, state) {
-                if (sessionManagerService.isOnline) {
-                  sessionManagerService.disconnectSocket();
+                if (sessionService.isOnline) {
+                  sessionService.disconnectSocket();
                 }
 
                 return MainMenu();
@@ -87,7 +88,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 return Loading();
               },
               onExit: (context, state) {
-                sessionManagerService.leaveMatch();
+                sessionService.leaveMatch();
                 return true;
               },
             ),
@@ -108,7 +109,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               path: "/settings",
               builder: (context, state) {
                 return ChangeNotifierProvider(
-                  create: (_) => SettingsMenuViewmodel(),
+                  create: (_) => SettingsMenuViewmodel(settingsService),
                   child: SettingsMenu(),
                 );
               },

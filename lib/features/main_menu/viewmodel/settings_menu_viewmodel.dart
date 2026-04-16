@@ -1,6 +1,9 @@
+import 'package:chess_app/core/settings_service.dart';
 import 'package:flutter/material.dart';
 
 class SettingsMenuViewmodel extends ChangeNotifier {
+  late final SettingsService _settingsService;
+
   // UI
   final List<String> _options = const ["General", "Theme"];
   List<String> get options => _options;
@@ -14,6 +17,10 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   // Theme settings
   Color _themeColor = const Color(0xff7B61FF);
   Color get themeColor => _themeColor;
+
+  SettingsMenuViewmodel(SettingsService service) {
+    _settingsService = service;
+  }
 
   void updateSelectedTabIndex(int newIndex) {
     if (_selectedTabIndex == newIndex) return;

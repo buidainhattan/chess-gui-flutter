@@ -1,4 +1,4 @@
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:chess_app/features/match/view/match.dart';
@@ -23,25 +23,25 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-    final SessionManagerService sessionManagerService = context
-        .read<SessionManagerService>();
-    _initAll = _initializeAll(sessionManagerService);
+    final SessionService sessionService = context
+        .read<SessionService>();
+    _initAll = _initializeAll(sessionService);
   }
 
   Future<_InitializedData> _initializeAll(
-    SessionManagerService sessionManagerService,
+    SessionService sessionService,
   ) async {
     final MatchManagerService matchManagerService = MatchManagerService(
-      sessionManagerService,
+      sessionService,
     );
     matchManagerService.initialSet(
       widget.fen,
-      sessionManagerService.playerSide,
+      sessionService.playerSide,
       widget.enableBot,
     );
     final chessBoardViewmodel = ChessBoardViewmodel(
       matchManagerService,
-      sessionManagerService,
+      sessionService,
     );
     final matchViewmodel = MatchViewmodel(matchManagerService);
     final timerViewmodel = TimerViewmodel(matchManagerService);
@@ -49,7 +49,7 @@ class _LoadingState extends State<Loading> {
     await chessBoardViewmodel.initializeChessBoard();
 
     timerViewmodel.setAndStartTimer(
-      setting: sessionManagerService.timeSetting,
+      setting: sessionService.timeSetting,
     );
 
     return _InitializedData(

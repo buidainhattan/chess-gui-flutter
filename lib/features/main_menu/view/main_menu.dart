@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +12,8 @@ class MainMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SessionManagerService sessionDataService =
-        Provider.of<SessionManagerService>(context);
+    final SessionService sessionService =
+        Provider.of<SessionService>(context);
 
     return Column(
       mainAxisAlignment: (context.isMobile && context.isLandscape)
@@ -24,7 +24,7 @@ class MainMenu extends StatelessWidget {
         MenuNavButton(
           label: "PLAY ONLINE",
           onPressed: () {
-            sessionDataService.connectSocket();
+            sessionService.connectSocket();
             context.push("/online");
           },
         ),

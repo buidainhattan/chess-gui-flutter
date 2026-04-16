@@ -5,13 +5,13 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/constants/game_end_constraint.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/match/model/match_state_model.dart';
 
 class MatchManagerService {
-  final SessionManagerService _sessionManagerService;
+  final SessionService _sessionService;
 
   late final FENHelper _fenHelper;
   FENHelper get fenHelper => _fenHelper;
@@ -55,7 +55,7 @@ class MatchManagerService {
   late List<String> _algebraicHistory;
   List<String> get algebraicHistory => _algebraicHistory;
 
-  MatchManagerService(this._sessionManagerService);
+  MatchManagerService(this._sessionService);
 
   void initialSet(String fen, Sides playerOneSide, bool isBotEnabled) {
     _botEnabled = isBotEnabled;
@@ -202,7 +202,7 @@ class MatchManagerService {
     MatchResult result,
   ) {
     _isMatchEndController.add(resultPOV);
-    _sessionManagerService.endMatch(winner.name, result.name);
+    _sessionService.endMatch(winner.name, result.name);
   }
 
   int _updateFullMoveNumber() {

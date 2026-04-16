@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/session_manager.dart';
+import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/main_menu/view/match_making.dart';
@@ -19,7 +19,7 @@ class GameModeMenu extends StatefulWidget {
 }
 
 class _GameModeMenuState extends State<GameModeMenu> {
-  late SessionManagerService sessionManagerService;
+  late SessionService sessionService;
 
   bool isDialogOpen = false;
 
@@ -28,20 +28,20 @@ class _GameModeMenuState extends State<GameModeMenu> {
       MenuNavButton(
         label: "ONLINE MATCH MAKING",
         onPressed: () {
-          sessionManagerService.joinMatchMaking();
+          sessionService.joinMatchMaking();
         },
       ),
       MenuNavButton(
         label: "CREATE / JOIN ROOM",
         onPressed: () {
-          sessionManagerService.updateGameMode("pvp");
+          sessionService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
       MenuNavButton(
         label: "LAN CONNECTION",
         onPressed: () {
-          sessionManagerService.updateGameMode("pvp");
+          sessionService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
@@ -53,14 +53,14 @@ class _GameModeMenuState extends State<GameModeMenu> {
       MenuNavButton(
         label: "PASS & PLAY",
         onPressed: () {
-          sessionManagerService.updateGameMode("pvp");
+          sessionService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
       MenuNavButton(
         label: "SOLO PLAY",
         onPressed: () {
-          sessionManagerService.updateGameMode("pve");
+          sessionService.updateGameMode("pve");
           context.push("/pve");
         },
       ),
@@ -69,14 +69,14 @@ class _GameModeMenuState extends State<GameModeMenu> {
   }
 
   void _onMatchMakingStatusChanges() {
-    final MatchMakingStatus? status = sessionManagerService.matchMakingStatus;
+    final MatchMakingStatus? status = sessionService.matchMakingStatus;
 
     if (status == MatchMakingStatus.pending) {
       isDialogOpen = true;
       MatchMakingDialog.show(context).then((result) {
         isDialogOpen = false;
         if (result == MatchMakingStatus.cancelled || result == null) {
-          sessionManagerService.leaveMatchMaking();
+          sessionService.leaveMatchMaking();
         }
       });
     } else if (status == MatchMakingStatus.matchFound) {
@@ -92,8 +92,8 @@ class _GameModeMenuState extends State<GameModeMenu> {
   @override
   void initState() {
     super.initState();
-    sessionManagerService = context.read<SessionManagerService>();
-    sessionManagerService.addListener(_onMatchMakingStatusChanges);
+    sessionService = context.read<SessionService>();
+    sessionService.addListener(_onMatchMakingStatusChanges);
   }
 
   @override
@@ -129,7 +129,7 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   @override
   void dispose() {
-    sessionManagerService.removeListener(_onMatchMakingStatusChanges);
+    sessionService.removeListener(_onMatchMakingStatusChanges);
     super.dispose();
   }
 }

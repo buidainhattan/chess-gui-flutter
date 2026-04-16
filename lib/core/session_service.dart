@@ -7,7 +7,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';
 
-class SessionManagerService extends ChangeNotifier {
+class SessionService extends ChangeNotifier {
   late IO.Socket _socket;
 
   bool _isOnline = false;
