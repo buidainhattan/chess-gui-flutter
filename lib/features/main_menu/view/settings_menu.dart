@@ -64,7 +64,7 @@ class SettingsMenu extends StatelessWidget {
                         Expanded(
                           child: switch (selectedIndex) {
                             1 => _SecondTabSettings(),
-                            _ => _FirstTabSettings(viewmodel.playerName),
+                            _ => _FirstTabSettings(viewmodel),
                           },
                         ),
                       ],
@@ -131,20 +131,68 @@ class _SettingTab extends StatelessWidget {
   }
 }
 
-class _FirstTabSettings extends StatelessWidget {
-  final String playerName;
+class _FirstTabSettings extends StatefulWidget {
+  final SettingsMenuViewmodel viewmodel;
 
-  const _FirstTabSettings(this.playerName);
+  const _FirstTabSettings(this.viewmodel);
+
+  @override
+  State<_FirstTabSettings> createState() => _FirstTabSettingsState();
+}
+
+class _FirstTabSettingsState extends State<_FirstTabSettings> {
+  final TextEditingController editPlayerNameController =
+      TextEditingController();
+  bool isEditPlayerName = false;
 
   @override
   Widget build(BuildContext context) {
+    final String playerName = widget.viewmodel.playerName;
+    editPlayerNameController.text = playerName;
+
     return ListView(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Your name: $playerName"),
-            IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
+            if (isEditPlayerName) ...{
+              Expanded(
+                child: TextFormField(
+                  controller: editPlayerNameController,
+                  autofocus: true,
+                  decoration: InputDecoration(labelText: "Your Name"),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  widget.viewmodel.updatePlayerName(
+                    editPlayerNameController.text,
+                  );
+                  setState(() {
+                    isEditPlayerName = false;
+                  });
+                },
+                icon: Icon(Icons.check),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    isEditPlayerName = false;
+                  });
+                },
+                icon: Icon(Icons.cancel),
+              ),
+            } else ...{
+              Text("Your Name: $playerName"),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    isEditPlayerName = true;
+                  });
+                },
+                icon: Icon(Icons.edit),
+              ),
+            },
           ],
         ),
       ],

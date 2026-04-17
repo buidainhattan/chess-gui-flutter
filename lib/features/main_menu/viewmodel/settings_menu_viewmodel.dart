@@ -11,15 +11,21 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   int get selectedTabIndex => _selectedTabIndex;
 
   // General settings
-  String _playerName = "Player";
+  late String _playerName;
   String get playerName => _playerName;
 
   // Theme settings
-  Color _themeColor = const Color(0xff7B61FF);
+  late Color _themeColor;
   Color get themeColor => _themeColor;
 
   SettingsMenuViewmodel(SettingsService service) {
     _settingsService = service;
+    _settingInitialization();
+  }
+
+  void _settingInitialization() {
+    _playerName = _settingsService.playerName;
+    _themeColor = Color(_settingsService.colorHexValue);
   }
 
   void updateSelectedTabIndex(int newIndex) {
@@ -29,13 +35,19 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updatePlayerName(String newName) {
+  Future<void> updatePlayerName(String newName) async {
+    if (_playerName == newName) return;
+
     _playerName = newName;
     notifyListeners();
+
+    await _settingsService.savePlayerName(newName);
   }
 
-  void updateThemeColor(Color newColor) {
-    _themeColor = newColor;
+  Future<void> updateThemeColor(int newColorHex) async {
+    _themeColor = Color(newColorHex);
     notifyListeners();
+
+    await _settingsService.saveColorHex(newColorHex);
   }
 }

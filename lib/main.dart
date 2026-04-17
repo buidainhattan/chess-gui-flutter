@@ -45,7 +45,7 @@ void main() async {
     MultiProvider(
       providers: [
         Provider.value(value: settingsService),
-        Provider(create: (_) => SessionService()),
+        ChangeNotifierProvider(create: (_) => SessionService()),
       ],
       child: const MyApp(),
     ),
