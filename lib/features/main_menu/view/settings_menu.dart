@@ -2,6 +2,7 @@ import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/main_menu/viewmodel/settings_menu_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -32,7 +33,7 @@ class SettingsMenu extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.grey,
                   border: Border.all(),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Selector<SettingsMenuViewmodel, int>(
                   selector: (context, viewmodel) => viewmodel.selectedTabIndex,
@@ -63,7 +64,7 @@ class SettingsMenu extends StatelessWidget {
                         ),
                         Expanded(
                           child: switch (selectedIndex) {
-                            1 => _SecondTabSettings(),
+                            1 => _SecondTabSettings(viewmodel),
                             _ => _FirstTabSettings(viewmodel),
                           },
                         ),
@@ -115,16 +116,21 @@ class _SettingTab extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isSelected = index == selectedIndex;
 
-    return Material(
-      shape: UnderlineInputBorder(borderSide: BorderSide(strokeAlign: 0)),
-      color: isSelected ? Colors.lightBlue : Colors.transparent,
-      child: InkWell(
-        onTap: callBack ?? () {},
-        onHover: (value) {},
-        hoverColor: Colors.lightBlue,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: vPadding),
-          child: Center(child: Text(text, style: context.menuText())),
+    return ClipRRect(
+      borderRadius: index == 0
+          ? BorderRadiusGeometry.only(topLeft: Radius.circular(8))
+          : BorderRadius.zero,
+      child: Material(
+        shape: UnderlineInputBorder(borderSide: BorderSide(strokeAlign: 0)),
+        color: isSelected ? Colors.lightBlue : Colors.transparent,
+        child: InkWell(
+          onTap: callBack ?? () {},
+          onHover: (value) {},
+          hoverColor: Colors.lightBlue,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: vPadding),
+            child: Center(child: Text(text, style: context.menuText())),
+          ),
         ),
       ),
     );
@@ -201,10 +207,92 @@ class _FirstTabSettingsState extends State<_FirstTabSettings> {
 }
 
 class _SecondTabSettings extends StatelessWidget {
-  const _SecondTabSettings();
+  final SettingsMenuViewmodel viewmodel;
+
+  const _SecondTabSettings(this.viewmodel);
 
   @override
   Widget build(BuildContext context) {
-    return ListView(children: [Center(child: Text("No setting yet!"))]);
+    return ListView(
+      children: [
+        Row(
+          children: [
+            Text("Color: "),
+            Expanded(
+              child: Container(
+                color: viewmodel.themeColor,
+                width: double.infinity,
+                height: 50.0,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (context) => _ThemeColorPickerDialog(
+                    initialColor: viewmodel.themeColor,
+                    onColorConfirm: (Color newColor) {
+                      viewmodel.updateThemeColor(newColor.toARGB32());
+                    },
+                  ),
+                );
+              },
+              icon: Icon(Icons.edit_attributes),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ThemeColorPickerDialog extends StatefulWidget {
+  final Color initialColor;
+  final Function(Color) onColorConfirm;
+
+  const _ThemeColorPickerDialog({
+    required this.initialColor,
+    required this.onColorConfirm,
+  });
+
+  @override
+  State<_ThemeColorPickerDialog> createState() =>
+      _ThemeColorPickerDialogState();
+}
+
+class _ThemeColorPickerDialogState extends State<_ThemeColorPickerDialog> {
+  late Color pickerColor;
+
+  @override
+  void initState() {
+    super.initState();
+    pickerColor = widget.initialColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Pick your new theme color!"),
+      content: SingleChildScrollView(
+        child: ColorPicker(
+          pickerColor: pickerColor,
+          onColorChanged: (Color newColor) {
+            setState(() {
+              pickerColor = newColor;
+            });
+          },
+        ),
+      ),
+      actions: [
+        TextButton(child: const Text("CANCEL"), onPressed: () => context.pop()),
+        ElevatedButton(
+          child: const Text("OK"),
+          onPressed: () {
+            widget.onColorConfirm(pickerColor);
+            context.pop();
+          },
+        ),
+      ],
+    );
   }
 }

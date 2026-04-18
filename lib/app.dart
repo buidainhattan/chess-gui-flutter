@@ -125,10 +125,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xff7B61FF),
+          seedColor: Color(settingsService.colorHexValue),
           brightness: Brightness.light,
         ),
         fontFamily: "Roboto",
+        dialogTheme: DialogThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8),
+          ),
+        ),
       ),
     );
   }
