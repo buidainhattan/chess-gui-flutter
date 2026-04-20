@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
@@ -5,15 +6,14 @@ class SettingsService {
 
   late String _playerName;
   String get playerName => _playerName;
-  late int _colorHexValue;
-  int get colorHexValue => _colorHexValue;
+  late final ValueNotifier<int> themeColorHexValue;
 
   // Initialize the preferences
   Future<void> init() async {
     _asyncPrefs = SharedPreferencesAsync();
 
     _playerName = await loadPlayerName();
-    _colorHexValue = await loadColorHex();
+    themeColorHexValue = ValueNotifier<int>(await loadThemeColorHex());
   }
 
   Future<void> savePlayerName(String value) async {
@@ -25,12 +25,12 @@ class SettingsService {
     return await _asyncPrefs.getString("player_name") ?? "Player";
   }
 
-  Future<void> saveColorHex(int value) async {
-    _colorHexValue = value;
+  Future<void> saveThemeColorHex(int value) async {
+    themeColorHexValue.value = value;
     await _asyncPrefs.setInt("color_hex_value", value);
   }
 
-  Future<int> loadColorHex() async {
+  Future<int> loadThemeColorHex() async {
     return await _asyncPrefs.getInt("color_hex_value") ?? 0xff7B61FF;
   }
 }

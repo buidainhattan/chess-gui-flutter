@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:chess_app/app_viewmodel.dart';
 import 'package:chess_app/core/session_service.dart';
 import 'package:chess_app/core/settings_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -46,6 +47,7 @@ void main() async {
       providers: [
         Provider.value(value: settingsService),
         ChangeNotifierProvider(create: (_) => SessionService()),
+        ChangeNotifierProvider(create: (_) => AppViewmodel(settingsService))
       ],
       child: const MyApp(),
     ),

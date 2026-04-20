@@ -25,7 +25,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void _settingInitialization() {
     _playerName = _settingsService.playerName;
-    _themeColor = Color(_settingsService.colorHexValue);
+    _themeColor = Color(_settingsService.themeColorHexValue.value);
   }
 
   void updateSelectedTabIndex(int newIndex) {
@@ -48,6 +48,6 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     _themeColor = Color(newColorHex);
     notifyListeners();
 
-    await _settingsService.saveColorHex(newColorHex);
+    await _settingsService.saveThemeColorHex(newColorHex);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:chess_app/app_viewmodel.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/session_service.dart';
@@ -119,22 +120,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
     );
 
-    return MaterialApp.router(
-      routerConfig: router,
-      title: 'Chess Game',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Color(settingsService.colorHexValue),
-          brightness: Brightness.light,
-        ),
-        fontFamily: "Roboto",
-        dialogTheme: DialogThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadiusGeometry.circular(8),
+    return Consumer<AppViewmodel>(
+      builder: (context, viewmodel, child) {
+        return MaterialApp.router(
+          routerConfig: router,
+          title: 'Chess Game',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Color(viewmodel.themeColorHexValue),
+              brightness: Brightness.light,
+            ),
+            fontFamily: "Roboto",
+            dialogTheme: DialogThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadiusGeometry.circular(8),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
