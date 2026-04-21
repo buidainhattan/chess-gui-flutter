@@ -15,8 +15,10 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   String get playerName => _playerName;
 
   // Theme settings
-  late Color _themeColor;
-  Color get themeColor => _themeColor;
+  late List<int> _colorHexList;
+  List<int> get colorHexList => _colorHexList;
+  late int _themeColorHexValue;
+  int get themeColorHexValue => _themeColorHexValue;
 
   SettingsMenuViewmodel(SettingsService service) {
     _settingsService = service;
@@ -25,7 +27,8 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void _settingInitialization() {
     _playerName = _settingsService.playerName;
-    _themeColor = Color(_settingsService.themeColorHexValue.value);
+    _colorHexList = _settingsService.colorHexList;
+    _themeColorHexValue = _settingsService.themeColorHexValue.value;
   }
 
   void updateSelectedTabIndex(int newIndex) {
@@ -35,7 +38,14 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatePlayerName(String newName) async {
+  void updateActiveThemeColor(int selectedColorHex) async {
+    _themeColorHexValue = selectedColorHex;
+    notifyListeners();
+
+    await _settingsService.saveThemeColorHex(selectedColorHex);
+  }
+
+  void updatePlayerName(String newName) async {
     if (_playerName == newName) return;
 
     _playerName = newName;
@@ -44,10 +54,21 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     await _settingsService.savePlayerName(newName);
   }
 
-  Future<void> updateThemeColor(int newColorHex) async {
-    _themeColor = Color(newColorHex);
+  void addThemeColor(int newColorHex) async {
+    _colorHexList = [..._colorHexList, newColorHex];
+    _themeColorHexValue = newColorHex;
     notifyListeners();
 
+    await _settingsService.saveColorHexToList(newColorHex);
     await _settingsService.saveThemeColorHex(newColorHex);
+  }
+
+  void deleteThemeColor(int colorHexToDelete) async {
+    if (_themeColorHexValue == colorHexToDelete) return;
+
+    _colorHexList = [..._colorHexList.where((e) => e != colorHexToDelete)];
+    notifyListeners();
+
+    await _settingsService.deleteColorHexFromList(colorHexToDelete);
   }
 }
