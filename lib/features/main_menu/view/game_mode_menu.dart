@@ -98,6 +98,8 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Align(
       alignment: Alignment.topCenter,
       child: Column(
@@ -114,13 +116,13 @@ class _GameModeMenuState extends State<GameModeMenu> {
           MenuNavButton(
             label: "BACK",
             onPressed: () => context.pop(),
-            textColor: Colors.black,
+            textColor: colorScheme.surfaceContainerLowest,
           ),
           SizedBox(height: AppTheme.spaceM),
           MenuNavButton(
             label: "QUIT",
             onPressed: () => exit(0),
-            textColor: Colors.red,
+            textColor: colorScheme.error,
           ),
         ],
       ),

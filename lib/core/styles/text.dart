@@ -30,7 +30,7 @@ extension AppTextContext on BuildContext {
     return AppTextStyles._base(
       size: responsive(s: 18, l: 24, xxl: 30),
       weight: FontWeight.w600,
-      color: color ?? Theme.of(this).colorScheme.primary,
+      color: color ?? Theme.of(this).colorScheme.onPrimaryContainer,
       height: 0.9,
     );
   }

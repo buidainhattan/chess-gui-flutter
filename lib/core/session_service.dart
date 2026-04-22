@@ -107,12 +107,17 @@ class SessionService extends ChangeNotifier {
   }
 
   void leaveMatch() {
-    if (_isOnline && _matchInProgress) {
-      endMatch(Sides.opposite(_playerSide).name, MatchResult.resignation.name);
-      _matchInProgress = false;
+    if (_isOnline) {
+      if (_matchInProgress) {
+        endMatch(
+          Sides.opposite(_playerSide).name,
+          MatchResult.resignation.name,
+        );
+        _matchInProgress = false;
+      }
+      
+      disconnectSocket();
     }
-
-    disconnectSocket();
   }
 
   void updateGameMode(String mode) {

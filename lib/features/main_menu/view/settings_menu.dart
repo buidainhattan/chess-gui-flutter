@@ -15,6 +15,8 @@ class SettingsMenu extends StatelessWidget {
     final SettingsMenuViewmodel viewmodel = context
         .read<SettingsMenuViewmodel>();
 
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Stack(
       children: [
         Center(
@@ -22,6 +24,8 @@ class SettingsMenu extends StatelessWidget {
             builder: (BuildContext context, BoxConstraints constraints) {
               final double width = constraints.maxWidth * 2 / 3;
               final double height = constraints.maxHeight * 4 / 5;
+
+              final Color borderColor = colorScheme.primary;
 
               final double optionWidth = width * 2 / 7;
               final double verticalStripWidth = 1;
@@ -32,8 +36,8 @@ class SettingsMenu extends StatelessWidget {
                 width: width,
                 height: height,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
-                  border: Border.all(),
+                  color: colorScheme.primaryContainer,
+                  border: Border.all(color: borderColor, width: 2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Selector<SettingsMenuViewmodel, int>(
@@ -49,6 +53,7 @@ class SettingsMenu extends StatelessWidget {
                                 return _SettingTab(
                                   index: entry.key,
                                   selectedIndex: selectedIndex,
+                                  borderColor: borderColor,
                                   text: entry.value,
                                   vPadding: vPadding,
                                   callBack: () => viewmodel
@@ -59,15 +64,18 @@ class SettingsMenu extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          color: Colors.black,
+                          color: borderColor,
                           width: verticalStripWidth,
                           height: double.infinity,
                         ),
                         Expanded(
-                          child: switch (selectedIndex) {
-                            1 => _SecondTabSettings(),
-                            _ => _FirstTabSettings(viewmodel),
-                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(AppTheme.spaceS),
+                            child: switch (selectedIndex) {
+                              1 => _SecondTabSettings(),
+                              _ => _FirstTabSettings(viewmodel),
+                            },
+                          ),
                         ),
                       ],
                     );
@@ -101,6 +109,7 @@ class SettingsMenu extends StatelessWidget {
 class _SettingTab extends StatelessWidget {
   final int index;
   final int selectedIndex;
+  final Color borderColor;
   final String text;
   final double vPadding;
   final VoidCallback? callBack;
@@ -108,6 +117,7 @@ class _SettingTab extends StatelessWidget {
   const _SettingTab({
     required this.index,
     required this.selectedIndex,
+    required this.borderColor,
     required this.text,
     required this.vPadding,
     this.callBack,
@@ -122,12 +132,16 @@ class _SettingTab extends StatelessWidget {
           ? BorderRadiusGeometry.only(topLeft: Radius.circular(8))
           : BorderRadius.zero,
       child: Material(
-        shape: UnderlineInputBorder(borderSide: BorderSide(strokeAlign: 0)),
-        color: isSelected ? Colors.lightBlue : Colors.transparent,
+        shape: UnderlineInputBorder(
+          borderSide: BorderSide(color: borderColor, strokeAlign: 0),
+        ),
+        color: isSelected
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+            : Colors.transparent,
         child: InkWell(
           onTap: callBack ?? () {},
           onHover: (value) {},
-          hoverColor: Colors.lightBlue,
+          hoverColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: vPadding),
             child: Center(child: Text(text, style: context.menuText())),
@@ -221,40 +235,34 @@ class _SecondTabSettingsState extends State<_SecondTabSettings> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: AppTheme.spaceS,
-            horizontal: AppTheme.spaceS,
-          ),
-          child: Consumer<SettingsMenuViewmodel>(
-            builder: (context, viewmodel, child) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Color: "),
-                  _ThemeColorPicker(
-                    deleteMode: deleteMode,
-                    pickerColor: Color(viewmodel.themeColorHexValue),
-                    colorHexList: viewmodel.colorHexList,
-                    onColorChanged: (selectedColor) => viewmodel
-                        .updateActiveThemeColor(selectedColor.toARGB32()),
-                    onAddColor: (addedColor) =>
-                        viewmodel.addThemeColor(addedColor.toARGB32()),
-                    onDeleteColor: (value) => viewmodel.deleteThemeColor(value),
-                    pickerSize: 40,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        deleteMode = !deleteMode;
-                      });
-                    },
-                    icon: Icon(deleteMode ? Icons.cancel : Icons.delete),
-                  ),
-                ],
-              );
-            },
-          ),
+        Consumer<SettingsMenuViewmodel>(
+          builder: (context, viewmodel, child) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Color: "),
+                _ThemeColorPicker(
+                  deleteMode: deleteMode,
+                  pickerColor: Color(viewmodel.themeColorHexValue),
+                  colorHexList: viewmodel.colorHexList,
+                  onColorChanged: (selectedColor) => viewmodel
+                      .updateActiveThemeColor(selectedColor.toARGB32()),
+                  onAddColor: (addedColor) =>
+                      viewmodel.addThemeColor(addedColor.toARGB32()),
+                  onDeleteColor: (value) => viewmodel.deleteThemeColor(value),
+                  pickerSize: 40,
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      deleteMode = !deleteMode;
+                    });
+                  },
+                  icon: Icon(deleteMode ? Icons.cancel : Icons.delete),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -290,43 +298,54 @@ class _ThemeColorPicker extends StatelessWidget {
         spacing: AppTheme.spaceS,
         runSpacing: AppTheme.spaceS,
         children: [
-          ...colors.map((color) {
-            final isCurrentColor = color.toARGB32() == pickerColor.toARGB32();
-            final brightness = ThemeData.estimateBrightnessForColor(color);
-            final iconColor = brightness == Brightness.light
-                ? Colors.black
-                : Colors.white;
+          for (final color in colors)
+            if (!(deleteMode && color.toARGB32() == pickerColor.toARGB32()))
+              Builder(
+                builder: (context) {
+                  final isCurrentColor =
+                      color.toARGB32() == pickerColor.toARGB32();
+                  final brightness = ThemeData.estimateBrightnessForColor(
+                    color,
+                  );
+                  final iconColor = brightness == Brightness.light
+                      ? Colors.black
+                      : Colors.white;
 
-            return Material(
-              color: color,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: (deleteMode && !isCurrentColor)
-                    ? () => onDeleteColor!(color.toARGB32())
-                    : () => onColorChanged(color),
-                hoverColor: iconColor.withValues(alpha: 0.15),
-                child: Container(
-                  width: pickerSize,
-                  height: pickerSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: (isCurrentColor && !deleteMode)
-                        ? Border.all(
-                            color: iconColor.withValues(alpha: 0.5),
-                            width: 3,
-                          )
-                        : null,
-                  ),
-                  child: isCurrentColor
-                      ? Icon(Icons.check, color: iconColor, size: 16)
-                      : deleteMode
-                      ? Icon(Icons.delete_forever, color: iconColor, size: 16)
-                      : null,
-                ),
+                  return Material(
+                    color: color,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: deleteMode
+                          ? () => onDeleteColor!(color.toARGB32())
+                          : () => onColorChanged(color),
+                      hoverColor: iconColor.withValues(alpha: 0.15),
+                      child: Container(
+                        width: pickerSize,
+                        height: pickerSize,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: isCurrentColor
+                              ? Border.all(
+                                  color: iconColor.withValues(alpha: 0.5),
+                                  width: 3,
+                                )
+                              : null,
+                        ),
+                        child: isCurrentColor
+                            ? Icon(Icons.check, color: iconColor, size: 16)
+                            : deleteMode
+                            ? Icon(
+                                Icons.delete_forever,
+                                color: iconColor,
+                                size: 16,
+                              )
+                            : null,
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          }),
           if (!deleteMode)
             Material(
               color: colorScheme.surfaceContainer,

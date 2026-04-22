@@ -44,6 +44,8 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
     final SessionService sessionService = context
         .read<SessionService>();
 
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
@@ -99,12 +101,12 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         MenuNavButton(
           label: "START GAME",
           onPressed: () => _toMatchScreen(context, sessionService),
-          textColor: Colors.green,
+          textColor: colorScheme.onPrimaryFixed,
         ),
         MenuNavButton(
           label: "BACK",
           onPressed: () => context.pop(),
-          textColor: Theme.of(context).colorScheme.onSurface,
+          textColor: colorScheme.surfaceContainerLowest,
         ),
       ],
     );

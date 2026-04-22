@@ -12,8 +12,9 @@ class MainMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SessionService sessionService =
-        Provider.of<SessionService>(context);
+    final SessionService sessionService = Provider.of<SessionService>(context);
+
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       mainAxisAlignment: (context.isMobile && context.isLandscape)
@@ -29,12 +30,16 @@ class MainMenu extends StatelessWidget {
           },
         ),
         MenuNavButton(label: "PLAY OFFLINE", route: "/offline"),
-        MenuNavButton(label: "SETTINGS", route: "/settings", textColor: Colors.black),
+        MenuNavButton(
+          label: "SETTINGS",
+          route: "/settings",
+          textColor: colorScheme.surfaceContainerLowest,
+        ),
         SizedBox(height: AppTheme.spaceM),
         MenuNavButton(
           label: "QUIT",
           onPressed: () => exit(0),
-          textColor: Colors.red,
+          textColor: colorScheme.error,
         ),
       ],
     );
