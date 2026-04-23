@@ -14,33 +14,23 @@ class MainMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final SessionService sessionService = Provider.of<SessionService>(context);
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       mainAxisAlignment: (context.isMobile && context.isLandscape)
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
-      spacing: context.isMobile ? 0 : AppTheme.spaceM,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: AppTheme.spaceM,
       children: [
-        MenuNavButton(
+        PrimaryNavButton(
           label: "PLAY ONLINE",
           onPressed: () {
             sessionService.connectSocket();
             context.push("/online");
           },
         ),
-        MenuNavButton(label: "PLAY OFFLINE", route: "/offline"),
-        MenuNavButton(
-          label: "SETTINGS",
-          route: "/settings",
-          textColor: colorScheme.surfaceContainerLowest,
-        ),
-        SizedBox(height: AppTheme.spaceM),
-        MenuNavButton(
-          label: "QUIT",
-          onPressed: () => exit(0),
-          textColor: colorScheme.error,
-        ),
+        SecondaryNavButton(label: "PLAY OFFLINE", route: "/offline"),
+        TertiaryNavButton(label: "SETTINGS", route: "/settings"),
+        DestructiveButton(label: "QUIT", onPressed: () => exit(0)),
       ],
     );
   }

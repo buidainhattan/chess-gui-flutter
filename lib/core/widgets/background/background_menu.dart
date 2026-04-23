@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:chess_app/core/styles/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -22,7 +21,7 @@ class BackgroundMenu extends StatelessWidget {
         return Column(
           children: [
             Expanded(
-              flex: (context.isMobile && context.isLandscape) ? 2 : 1,
+              flex: 4,
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -35,8 +34,8 @@ class BackgroundMenu extends StatelessWidget {
                           child: FutureBuilder<String>(
                             future: _applyPieceColors(
                               "assets/images/backgrounds/pieces/pawn.svg",
-                              fill: colorScheme.onPrimaryContainer,
-                              outline: colorScheme.inversePrimary,
+                              fill: colorScheme.primary,
+                              outline: colorScheme.onPrimaryContainer,
                             ),
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
@@ -55,7 +54,7 @@ class BackgroundMenu extends StatelessWidget {
                             height: 0.9,
                             fontSize: size,
                             fontWeight: FontWeight.bold,
-                            color: colorScheme.onPrimaryFixed,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -66,7 +65,7 @@ class BackgroundMenu extends StatelessWidget {
                         height: 0.9,
                         fontSize: size,
                         fontWeight: FontWeight.w500,
-                        color: colorScheme.onPrimaryContainer,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ],
@@ -74,8 +73,11 @@ class BackgroundMenu extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: (context.isMobile && context.isLandscape) ? 3 : 1,
-              child: child,
+              flex: 5,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: child,
+              ),
             ),
           ],
         );

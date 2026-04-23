@@ -7,7 +7,7 @@ class AppTextStyles {
   // This is the "Master Setting" for all text in your app
   static TextStyle _base({
     required double size,
-    FontWeight weight = FontWeight.w400,
+    FontWeight? weight,
     Color? color,
     double? height,
     List<FontFeature>? fontFeature,
@@ -16,11 +16,11 @@ class AppTextStyles {
     return TextStyle(
       fontFamily: _fontFamily,
       fontSize: size,
-      fontWeight: weight,
+      fontWeight: weight ?? FontWeight.normal,
       color: color,
-      height: height,
+      height: height ?? 1,
       fontFeatures: fontFeature,
-      letterSpacing: letterSpacing ?? 0.2,
+      letterSpacing: letterSpacing ?? 1,
     );
   }
 }
@@ -28,10 +28,19 @@ class AppTextStyles {
 extension AppTextContext on BuildContext {
   TextStyle menuText({Color? color}) {
     return AppTextStyles._base(
-      size: responsive(s: 18, l: 24, xxl: 30),
+      size: responsive(s: 16, l: 18, xxl: 24),
       weight: FontWeight.w600,
-      color: color ?? Theme.of(this).colorScheme.onPrimaryContainer,
-      height: 0.9,
+      color: color ?? Theme.of(this).colorScheme.primary,
+      letterSpacing: 1.2,
+    );
+  }
+
+  TextStyle selectionText({Color? color}) {
+    return AppTextStyles._base(
+      size: responsive(s: 14, l: 16, xxl: 18),
+      weight: FontWeight.w600,
+      color: color,
+      letterSpacing: 1.2,
     );
   }
 

@@ -91,12 +91,12 @@ class SettingsMenu extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MenuNavButton(
+              TertiaryNavButton(
                 label: "BACK",
+                color: colorScheme.onPrimary,
                 onPressed: () {
                   context.pop();
                 },
-                textColor: Colors.black,
               ),
             ],
           ),
@@ -141,7 +141,9 @@ class _SettingTab extends StatelessWidget {
         child: InkWell(
           onTap: callBack ?? () {},
           onHover: (value) {},
-          hoverColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+          hoverColor: Theme.of(
+            context,
+          ).colorScheme.primary.withValues(alpha: 0.15),
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: vPadding),
             child: Center(child: Text(text, style: context.menuText())),

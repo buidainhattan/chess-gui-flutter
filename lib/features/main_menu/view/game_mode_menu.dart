@@ -25,20 +25,20 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   List<Widget> _buildOnlineButtons() {
     return [
-      MenuNavButton(
-        label: "ONLINE MATCH MAKING",
+      PrimaryNavButton(
+        label: "MATCH MAKING",
         onPressed: () {
           sessionService.joinMatchMaking();
         },
       ),
-      MenuNavButton(
+      PrimaryNavButton(
         label: "CREATE / JOIN ROOM",
         onPressed: () {
           sessionService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
-      MenuNavButton(
+      SecondaryNavButton(
         label: "LAN CONNECTION",
         onPressed: () {
           sessionService.updateGameMode("pvp");
@@ -50,21 +50,21 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   List<Widget> _buildOfflineButtons() {
     return [
-      MenuNavButton(
+      PrimaryNavButton(
         label: "PASS & PLAY",
         onPressed: () {
           sessionService.updateGameMode("pvp");
           context.push("/pvp");
         },
       ),
-      MenuNavButton(
+      PrimaryNavButton(
         label: "SOLO PLAY",
         onPressed: () {
           sessionService.updateGameMode("pve");
           context.push("/pve");
         },
       ),
-      MenuNavButton(label: "LOAD"),
+      SecondaryNavButton(label: "LOAD", onPressed: () {}),
     ];
   }
 
@@ -98,14 +98,13 @@ class _GameModeMenuState extends State<GameModeMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return Align(
       alignment: Alignment.topCenter,
       child: Column(
         mainAxisAlignment: (context.isMobile && context.isLandscape)
             ? MainAxisAlignment.center
             : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: context.isMobile ? 0 : AppTheme.spaceM,
         children: [
           if (widget.connectionMode == ConnectionMode.online)
@@ -113,17 +112,8 @@ class _GameModeMenuState extends State<GameModeMenu> {
           else
             ..._buildOfflineButtons(),
 
-          MenuNavButton(
-            label: "BACK",
-            onPressed: () => context.pop(),
-            textColor: colorScheme.surfaceContainerLowest,
-          ),
-          SizedBox(height: AppTheme.spaceM),
-          MenuNavButton(
-            label: "QUIT",
-            onPressed: () => exit(0),
-            textColor: colorScheme.error,
-          ),
+          TertiaryNavButton(label: "BACK", onPressed: () => context.pop()),
+          DestructiveButton(label: "QUIT", onPressed: () => exit(0)),
         ],
       ),
     );
