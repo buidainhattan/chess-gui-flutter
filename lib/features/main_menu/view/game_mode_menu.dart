@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/session_service.dart';
-import 'package:chess_app/core/styles/theme.dart';
+import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
+import 'package:chess_app/core/widgets/custom_layouts.dart';
 import 'package:chess_app/features/main_menu/view/match_making.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -100,12 +100,7 @@ class _GameModeMenuState extends State<GameModeMenu> {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
-      child: Column(
-        mainAxisAlignment: (context.isMobile && context.isLandscape)
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: context.isMobile ? 0 : AppTheme.spaceM,
+      child: MenuLayout(
         children: [
           if (widget.connectionMode == ConnectionMode.online)
             ..._buildOnlineButtons()

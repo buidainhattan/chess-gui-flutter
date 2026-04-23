@@ -1,4 +1,4 @@
-import 'package:chess_app/core/session_service.dart';
+import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:chess_app/features/match/view/match.dart';

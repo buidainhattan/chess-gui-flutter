@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:chess_app/app_viewmodel.dart';
-import 'package:chess_app/core/session_service.dart';
-import 'package:chess_app/core/settings_service.dart';
+import 'package:chess_app/core/services/session_service.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:chess_app/app.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';

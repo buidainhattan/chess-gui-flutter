@@ -1,5 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/session_service.dart';
+import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
@@ -45,12 +45,13 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
         DropdownMenu<TimeMode>(
           initialSelection: selectedMode,
+          width: double.infinity,
           selectOnly: true,
-          width: 400,
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: Colors.transparent, // Subtle glass effect

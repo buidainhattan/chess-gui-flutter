@@ -1,4 +1,4 @@
-import 'package:chess_app/core/settings_service.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:flutter/material.dart';
 
 class SettingsMenuViewmodel extends ChangeNotifier {

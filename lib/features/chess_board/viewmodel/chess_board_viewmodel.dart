@@ -5,7 +5,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
-import 'package:chess_app/core/session_service.dart';
+import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/features/chess_board/model/board_state_model.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';

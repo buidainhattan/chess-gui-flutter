@@ -1,8 +1,8 @@
 import 'package:chess_app/app_viewmodel.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
-import 'package:chess_app/core/session_service.dart';
-import 'package:chess_app/core/settings_service.dart';
+import 'package:chess_app/core/services/session_service.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:chess_app/core/widgets/background/background.dart';
 import 'package:chess_app/core/widgets/background/background_match.dart';
 import 'package:chess_app/core/widgets/background/background_menu.dart';
