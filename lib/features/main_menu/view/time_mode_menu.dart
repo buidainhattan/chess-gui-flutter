@@ -62,22 +62,38 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: AppTheme.spaceS,
-          children: selectedMode!.settings.entries.map((entry) {
-            bool isSelected = selectedSetting == entry.value;
+          children: [
+            for (var entry in selectedMode!.settings.entries) ...[
+              Builder(
+                builder: (context) {
+                  final bool isSelected = selectedSetting == entry.value;
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceS),
-              child: SelectableButton(
-                label: entry.key,
-                isSelected: isSelected,
-                onPressed: () {
-                  setState(() {
-                    selectedSetting = entry.value;
-                  });
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppTheme.spaceS,
+                    ),
+                    child: SelectableButton(
+                      label: entry.key,
+                      isSelected: isSelected,
+                      onPressed: () {
+                        setState(() {
+                          selectedSetting = entry.value;
+                        });
+                      },
+                    ),
+                  );
                 },
               ),
-            );
-          }).toList(),
+              if (entry.value != selectedMode!.settings.values.last)
+                SizedBox(
+                  height: 40,
+                  child: VerticalDivider(
+                    thickness: 1,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+            ],
+          ],
         ),
 
         PrimaryNavButton(
@@ -161,8 +177,8 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
 
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
-    var size = renderBox.size;
-    final colorScheme = Theme.of(context).colorScheme;
+    Size size = renderBox.size;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -192,7 +208,14 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (var item in widget.items)
-                      if (item != selectedItem)
+                      if (item != selectedItem) ...[
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          indent: AppTheme.spaceS,
+                          endIndent: AppTheme.spaceS,
+                          color: colorScheme.primary,
+                        ),
                         _HoveringWrapper(
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
@@ -216,6 +239,7 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
                             ),
                           ),
                         ),
+                      ],
                   ],
                 ),
               ),
