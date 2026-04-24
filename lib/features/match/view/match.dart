@@ -1,4 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/swiping_shader.dart';
@@ -16,10 +17,7 @@ class Match extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MatchViewmodel matchViewmodel = Provider.of<MatchViewmodel>(
-      context,
-      listen: false,
-    );
+    final MatchViewmodel matchViewmodel = context.read<MatchViewmodel>();
 
     return SafeArea(
       child: Padding(
@@ -74,6 +72,8 @@ class _MatchLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SettingsService settingsService = context.read<SettingsService>();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         const double columnSpacing = AppTheme.spaceXS;
@@ -134,7 +134,7 @@ class _MatchLayout extends StatelessWidget {
                   SizedBox(
                     height: cardHeight,
                     child: PlayerCard(
-                      playerName: 'You',
+                      playerName: settingsService.playerName,
                       playerSide: matchViewmodel.playerOneSide,
                       isPlayerOne: true,
                       isBot: false,
@@ -164,8 +164,7 @@ class _TurnStrip extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Selector<MatchViewmodel, Sides>(
-      selector: (context, matchViewmodel) =>
-          matchViewmodel.sideToMove,
+      selector: (context, matchViewmodel) => matchViewmodel.sideToMove,
       builder: (context, sideToMove, _) {
         final bool isActive = sideToMove == targetSide;
 
@@ -190,7 +189,9 @@ class _TurnStrip extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.contain,
                   child: Text(
-                    sideToMove == playerOneSide ? 'Your turn' : "Opponent's turn",
+                    sideToMove == playerOneSide
+                        ? 'Your turn'
+                        : "Opponent's turn",
                     style: context.turnStripText(),
                   ),
                 ),

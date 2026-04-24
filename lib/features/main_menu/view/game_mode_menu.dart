@@ -31,20 +31,21 @@ class _GameModeMenuState extends State<GameModeMenu> {
           sessionService.joinMatchMaking();
         },
       ),
-      PrimaryNavButton(
-        label: "CREATE / JOIN ROOM",
-        onPressed: () {
-          sessionService.updateGameMode("pvp");
-          context.push("/pvp");
-        },
-      ),
-      SecondaryNavButton(
-        label: "LAN CONNECTION",
-        onPressed: () {
-          sessionService.updateGameMode("pvp");
-          context.push("/pvp");
-        },
-      ),
+      // TODO
+      // PrimaryNavButton(
+      //   label: "CREATE / JOIN ROOM",
+      //   onPressed: () {
+      //     sessionService.updateGameMode("pvp");
+      //     context.push("/pvp");
+      //   },
+      // ),
+      // SecondaryNavButton(
+      //   label: "LAN CONNECTION",
+      //   onPressed: () {
+      //     sessionService.updateGameMode("pvp");
+      //     context.push("/pvp");
+      //   },
+      // ),
     ];
   }
 
@@ -64,7 +65,8 @@ class _GameModeMenuState extends State<GameModeMenu> {
           context.push("/pve");
         },
       ),
-      SecondaryNavButton(label: "LOAD", onPressed: () {}),
+      // TODO
+      // SecondaryNavButton(label: "LOAD", onPressed: () {}),
     ];
   }
 

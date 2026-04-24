@@ -42,67 +42,21 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
   Widget build(BuildContext context) {
     final SessionService sessionService = context.read<SessionService>();
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: context.isMobile ? 0 : AppTheme.spaceM,
       children: [
-        DropdownMenu<TimeMode>(
-          initialSelection: selectedMode,
-          width: double.infinity,
-          selectOnly: true,
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.transparent, // Subtle glass effect
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 16,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25),
-              borderSide: BorderSide(
-                color: colorScheme.primary.withValues(alpha: 0.4),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-          ),
-          // Styling the text inside the field
-          textStyle: context.menuText(),
-          textAlign: TextAlign.center,
-          // Styling the pop-up menu
-          menuStyle: MenuStyle(
-            backgroundColor: WidgetStatePropertyAll(colorScheme.inversePrimary),
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: colorScheme.primary),
-              ),
-            ),
-          ),
-          onSelected: (TimeMode? value) {
-            if (value != null) {
-              setState(() {
-                selectedMode = value;
-                selectedSetting = selectedMode!.settings.values.first;
-              });
-            }
+        _ExpandingDropdown<TimeMode>(
+          initialSelection: selectedMode!,
+          items: TimeMode.values,
+          labelBuilder: (mode) => mode.name.toUpperCase(),
+          onSelected: (value) {
+            setState(() {
+              selectedMode = value;
+              selectedSetting = value.settings.values.first;
+            });
           },
-          dropdownMenuEntries: TimeMode.values.map<DropdownMenuEntry<TimeMode>>(
-            (TimeMode mode) {
-              return DropdownMenuEntry<TimeMode>(
-                value: mode,
-                label: mode.name.toUpperCase(),
-                style: MenuItemButton.styleFrom(
-                  foregroundColor:
-                      colorScheme.onPrimary, // Text color in the menu
-                ),
-              );
-            },
-          ).toList(),
         ),
 
         Row(
@@ -132,6 +86,264 @@ class _TimeModeMenuState extends State<TimeModeMenu> {
         ),
         TertiaryNavButton(label: "BACK", onPressed: () => context.pop()),
       ],
+    );
+  }
+}
+
+class _ExpandingDropdown<T> extends StatefulWidget {
+  final T initialSelection;
+  final List<T> items;
+  final String Function(T) labelBuilder;
+  final ValueChanged<T> onSelected;
+
+  const _ExpandingDropdown({
+    required this.initialSelection,
+    required this.items,
+    required this.labelBuilder,
+    required this.onSelected,
+  });
+
+  @override
+  State<_ExpandingDropdown<T>> createState() => _ExpandingDropdownState<T>();
+}
+
+class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
+    with SingleTickerProviderStateMixin {
+  late T selectedItem;
+  bool isExpanded = false;
+  OverlayEntry? overlayEntry;
+  final LayerLink layerLink = LayerLink();
+
+  late AnimationController controller;
+  late Animation<double> expandAnimation;
+  late Animation<double> rotateAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedItem = widget.initialSelection;
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    expandAnimation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
+    );
+    rotateAnimation = Tween<double>(
+      begin: 0,
+      end: 0.5,
+    ).animate(expandAnimation);
+  }
+
+  void _toggleMenu() {
+    if (isExpanded) {
+      _closeMenu();
+    } else {
+      _openMenu();
+    }
+  }
+
+  void _openMenu() {
+    overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(overlayEntry!);
+    controller.forward();
+    setState(() => isExpanded = true);
+  }
+
+  void _closeMenu() {
+    controller.reverse().then((_) {
+      overlayEntry?.remove();
+      overlayEntry = null;
+      if (mounted) setState(() => isExpanded = false);
+    });
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width,
+        child: CompositedTransformFollower(
+          link: layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0, size.height - 1), // -1 to overlap borders
+          child: Material(
+            color: Colors.transparent,
+            child: SizeTransition(
+              sizeFactor: expandAnimation,
+              axisAlignment: -1.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.inversePrimary,
+                  border: Border(
+                    left: BorderSide(color: colorScheme.primary),
+                    right: BorderSide(color: colorScheme.primary),
+                    bottom: BorderSide(color: colorScheme.primary),
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(8),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var item in widget.items)
+                      if (item != selectedItem)
+                        _HoveringWrapper(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              setState(() => selectedItem = item);
+                              widget.onSelected(item);
+                              _toggleMenu();
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 24,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  widget.labelBuilder(item),
+                                  style: context.menuText(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return CompositedTransformTarget(
+      link: layerLink,
+      child: _HoveringWrapper(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(8),
+          bottom: isExpanded ? Radius.zero : Radius.circular(8),
+        ),
+        isPersisted: isExpanded,
+        child: GestureDetector(
+          onTap: _toggleMenu,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.inversePrimary,
+              // Animate border radius: bottom becomes square when expanded
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(8),
+                bottom: isExpanded ? Radius.zero : Radius.circular(8),
+              ),
+              border: Border.all(
+                color: isExpanded
+                    ? colorScheme.primary
+                    : colorScheme.primary.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Spacer(),
+                Text(
+                  widget.labelBuilder(selectedItem),
+                  style: context.menuText(),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: RotationTransition(
+                      turns: rotateAnimation,
+                      child: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    overlayEntry?.remove();
+    controller.dispose();
+    super.dispose();
+  }
+}
+
+class _HoveringWrapper extends StatefulWidget {
+  final Widget child;
+  final BorderRadius? borderRadius;
+  final bool isPersisted;
+
+  const _HoveringWrapper({
+    required this.child,
+    this.borderRadius,
+    this.isPersisted = false,
+  });
+
+  @override
+  State<_HoveringWrapper> createState() => _HoveringWrapperState();
+}
+
+class _HoveringWrapperState extends State<_HoveringWrapper> {
+  bool isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color hoveringColor = Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: 0.08);
+
+    return MouseRegion(
+      onEnter: (event) {
+        setState(() {
+          isHovering = true;
+        });
+      },
+      onExit: (event) {
+        setState(() {
+          isHovering = false;
+        });
+      },
+      child: ClipRRect(
+        borderRadius: widget.borderRadius ?? BorderRadius.zero,
+        child: Stack(
+          children: [
+            Center(child: widget.child),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  color: isHovering || widget.isPersisted
+                      ? hoveringColor
+                      : Colors.transparent,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
