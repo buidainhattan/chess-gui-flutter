@@ -1,4 +1,5 @@
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -20,6 +21,20 @@ class Square extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    final BoardTheme boardTheme = BoardThemes.classic;
+
+    final Color fillColor;
+
+    if (squareColor == Sides.white) {
+      fillColor = boardTheme.lightSquare;
+    } else {
+      fillColor = boardTheme.darkSquare;
+    }
+
+    final Color hintColor = boardTheme.selectedOverlay(colorScheme);
+
     return GestureDetector(
       onTap: () {
         chessBoardViewmodel.onSquareTapped(index);
@@ -29,21 +44,17 @@ class Square extends StatelessWidget {
         height: tileSize,
         child: Stack(
           children: [
+            Container(decoration: BoxDecoration(color: fillColor)),
             Selector<ChessBoardViewmodel, bool>(
               selector: (context, viewmodel) =>
                   viewmodel.boardState.preFrom == index ||
                   viewmodel.boardState.from == index ||
                   viewmodel.boardState.to == index,
               builder: (context, isSelected, child) {
-                final String assetName = isSelected
-                    ? "assets/images/tiles/tile_${squareColor.name}_selected.svg"
-                    : "assets/images/tiles/tile_${squareColor.name}.svg";
-
-                return SvgPicture.asset(
-                  assetName,
-                  width: tileSize,
-                  height: tileSize,
-                );
+                if (isSelected) {
+                  return Container(decoration: BoxDecoration(color: hintColor));
+                }
+                return SizedBox.shrink();
               },
             ),
             Selector<
@@ -51,8 +62,10 @@ class Square extends StatelessWidget {
               ({bool isMoveableTo, bool isCapture})
             >(
               selector: (context, viewmodel) {
-                final bool isMoveableTo = viewmodel.boardState.moveList.contains(index);
-                final bool isCapture = viewmodel.boardState.pieceKeys[index].isNotEmpty;
+                final bool isMoveableTo = viewmodel.boardState.moveList
+                    .contains(index);
+                final bool isCapture =
+                    viewmodel.boardState.pieceKeys[index].isNotEmpty;
 
                 return (isMoveableTo: isMoveableTo, isCapture: isCapture);
               },
@@ -80,6 +93,7 @@ class Square extends StatelessWidget {
                     hintName,
                     width: hintSize,
                     height: hintSize,
+                    colorFilter: ColorFilter.mode(hintColor, BlendMode.srcIn),
                   ),
                 );
               },
@@ -96,7 +110,8 @@ class Square extends StatelessWidget {
                 if (!isChecked) {
                   return SizedBox.shrink();
                 }
-                final String hintName = "assets/images/tiles/tile_hint_checking.svg";
+                final String hintName =
+                    "assets/images/tiles/tile_hint_checking.svg";
 
                 return SvgPicture.asset(
                   hintName,

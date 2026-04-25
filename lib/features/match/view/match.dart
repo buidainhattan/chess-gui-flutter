@@ -224,16 +224,29 @@ class _MovesSidebar extends StatefulWidget {
 }
 
 class _MovesSidebarState extends State<_MovesSidebar> {
-  bool _isOpen = false;
+  bool isOpen = false;
 
-  void _toggle() => setState(() => _isOpen = !_isOpen);
+  void _toggle() => setState(() => isOpen = !isOpen);
 
   @override
   Widget build(BuildContext context) {
+    final MatchViewmodel viewmodel = context.read<MatchViewmodel>();
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
+    final bool isPlayerOneWhite = viewmodel.playerOneSide == Sides.white;
+    final Color backgroundColor, borderColor, textColor;
+    if (isPlayerOneWhite) {
+      backgroundColor = colorScheme.primaryContainer;
+      borderColor = colorScheme.primary;
+      textColor = colorScheme.onPrimaryContainer;
+    } else {
+      backgroundColor = colorScheme.primary;
+      borderColor = colorScheme.primaryContainer;
+      textColor = colorScheme.onPrimary;
+    }
+
     return Row(
-      // Ensure the sidebar takes full height if isVertical is true
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -242,14 +255,14 @@ class _MovesSidebarState extends State<_MovesSidebar> {
           onTap: _toggle,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spaceS,
+              vertical: AppTheme.spaceS * 1.5,
+            ),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
+              color: backgroundColor,
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: _isOpen ? colorScheme.primary : colorScheme.secondary,
-                width: _isOpen ? 1.5 : 1.0,
-              ),
+              border: Border.all(color: borderColor, width: isOpen ? 1.5 : 1.0),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -257,12 +270,12 @@ class _MovesSidebarState extends State<_MovesSidebar> {
               spacing: 8,
               children: [
                 AnimatedRotation(
-                  turns: _isOpen ? 0.5 : 0.0,
+                  turns: isOpen ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 260),
                   child: Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color: colorScheme.onSecondaryContainer,
+                    color: textColor,
                   ),
                 ),
                 RotatedBox(
@@ -273,7 +286,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                       fontSize: 9.5,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1.2,
-                      color: colorScheme.onSecondaryContainer,
+                      color: textColor,
                     ),
                   ),
                 ),
@@ -286,9 +299,9 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: colorScheme.secondaryContainer,
+                      color: backgroundColor,
                       border: Border.all(
-                        color: colorScheme.onSecondaryContainer,
+                        color: borderColor,
                         strokeAlign: BorderSide.strokeAlignCenter,
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -296,7 +309,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                     child: Text(
                       '$count',
                       style: TextStyle(
-                        color: colorScheme.onSecondaryContainer,
+                        color: textColor,
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
@@ -313,13 +326,16 @@ class _MovesSidebarState extends State<_MovesSidebar> {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           // If maxPanelWidth is null, it expands to available space (infinity)
-          width: _isOpen
-              ? (widget.maxPanelWidth ?? context.screenWidth / 2)
-              : 0,
+          width: isOpen ? (widget.maxPanelWidth ?? context.screenWidth / 2) : 0,
           child: ClipRect(
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.only(left: 8),
-              child: _MoveHistoryPanel(),
+              child: _MoveHistoryPanel(
+                isPlayerOneWhite: isPlayerOneWhite,
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                textColor: textColor,
+              ),
             ),
           ),
         ),
@@ -329,16 +345,30 @@ class _MovesSidebarState extends State<_MovesSidebar> {
 }
 
 class _MoveHistoryPanel extends StatelessWidget {
-  const _MoveHistoryPanel();
+  final bool isPlayerOneWhite;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color textColor;
+
+  const _MoveHistoryPanel({
+    required this.isPlayerOneWhite,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
+    final Color currentMoveHistory = isPlayerOneWhite
+        ? colorScheme.primary.withValues(alpha: 0.25)
+        : colorScheme.primaryContainer.withValues(alpha: 0.25);
+
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
-        border: Border.all(color: colorScheme.primary),
+        color: backgroundColor,
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -350,14 +380,14 @@ class _MoveHistoryPanel extends StatelessWidget {
             child: Text(
               'MOVE HISTORY',
               style: TextStyle(
-                color: colorScheme.primary,
+                color: textColor,
                 fontSize: 10.5,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          Divider(height: 1, color: colorScheme.primary),
+          Divider(height: 1, color: borderColor),
           // List
           Expanded(
             child: Selector<MatchViewmodel, List<String>>(
@@ -368,10 +398,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                   return Center(
                     child: Text(
                       'No moves yet',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: textColor, fontSize: 13),
                     ),
                   );
                 }
@@ -382,11 +409,11 @@ class _MoveHistoryPanel extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   itemCount: rowCount,
                   itemBuilder: (_, i) {
-                    final white = history[i * 2];
-                    final black = (i * 2 + 1 < history.length)
+                    final String white = history[i * 2];
+                    final String? black = (i * 2 + 1 < history.length)
                         ? history[i * 2 + 1]
                         : null;
-                    final isLast = i == rowCount - 1;
+                    final bool isLast = i == rowCount - 1;
 
                     return Container(
                       margin: const EdgeInsets.symmetric(
@@ -398,9 +425,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: isLast
-                            ? colorScheme.primary.withValues(alpha: 0.25)
-                            : Colors.transparent,
+                        color: isLast ? currentMoveHistory : Colors.transparent,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Row(
@@ -409,21 +434,18 @@ class _MoveHistoryPanel extends StatelessWidget {
                             width: 26,
                             child: Text(
                               '${i + 1}.',
-                              style: TextStyle(
-                                color: colorScheme.primary,
-                                fontSize: 11,
-                              ),
+                              style: TextStyle(color: textColor, fontSize: 11),
                             ),
                           ),
                           Expanded(
                             child: Text(
                               white,
                               style: TextStyle(
-                                color: colorScheme.primary,
+                                color: textColor,
                                 fontSize: 12,
                                 fontWeight: isLast
                                     ? FontWeight.w700
-                                    : FontWeight.w500,
+                                    : FontWeight.normal,
                               ),
                             ),
                           ),
@@ -432,7 +454,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                                 ? Text(
                                     black,
                                     style: TextStyle(
-                                      color: colorScheme.primary,
+                                      color: textColor,
                                       fontSize: 12,
                                     ),
                                   )
@@ -460,11 +482,11 @@ class _Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<_Menu> {
-  bool _isOpen = false;
+  bool isOpen = false;
 
   void _openMenu() {
     setState(() {
-      _isOpen = !_isOpen;
+      isOpen = !isOpen;
     });
   }
 
@@ -472,8 +494,8 @@ class _MenuState extends State<_Menu> {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
-      width: _isOpen ? 150 : 100,
-      height: _isOpen ? 150 : 50,
+      width: isOpen ? 150 : 100,
+      height: isOpen ? 150 : 50,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
         border: Border.all(color: Theme.of(context).colorScheme.primary),

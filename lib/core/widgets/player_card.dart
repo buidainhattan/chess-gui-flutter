@@ -33,13 +33,13 @@ class PlayerCard extends StatelessWidget {
 
     if (playerSide == Sides.white) {
       background = colorScheme.primaryContainer;
-      border = colorScheme.secondary;
+      border = colorScheme.primary;
       text = colorScheme.onPrimaryContainer;
       containerBackground = colorScheme.primary;
       containerText = colorScheme.onPrimary;
     } else {
       background = colorScheme.primary;
-      border = colorScheme.secondaryContainer;
+      border = colorScheme.primaryContainer;
       text = colorScheme.onPrimary;
       containerBackground = colorScheme.primaryContainer;
       containerText = colorScheme.onPrimaryContainer;
@@ -47,6 +47,8 @@ class PlayerCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final double timerHeight = constraints.maxHeight * 0.5;
+
         return Stack(
           children: [
             Container(
@@ -86,8 +88,8 @@ class PlayerCard extends StatelessWidget {
                     },
                   ),
 
-                  FractionallySizedBox(
-                    heightFactor: 0.6,
+                  SizedBox(
+                    height: timerHeight,
                     child: _PlayerTimer(
                       isActive: isActive,
                       isPlayerOne: isPlayerOne,
@@ -99,9 +101,14 @@ class PlayerCard extends StatelessWidget {
                 ],
               ),
             ),
-            !isActive
-                ? Container(color: Colors.black.withValues(alpha: 0.15))
-                : SizedBox.shrink(),
+            Container(
+              decoration: BoxDecoration(
+                color: isActive
+                    ? colorScheme.onPrimary.withValues(alpha: 0.08)
+                    : colorScheme.onSurface.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
           ],
         );
       },
@@ -239,31 +246,32 @@ class _PlayerTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: context.isMobile ? 5 / 2 : 16 / 7,
-      child: Container(
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Selector<TimerViewmodel, String>(
-          selector: (context, timerViewmodel) => isPlayerOne
-              ? timerViewmodel.playerOneTime
-              : timerViewmodel.playerTwoTime,
-          builder: (context, timerText, child) {
-            final formattedTimerText = timerText.length > 5
-                ? timerText.substring(0, 5)
-                : timerText;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppTheme.spaceS,
+        vertical: AppTheme.spaceXS,
+      ),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Selector<TimerViewmodel, String>(
+        selector: (context, timerViewmodel) => isPlayerOne
+            ? timerViewmodel.playerOneTime
+            : timerViewmodel.playerTwoTime,
+        builder: (context, timerText, child) {
+          final formattedTimerText = timerText.length > 5
+              ? timerText.substring(0, 5)
+              : timerText;
 
-            return Center(
-              child: AutoSizeText(
-                formattedTimerText,
-                maxLines: 1,
-                style: context.timerText(textColor),
-              ),
-            );
-          },
-        ),
+          return Center(
+            child: AutoSizeText(
+              formattedTimerText,
+              maxLines: 1,
+              style: context.timerText(textColor),
+            ),
+          );
+        },
       ),
     );
   }

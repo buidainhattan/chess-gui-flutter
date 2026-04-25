@@ -17,6 +17,8 @@ class ChessBoard extends StatelessWidget {
     final ChessBoardViewmodel chessBoardViewmodel = context
         .read<ChessBoardViewmodel>();
 
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     final bool isPlayerOneWhite =
         chessBoardViewmodel.playerOneSide == Sides.white;
 
@@ -61,27 +63,36 @@ class ChessBoard extends StatelessWidget {
                 },
               ),
 
-              Column(
-                children: List.generate(8, (rowIndex) {
-                  return Row(
-                    children: List.generate(8, (colIndex) {
-                      int squareIndex = rowIndex * 8 + 7 - colIndex;
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: colorScheme.primary),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadiusGeometry.circular(8),
+                  child: Column(
+                    children: List.generate(8, (rowIndex) {
+                      return Row(
+                        children: List.generate(8, (colIndex) {
+                          int squareIndex = rowIndex * 8 + 7 - colIndex;
 
-                      Sides squareColor = (rowIndex + colIndex).isEven
-                          ? Sides.black
-                          : Sides.white;
+                          Sides squareColor = (rowIndex + colIndex).isEven
+                              ? Sides.black
+                              : Sides.white;
 
-                      return Square(
-                        chessBoardViewmodel: chessBoardViewmodel,
-                        tileSize: tileSize,
-                        squareColor: squareColor,
-                        index: isPlayerOneWhite
-                            ? 63 - squareIndex
-                            : squareIndex,
+                          return Square(
+                            chessBoardViewmodel: chessBoardViewmodel,
+                            tileSize: tileSize,
+                            squareColor: squareColor,
+                            index: isPlayerOneWhite
+                                ? 63 - squareIndex
+                                : squareIndex,
+                          );
+                        }),
                       );
                     }),
-                  );
-                }),
+                  ),
+                ),
               ),
 
               IgnorePointer(
@@ -173,94 +184,7 @@ class ChessBoard extends StatelessWidget {
                   },
                 ),
               ),
-
-              // Column(
-              //   children: List.generate(9, (rowIndex) {
-              //     return Row(
-              //       children: List.generate(9, (colIndex) {
-              //         int loopIndex = (8 - rowIndex) * 9 + colIndex;
-              //         int squareIndex = isPlayerOneWhite
-              //             ? loopIndex - 17 + rowIndex
-              //             : 63 - (loopIndex - 17 + rowIndex);
-              //         int rank = isPlayerOneWhite
-              //             ? (8 - rowIndex)
-              //             : (rowIndex + 1);
-              //         int file = isPlayerOneWhite
-              //             ? (colIndex - 1)
-              //             : (8 - colIndex);
-
-              //         // Generate board black and white squares
-              //         if (loopIndex % 9 != 0 && loopIndex > 8) {
-              //           Sides squareColor = (rowIndex + colIndex) % 2 == 0
-              //               ? Sides.black
-              //               : Sides.white;
-
-              //           return Square(
-              //             chessBoardViewmodel: chessBoardViewmodel,
-              //             tileSize: tileSize,
-              //             squareColor: squareColor,
-              //             index: squareIndex,
-              //           );
-              //         } else {
-              //           // Handle rank numbering
-              //           if (loopIndex % 9 == 0 && loopIndex > 8) {
-              //             return SizedBox(
-              //               width: rankOffset,
-              //               height: tileSize,
-              //               child: Center(child: Text("${(rank).toInt()}")),
-              //             );
-              //           } else {
-              //             // Handle file alphabetical numbering
-              //             // Skip a square between rank and file
-              //             if (loopIndex == 0) {
-              //               return SizedBox(
-              //                 width: rankOffset,
-              //                 height: fileOffset,
-              //               );
-              //             }
-              //             return SizedBox(
-              //               width: tileSize,
-              //               height: fileOffset,
-              //               child: Center(child: Text((files[file]))),
-              //             );
-              //           }
-              //         }
-              //       }),
-              //     );
-              //   }),
-              // ),
-              // ...chessBoardViewmodel.boardState.pieceList.entries.map(
-              //   (entry) => Selector<ChessBoardViewmodel, PieceModel?>(
-              //     key: ValueKey(entry.key),
-
-              //     selector: (context, viewModel) =>
-              //         viewModel.boardState.pieceList[entry.key],
-              //     builder: (context, pieceModel, child) {
-              //       if (pieceModel == null || pieceModel.isCaptured) {
-              //         return SizedBox.shrink();
-              //       }
-              //       int index = isPlayerOneWhite
-              //           ? pieceModel.index
-              //           : 63 - pieceModel.index;
-
-              //       int rowIndex = (7 - index ~/ 8);
-              //       int colIndex = (index % 8 + 1);
-              //       double topPosition =
-              //           ((rowIndex * tileSize) + (tileSize - pieceSize) / 2);
-              //       double leftPosition =
-              //           (((colIndex - 1) * tileSize) +
-              //           rankOffset +
-              //           (tileSize - pieceSize) / 2);
-
-              //       return Piece(
-              //         piece: pieceModel,
-              //         pieceSize: pieceSize,
-              //         topPosition: topPosition,
-              //         leftPosition: leftPosition,
-              //       );
-              //     },
-              //   ),
-              // ),
+     
               Selector<ChessBoardViewmodel, bool>(
                 selector: (context, chessBoardViewmodel) =>
                     chessBoardViewmodel.lockBoard,
