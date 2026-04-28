@@ -8,7 +8,9 @@ import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
 import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/features/chess_board/helper/fen_helper.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
+import 'package:chess_app/features/match/model/match_end_result_model.dart';
 import 'package:chess_app/features/match/model/match_state_model.dart';
+import 'package:flutter/material.dart';
 
 class MatchManagerService {
   final SessionService _sessionService;
@@ -30,10 +32,7 @@ class MatchManagerService {
   Stream<List<String>> get algebraicHistoryStream =>
       _algebraicHistoryController.stream;
 
-  final StreamController<FirstPlayerPOVResult> _isMatchEndController =
-      StreamController<FirstPlayerPOVResult>.broadcast();
-  Stream<FirstPlayerPOVResult> get isMatchEndStream =>
-      _isMatchEndController.stream;
+  final ValueNotifier<MatchEndResult?> resultNotifier = ValueNotifier(null);
 
   bool _botEnabled = false;
   bool get botEnabled => _botEnabled;
@@ -72,7 +71,6 @@ class MatchManagerService {
     );
     _matchStateHistory = [];
     _algebraicHistory = [];
-    _isMatchEndController.add(FirstPlayerPOVResult.ongoing);
   }
 
   Future<void> switchSide({bool isCheckmate = false}) async {
@@ -145,10 +143,10 @@ class MatchManagerService {
     }
 
     if (await _engineBridge.isRepetition()) {
-      _endMatch(FirstPlayerPOVResult.draw, Sides.color_NB, MatchResult.draw);
+      _endMatch(POVResult.draw, Sides.color_NB, MatchResult.draw);
     }
     if (_draw75MovesRule(_matchState.halfMoveClock)) {
-      _endMatch(FirstPlayerPOVResult.draw, Sides.color_NB, MatchResult.draw);
+      _endMatch(POVResult.draw, Sides.color_NB, MatchResult.draw);
     }
   }
 
@@ -171,37 +169,25 @@ class MatchManagerService {
     if (_matchState.isChecking) {
       _matchState = _matchState.copyWith(isChecking: false, isCheckmate: true);
       if (_matchState.activeSide == _playerOneSide) {
-        _endMatch(
-          FirstPlayerPOVResult.lose,
-          _playerTwoSide,
-          MatchResult.checkmate,
-        );
+        _endMatch(POVResult.lose, _playerTwoSide, MatchResult.checkmate);
       } else {
-        _endMatch(
-          FirstPlayerPOVResult.win,
-          _playerOneSide,
-          MatchResult.checkmate,
-        );
+        _endMatch(POVResult.win, _playerOneSide, MatchResult.checkmate);
       }
     } else {
-      _endMatch(FirstPlayerPOVResult.draw, Sides.color_NB, MatchResult.draw);
+      _endMatch(POVResult.draw, Sides.color_NB, MatchResult.draw);
     }
   }
 
   void timerEnd(Sides endedSide) {
     if (endedSide == _playerOneSide) {
-      _endMatch(FirstPlayerPOVResult.lose, _playerTwoSide, MatchResult.timeout);
+      _endMatch(POVResult.lose, _playerTwoSide, MatchResult.timeout);
     } else {
-      _endMatch(FirstPlayerPOVResult.win, _playerOneSide, MatchResult.timeout);
+      _endMatch(POVResult.win, _playerOneSide, MatchResult.timeout);
     }
   }
 
-  void _endMatch(
-    FirstPlayerPOVResult resultPOV,
-    Sides winner,
-    MatchResult result,
-  ) {
-    _isMatchEndController.add(resultPOV);
+  void _endMatch(POVResult resultPOV, Sides winner, MatchResult result) {
+    resultNotifier.value = MatchEndResult(resultPOV, result);
     _sessionService.endMatch(winner.name, result.name);
   }
 
@@ -219,7 +205,7 @@ class MatchManagerService {
   void dispose() {
     _stateController.close();
     _algebraicHistoryController.close();
-    _isMatchEndController.close();
     _redoSignalController.close();
+    resultNotifier.dispose();
   }
 }

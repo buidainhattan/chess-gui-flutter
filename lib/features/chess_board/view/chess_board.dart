@@ -198,11 +198,11 @@ class ChessBoard extends StatelessWidget {
                   return SizedBox.shrink();
                 },
               ),
-              Selector<ChessBoardViewmodel, FirstPlayerPOVResult>(
+              Selector<ChessBoardViewmodel, POVResult>(
                 selector: (context, chessBoardViewmodel) =>
                     chessBoardViewmodel.result,
                 builder: (context, result, child) {
-                  if (result != FirstPlayerPOVResult.ongoing) {
+                  if (result != POVResult.ongoing) {
                     return AbsorbPointer(
                       absorbing: true,
                       child: SizedBox(width: size, height: size),

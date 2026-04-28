@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
+import 'package:chess_app/core/services/match_manager_service.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
+import 'package:chess_app/features/match/model/match_end_result_model.dart';
 import 'package:flutter/widgets.dart';
 
 class TimerViewmodel extends ChangeNotifier {
@@ -22,7 +23,6 @@ class TimerViewmodel extends ChangeNotifier {
   late Sides _sideToMove;
 
   late final StreamSubscription _matchStateSubscription;
-  late final StreamSubscription _isMatchEndSubscription;
 
   TimerViewmodel(this._matchManagerService) {
     _playerOneSide = _matchManagerService.playerOneSide;
@@ -39,13 +39,7 @@ class TimerViewmodel extends ChangeNotifier {
       _sideToMove = newState.activeSide;
     });
 
-    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
-      newState,
-    ) {
-      if (newState != FirstPlayerPOVResult.ongoing) {
-        _stopTimer();
-      }
-    });
+    _matchManagerService.resultNotifier.addListener(_onMatchEnd);
   }
 
   void setAndStartTimer({TimeSetting? setting}) {
@@ -63,6 +57,13 @@ class TimerViewmodel extends ChangeNotifier {
     playerTwoTime = _formatDuration(_playerTwoRemainingTime);
 
     _startTimer();
+  }
+
+  void _onMatchEnd() {
+    final MatchEndResult? result = _matchManagerService.resultNotifier.value;
+    if (result == null) return;
+
+    _stopTimer();
   }
 
   void _increaseTimer(Sides endTurnSide) {
@@ -134,8 +135,8 @@ class TimerViewmodel extends ChangeNotifier {
   @override
   void dispose() {
     _matchStateSubscription.cancel();
-    _isMatchEndSubscription.cancel();
     _timer?.cancel();
+    _matchManagerService.resultNotifier.removeListener(_onMatchEnd);
     super.dispose();
   }
 }

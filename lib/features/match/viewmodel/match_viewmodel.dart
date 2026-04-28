@@ -1,15 +1,20 @@
 import 'dart:async';
 
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
+import 'package:chess_app/core/services/settings_service.dart';
+import 'package:chess_app/core/services/match_manager_service.dart';
+import 'package:chess_app/features/match/model/match_end_result_model.dart';
 import 'package:flutter/widgets.dart';
 
 class MatchViewmodel extends ChangeNotifier {
+  final SettingsService _settingsService;
   final MatchManagerService _matchManagerService;
 
   late bool botEnabled;
 
+  late final String playerOneName;
   late final Sides playerOneSide;
+  final String playerTwoName = "player 2";
   late final Sides playerTwoSide;
   late Sides sideToMove;
   late String playerOneCastlingRight;
@@ -22,14 +27,14 @@ class MatchViewmodel extends ChangeNotifier {
 
   late List<String> algebraicHistory;
 
-  FirstPlayerPOVResult result = FirstPlayerPOVResult.ongoing;
+  MatchEndResult? result;
 
   late final StreamSubscription _matchStateSubscription;
   late final StreamSubscription _algebraicHistorySubscription;
-  late final StreamSubscription _isMatchEndSubscription;
 
-  MatchViewmodel(this._matchManagerService) {
+  MatchViewmodel(this._settingsService, this._matchManagerService) {
     botEnabled = _matchManagerService.botEnabled;
+    playerOneName = _settingsService.playerName;
     playerOneSide = _matchManagerService.playerOneSide;
     playerTwoSide = _matchManagerService.playerTwoSide;
     playerOnePieceCaptured =
@@ -62,13 +67,7 @@ class MatchViewmodel extends ChangeNotifier {
           notifyListeners();
         });
 
-    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
-      newState,
-    ) {
-      result = newState;
-
-      notifyListeners();
-    });
+    _matchManagerService.resultNotifier.addListener(_onMatchEnd);
   }
 
   void relayUnMakeSignal() {
@@ -79,11 +78,17 @@ class MatchViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _onMatchEnd() {
+    result = _matchManagerService.resultNotifier.value;
+
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _matchStateSubscription.cancel();
-    _isMatchEndSubscription.cancel();
     _algebraicHistorySubscription.cancel();
+    _matchManagerService.resultNotifier.removeListener(_onMatchEnd);
     super.dispose();
   }
 }

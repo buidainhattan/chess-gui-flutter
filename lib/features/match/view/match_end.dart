@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class MatchEndDialog extends StatelessWidget {
-  final FirstPlayerPOVResult result;
+  final POVResult result;
   final MatchResult matchResult;
   final ConnectionMode connectionMode;
   final String whitePlayerName;
@@ -15,7 +15,7 @@ class MatchEndDialog extends StatelessWidget {
 
   static Future<void> show(
     BuildContext context, {
-    required FirstPlayerPOVResult result,
+    required POVResult result,
     required MatchResult matchResult,
     required ConnectionMode connectionMode,
     required String whitePlayerName,
@@ -24,7 +24,7 @@ class MatchEndDialog extends StatelessWidget {
     required Duration duration,
   }) {
     assert(
-      result != FirstPlayerPOVResult.ongoing,
+      result != POVResult.ongoing,
       "Cannot show end dialog for ongoing match",
     );
     return showDialog(
@@ -56,17 +56,17 @@ class MatchEndDialog extends StatelessWidget {
   bool get _isOnline => connectionMode == ConnectionMode.online;
 
   String get _resultLabel => switch (result) {
-    FirstPlayerPOVResult.win => _isOnline ? 'You won!' : 'White wins!',
-    FirstPlayerPOVResult.lose => _isOnline ? 'You lost.' : 'Black wins!',
-    FirstPlayerPOVResult.draw => 'Draw.',
-    FirstPlayerPOVResult.ongoing => '',
+    POVResult.win => _isOnline ? 'You won!' : 'White wins!',
+    POVResult.lose => _isOnline ? 'You lost.' : 'Black wins!',
+    POVResult.draw => 'Draw.',
+    POVResult.ongoing => '',
   };
 
   String get _resultIcon => switch (result) {
-    FirstPlayerPOVResult.win => '♛',
-    FirstPlayerPOVResult.lose => '♟',
-    FirstPlayerPOVResult.draw => '½',
-    FirstPlayerPOVResult.ongoing => '',
+    POVResult.win => '♛',
+    POVResult.lose => '♟',
+    POVResult.draw => '½',
+    POVResult.ongoing => '',
   };
 
   String get _endReasonLabel => switch (matchResult) {
@@ -83,28 +83,28 @@ class MatchEndDialog extends StatelessWidget {
   }
 
   Color _iconBackground(ColorScheme cs) => switch (result) {
-    FirstPlayerPOVResult.win => cs.primaryContainer,
-    FirstPlayerPOVResult.lose => cs.errorContainer,
-    FirstPlayerPOVResult.draw => cs.surfaceContainerHighest,
-    FirstPlayerPOVResult.ongoing => cs.surfaceContainerHighest,
+    POVResult.win => cs.primaryContainer,
+    POVResult.lose => cs.errorContainer,
+    POVResult.draw => cs.surfaceContainerHighest,
+    POVResult.ongoing => cs.surfaceContainerHighest,
   };
 
   ({String white, String black}) get _scores => switch (result) {
-    FirstPlayerPOVResult.win => (white: '1', black: '0'),
-    FirstPlayerPOVResult.lose => (white: '0', black: '1'),
-    FirstPlayerPOVResult.draw => (white: '½', black: '½'),
-    FirstPlayerPOVResult.ongoing => (white: '-', black: '-'),
+    POVResult.win => (white: '1', black: '0'),
+    POVResult.lose => (white: '0', black: '1'),
+    POVResult.draw => (white: '½', black: '½'),
+    POVResult.ongoing => (white: '-', black: '-'),
   };
 
   Color _whiteScoreColor(ColorScheme cs) => switch (result) {
-    FirstPlayerPOVResult.win => cs.primary,
-    FirstPlayerPOVResult.lose => cs.error,
+    POVResult.win => cs.primary,
+    POVResult.lose => cs.error,
     _ => cs.onSurfaceVariant,
   };
 
   Color _blackScoreColor(ColorScheme cs) => switch (result) {
-    FirstPlayerPOVResult.win => cs.error,
-    FirstPlayerPOVResult.lose => cs.primary,
+    POVResult.win => cs.error,
+    POVResult.lose => cs.primary,
     _ => cs.onSurfaceVariant,
   };
 
@@ -211,6 +211,7 @@ class MatchEndDialog extends StatelessWidget {
 
                   const SizedBox(width: 8),
 
+                  // TODO: implement rematch and replay
                   Expanded(
                     child: PrimaryNavButton(
                       label: _isOnline ? 'Rematch' : 'Play again',

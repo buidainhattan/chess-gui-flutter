@@ -94,7 +94,7 @@ enum MoveFlags {
 
 enum SoundFXs { movePiece, capturePiece, castling }
 
-enum FirstPlayerPOVResult { win, lose, draw, ongoing }
+enum POVResult { win, lose, draw, ongoing }
 
 enum MatchResult {
   checkmate, resignation, timeout, draw; 

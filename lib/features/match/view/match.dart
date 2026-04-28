@@ -1,5 +1,4 @@
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/services/settings_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/swiping_shader.dart';
@@ -12,8 +11,41 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class Match extends StatelessWidget {
+class Match extends StatefulWidget {
   const Match({super.key});
+
+  @override
+  State<Match> createState() => _MatchState();
+}
+
+class _MatchState extends State<Match> {
+  late final MatchViewmodel matchViewmodel;
+
+  void _onMatchResultChanged() {
+    if (matchViewmodel.result != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        MatchEndDialog.show(
+          context,
+          result: matchViewmodel.result!.resultPOV,
+          matchResult: matchViewmodel.result!.result,
+          connectionMode: ConnectionMode.offline,
+          whitePlayerName: matchViewmodel.playerOneName,
+          blackPlayerName: matchViewmodel.playerTwoName,
+          moveCount: 50,
+          duration: Duration(minutes: 10),
+        );
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    matchViewmodel = context.read<MatchViewmodel>();
+    matchViewmodel.addListener(_onMatchResultChanged);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,27 +59,6 @@ class Match extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            Selector<MatchViewmodel, FirstPlayerPOVResult>(
-              selector: (context, viewmodel) => viewmodel.result,
-              builder: (context, result, child) {
-                if (result != FirstPlayerPOVResult.ongoing) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    MatchEndDialog.show(
-                      context,
-                      result: result,
-                      matchResult: MatchResult.checkmate,
-                      connectionMode: ConnectionMode.offline,
-                      whitePlayerName: "Tan",
-                      blackPlayerName: "Bot",
-                      moveCount: 50,
-                      duration: Duration(minutes: 5),
-                    );
-                  });
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-
             // ── Main layout ──
             _MatchLayout(matchViewmodel: matchViewmodel),
 
@@ -81,8 +92,6 @@ class _MatchLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsService settingsService = context.read<SettingsService>();
-
     return LayoutBuilder(
       builder: (context, constraints) {
         const double columnSpacing = AppTheme.spaceXS;
@@ -113,9 +122,7 @@ class _MatchLayout extends StatelessWidget {
                   SizedBox(
                     height: cardHeight,
                     child: PlayerCard(
-                      playerName: matchViewmodel.botEnabled
-                          ? 'Bot · Easy'
-                          : 'Player 2',
+                      playerName: matchViewmodel.playerTwoName,
                       playerSide: matchViewmodel.playerTwoSide,
                       isPlayerOne: false,
                       isBot: matchViewmodel.botEnabled,
@@ -143,7 +150,7 @@ class _MatchLayout extends StatelessWidget {
                   SizedBox(
                     height: cardHeight,
                     child: PlayerCard(
-                      playerName: settingsService.playerName,
+                      playerName: matchViewmodel.playerOneName,
                       playerSide: matchViewmodel.playerOneSide,
                       isPlayerOne: true,
                       isBot: false,

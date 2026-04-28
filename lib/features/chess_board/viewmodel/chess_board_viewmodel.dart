@@ -9,8 +9,9 @@ import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/features/chess_board/model/board_state_model.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
-import 'package:chess_app/features/chess_board/helper/match_manager_service.dart';
+import 'package:chess_app/core/services/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/helper/move_manager.dart';
+import 'package:chess_app/features/match/model/match_end_result_model.dart';
 import 'package:flutter/material.dart';
 
 class ChessBoardViewmodel extends ChangeNotifier {
@@ -22,7 +23,6 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   late final StreamSubscription _opponentMoveSubscription;
   late final StreamSubscription _redoSignalSubscription;
-  late final StreamSubscription _isMatchEndSubscription;
 
   // <--- State to control GUI --->
   late Sides _playerOneSide;
@@ -35,8 +35,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  FirstPlayerPOVResult _result = FirstPlayerPOVResult.ongoing;
-  FirstPlayerPOVResult get result => _result;
+  POVResult _result = POVResult.ongoing;
+  POVResult get result => _result;
 
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;
@@ -60,12 +60,13 @@ class ChessBoardViewmodel extends ChangeNotifier {
     }
 
     if (_sessionService.isOnline) {
-      _opponentMoveSubscription = _sessionService.opponentMoveStream
-          .listen((newState) async {
-            final (:from, :to) = moveStringToIndices(newState);
-            final MoveModel move = _moveManager.getMove(from, to);
-            await _makeMove(move);
-          });
+      _opponentMoveSubscription = _sessionService.opponentMoveStream.listen((
+        newState,
+      ) async {
+        final (:from, :to) = moveStringToIndices(newState);
+        final MoveModel move = _moveManager.getMove(from, to);
+        await _makeMove(move);
+      });
     }
     _redoSignalSubscription = _matchManagerService.redoSignalStream.listen((
       newState,
@@ -73,13 +74,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
       await _unMakeMove(newState);
     });
 
-    _isMatchEndSubscription = _matchManagerService.isMatchEndStream.listen((
-      newState,
-    ) {
-      _result = newState;
-
-      notifyListeners();
-    });
+    _matchManagerService.resultNotifier.addListener(_onMatchEnd);
 
     _isInitialized = true;
     await _startTurn();
@@ -420,11 +415,17 @@ class ChessBoardViewmodel extends ChangeNotifier {
     return SoundFXs.movePiece;
   }
 
+  void _onMatchEnd() {
+    final result = _matchManagerService.resultNotifier.value;
+    if (result == null) return;
+    _result = result.resultPOV;
+  }
+
   @override
   void dispose() {
     _opponentMoveSubscription.cancel();
     _redoSignalSubscription.cancel();
-    _isMatchEndSubscription.cancel();
+    _matchManagerService.resultNotifier.removeListener(_onMatchEnd);
     super.dispose();
   }
 }

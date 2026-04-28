@@ -17,12 +17,12 @@ class AudioController {
     await _preloadSounds();
   }
 
-  Future<void> playSoundEffect(SoundFXs sound) async {
+  void playSoundEffect(SoundFXs sound) {
     if (_sounds[sound] == null) {
       return;
     }
 
-    await _soLoud.play(_sounds[sound]!);
+    _soLoud.play(_sounds[sound]!);
   }
 
   void dispose() {
