@@ -44,6 +44,14 @@ extension AppTextContext on BuildContext {
     );
   }
 
+  TextStyle mainTextStyle({Color? color}) {
+    return AppTextStyles._base(
+      size: responsive(s: 14, l: 16, xxl: 18),
+      weight: FontWeight.normal,
+      color: color,
+    );
+  }
+
   TextStyle playerNameText(Color? color) {
     return AppTextStyles._base(size: 18, weight: FontWeight.w600, color: color);
   }

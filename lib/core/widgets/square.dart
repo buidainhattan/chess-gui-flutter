@@ -33,6 +33,9 @@ class Square extends StatelessWidget {
       fillColor = boardTheme.darkSquare;
     }
 
+    final Color lastMoveColor = boardTheme.lastMoveOverlay(colorScheme);
+    final Color selectedColor = boardTheme.selectedOverlay(colorScheme);
+    final Color inCheckColor = boardTheme.checkOverlay(colorScheme);
     final Color hintColor = boardTheme.selectedOverlay(colorScheme);
 
     return GestureDetector(
@@ -45,18 +48,32 @@ class Square extends StatelessWidget {
         child: Stack(
           children: [
             Container(decoration: BoxDecoration(color: fillColor)),
-            Selector<ChessBoardViewmodel, bool>(
-              selector: (context, viewmodel) =>
-                  viewmodel.boardState.preFrom == index ||
-                  viewmodel.boardState.from == index ||
-                  viewmodel.boardState.to == index,
-              builder: (context, isSelected, child) {
-                if (isSelected) {
-                  return Container(decoration: BoxDecoration(color: hintColor));
+            Selector<ChessBoardViewmodel, ({bool isSelected, bool isLastMove})>(
+              selector: (context, viewmodel) {
+                final bool isSelected = viewmodel.boardState.from == index;
+                final bool isLastMove =
+                    viewmodel.boardState.preFrom == index ||
+                    viewmodel.boardState.to == index;
+
+                return (isSelected: isSelected, isLastMove: isLastMove);
+              },
+              builder: (context, state, child) {
+                if (state.isSelected) {
+                  return Container(
+                    decoration: BoxDecoration(color: selectedColor),
+                  );
                 }
+
+                if (state.isLastMove) {
+                  return Container(
+                    decoration: BoxDecoration(color: lastMoveColor),
+                  );
+                }
+
                 return SizedBox.shrink();
               },
             ),
+
             Selector<
               ChessBoardViewmodel,
               ({bool isMoveableTo, bool isCapture})
@@ -98,6 +115,7 @@ class Square extends StatelessWidget {
                 );
               },
             ),
+
             Selector<ChessBoardViewmodel, bool>(
               selector: (context, viewmodel) {
                 if (viewmodel.boardState.checkedKingSquare != null &&
@@ -117,6 +135,7 @@ class Square extends StatelessWidget {
                   hintName,
                   width: tileSize,
                   height: tileSize,
+                  colorFilter: ColorFilter.mode(inCheckColor, BlendMode.srcIn),
                 );
               },
             ),

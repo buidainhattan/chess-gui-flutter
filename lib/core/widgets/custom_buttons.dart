@@ -6,12 +6,14 @@ import 'package:go_router/go_router.dart';
 /// The main navigation target
 class PrimaryNavButton extends StatelessWidget {
   final String label;
+  final TextStyle? labelStyle;
   final String? route;
   final VoidCallback? onPressed;
 
   const PrimaryNavButton({
     super.key,
     required this.label,
+    this.labelStyle,
     this.route,
     this.onPressed,
   }) : assert(
@@ -34,7 +36,7 @@ class PrimaryNavButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: context.menuText(color: colorScheme.onPrimary),
+          style: labelStyle ?? context.menuText(color: colorScheme.onPrimary),
         ),
       ),
     );
@@ -44,12 +46,14 @@ class PrimaryNavButton extends StatelessWidget {
 /// Important but alternative navigation
 class SecondaryNavButton extends StatelessWidget {
   final String label;
+  final TextStyle? labelStyle;
   final String? route;
   final VoidCallback? onPressed;
 
   const SecondaryNavButton({
     super.key,
     required this.label,
+    this.labelStyle,
     this.route,
     this.onPressed,
   }) : assert(
@@ -70,7 +74,10 @@ class SecondaryNavButton extends StatelessWidget {
           side: BorderSide(color: colorScheme.primary, width: 2),
           shape: const StadiumBorder(),
         ),
-        child: Text(label, style: context.menuText(color: colorScheme.primary)),
+        child: Text(
+          label,
+          style: labelStyle ?? context.menuText(color: colorScheme.primary),
+        ),
       ),
     );
   }
@@ -79,6 +86,7 @@ class SecondaryNavButton extends StatelessWidget {
 /// Utility navigation
 class TertiaryNavButton extends StatelessWidget {
   final String label;
+  final TextStyle? labelStyle;
   final Color? color;
   final String? route;
   final VoidCallback? onPressed;
@@ -86,6 +94,7 @@ class TertiaryNavButton extends StatelessWidget {
   const TertiaryNavButton({
     super.key,
     required this.label,
+    this.labelStyle,
     this.color,
     this.route,
     this.onPressed,
@@ -102,7 +111,8 @@ class TertiaryNavButton extends StatelessWidget {
       onPressed: route != null ? () => context.push(route!) : onPressed,
       child: Text(
         label,
-        style: context.menuText(color: color ?? colorScheme.primary),
+        style:
+            labelStyle ?? context.menuText(color: color ?? colorScheme.primary),
       ),
     );
   }
@@ -111,12 +121,14 @@ class TertiaryNavButton extends StatelessWidget {
 /// Destructive (such as exit or delete actions)
 class DestructiveButton extends StatelessWidget {
   final String label;
+  final TextStyle? labelStyle;
   final String? route;
   final VoidCallback? onPressed;
 
   const DestructiveButton({
     super.key,
     required this.label,
+    this.labelStyle,
     this.route,
     this.onPressed,
   }) : assert(
@@ -130,7 +142,10 @@ class DestructiveButton extends StatelessWidget {
 
     return TextButton(
       onPressed: route != null ? () => context.push(route!) : onPressed,
-      child: Text(label, style: context.menuText(color: colorScheme.error)),
+      child: Text(
+        label,
+        style: labelStyle ?? context.menuText(color: colorScheme.error),
+      ),
     );
   }
 }

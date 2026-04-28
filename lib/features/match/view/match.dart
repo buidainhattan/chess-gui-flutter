@@ -32,7 +32,16 @@ class Match extends StatelessWidget {
               builder: (context, result, child) {
                 if (result != FirstPlayerPOVResult.ongoing) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    MatchEndDialog.show(context, result);
+                    MatchEndDialog.show(
+                      context,
+                      result: result,
+                      matchResult: MatchResult.checkmate,
+                      connectionMode: ConnectionMode.offline,
+                      whitePlayerName: "Tan",
+                      blackPlayerName: "Bot",
+                      moveCount: 50,
+                      duration: Duration(minutes: 5),
+                    );
                   });
                 }
                 return const SizedBox.shrink();
