@@ -11,7 +11,6 @@ import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
 import 'package:chess_app/core/services/match_manager_service.dart';
 import 'package:chess_app/features/chess_board/helper/move_manager.dart';
-import 'package:chess_app/features/match/model/match_end_result_model.dart';
 import 'package:flutter/material.dart';
 
 class ChessBoardViewmodel extends ChangeNotifier {

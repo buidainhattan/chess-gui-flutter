@@ -1,3 +1,4 @@
+import 'package:chess_app/core/basics/duration_extensions.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
@@ -75,12 +76,6 @@ class MatchEndDialog extends StatelessWidget {
     MatchResult.timeout => 'Timeout',
     MatchResult.draw => 'Draw agreed',
   };
-
-  String get _formattedDuration {
-    final m = duration.inMinutes.toString().padLeft(2, '0');
-    final s = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
 
   Color _iconBackground(ColorScheme cs) => switch (result) {
     POVResult.win => cs.primaryContainer,
@@ -186,7 +181,10 @@ class MatchEndDialog extends StatelessWidget {
               child: Row(
                 children: [
                   _StatCell(value: '$moveCount', label: 'Moves'),
-                  _StatCell(value: _formattedDuration, label: 'Duration'),
+                  _StatCell(
+                    value: duration.toFormattedString(),
+                    label: 'Duration',
+                  ),
                 ],
               ),
             ),

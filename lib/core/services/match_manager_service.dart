@@ -54,6 +54,10 @@ class MatchManagerService {
   late List<String> _algebraicHistory;
   List<String> get algebraicHistory => _algebraicHistory;
 
+  final DateTime _startedAt = DateTime.now();
+  Duration _elapsedTime = Duration.zero;
+  Duration get elapsedTime => _elapsedTime;
+
   MatchManagerService(this._sessionService);
 
   void initialSet(String fen, Sides playerOneSide, bool isBotEnabled) {
@@ -187,6 +191,7 @@ class MatchManagerService {
   }
 
   void _endMatch(POVResult resultPOV, Sides winner, MatchResult result) {
+    _elapsedTime = DateTime.now().difference(_startedAt);
     resultNotifier.value = MatchEndResult(resultPOV, result);
     _sessionService.endMatch(winner.name, result.name);
   }

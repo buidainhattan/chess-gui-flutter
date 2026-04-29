@@ -33,8 +33,8 @@ class _MatchState extends State<Match> {
           connectionMode: ConnectionMode.offline,
           whitePlayerName: matchViewmodel.playerOneName,
           blackPlayerName: matchViewmodel.playerTwoName,
-          moveCount: 50,
-          duration: Duration(minutes: 10),
+          moveCount: (matchViewmodel.algebraicHistory.length / 2).ceil(),
+          duration: matchViewmodel.elapsedTime,
         );
       });
     }

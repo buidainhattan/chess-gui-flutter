@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chess_app/core/basics/duration_extensions.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/services/match_manager_service.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
@@ -53,8 +54,8 @@ class TimerViewmodel extends ChangeNotifier {
       _increment = Duration(seconds: setting.increment);
     }
 
-    playerOneTime = _formatDuration(_playerOneRemainingTime);
-    playerTwoTime = _formatDuration(_playerTwoRemainingTime);
+    playerOneTime = _playerOneRemainingTime.toFormattedString();
+    playerTwoTime = _playerTwoRemainingTime.toFormattedString();
 
     _startTimer();
   }
@@ -69,10 +70,10 @@ class TimerViewmodel extends ChangeNotifier {
   void _increaseTimer(Sides endTurnSide) {
     if (endTurnSide == _playerOneSide) {
       _playerOneRemainingTime += _increment;
-      playerOneTime = _formatDuration(_playerOneRemainingTime);
+      playerOneTime = _playerOneRemainingTime.toFormattedString();
     } else {
       _playerTwoRemainingTime += _increment;
-      playerTwoTime = _formatDuration(_playerTwoRemainingTime);
+      playerTwoTime = _playerTwoRemainingTime.toFormattedString();
     }
   }
 
@@ -101,7 +102,7 @@ class TimerViewmodel extends ChangeNotifier {
         _playerOneRemainingTime = Duration.zero;
         _matchManagerService.timerEnd(_playerOneSide);
       }
-      playerOneTime = _formatDuration(_playerOneRemainingTime);
+      playerOneTime = _playerOneRemainingTime.toFormattedString();
     }
     if (_sideToMove == _playerTwoSide) {
       if (_playerTwoRemainingTime > Duration.zero) {
@@ -110,7 +111,7 @@ class TimerViewmodel extends ChangeNotifier {
         _playerTwoRemainingTime = Duration.zero;
         _matchManagerService.timerEnd(_playerTwoSide);
       }
-      playerTwoTime = _formatDuration(_playerTwoRemainingTime);
+      playerTwoTime = _playerTwoRemainingTime.toFormattedString();
     }
     _lastTickTime = now;
 
@@ -120,16 +121,6 @@ class TimerViewmodel extends ChangeNotifier {
   void _stopTimer() {
     _isTimerRunning = false;
     _timer?.cancel();
-  }
-
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-
-    final formattedMinutes = minutes.toString().padLeft(2, '0');
-    final formattedSeconds = seconds.toString().padLeft(2, '0');
-
-    return '$formattedMinutes:$formattedSeconds';
   }
 
   @override

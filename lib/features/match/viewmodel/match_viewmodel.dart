@@ -27,6 +27,8 @@ class MatchViewmodel extends ChangeNotifier {
 
   late List<String> algebraicHistory;
 
+  late Duration elapsedTime;
+
   MatchEndResult? result;
 
   late final StreamSubscription _matchStateSubscription;
@@ -47,6 +49,8 @@ class MatchViewmodel extends ChangeNotifier {
     fullMoveCount = _matchManagerService.matchState.fullMoveNumber;
 
     algebraicHistory = _matchManagerService.algebraicHistory;
+
+    elapsedTime = _matchManagerService.elapsedTime;
 
     _matchStateSubscription = _matchManagerService.stateStream.listen((
       newState,
@@ -80,6 +84,7 @@ class MatchViewmodel extends ChangeNotifier {
 
   void _onMatchEnd() {
     result = _matchManagerService.resultNotifier.value;
+    elapsedTime = _matchManagerService.elapsedTime;
 
     notifyListeners();
   }
