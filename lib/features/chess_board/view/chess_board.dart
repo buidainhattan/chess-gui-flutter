@@ -43,26 +43,6 @@ class ChessBoard extends StatelessWidget {
           height: size,
           child: Stack(
             children: [
-              Selector<ChessBoardViewmodel, bool>(
-                selector: (context, viewmodel) =>
-                    viewmodel.boardState.isPromotion,
-                builder: (context, isPromotion, _) {
-                  if (isPromotion) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      PromotionDialog.show(
-                        context,
-                        chessBoardViewmodel.boardState.activeSide,
-                      ).then((chosenPiece) {
-                        chessBoardViewmodel.promotePiece(
-                          piecePromotedTo: chosenPiece!,
-                        );
-                      });
-                    });
-                  }
-                  return SizedBox.shrink();
-                },
-              ),
-
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: colorScheme.primary),
@@ -184,7 +164,7 @@ class ChessBoard extends StatelessWidget {
                   },
                 ),
               ),
-     
+
               Selector<ChessBoardViewmodel, bool>(
                 selector: (context, chessBoardViewmodel) =>
                     chessBoardViewmodel.lockBoard,
@@ -206,6 +186,26 @@ class ChessBoard extends StatelessWidget {
                     return AbsorbPointer(
                       absorbing: true,
                       child: SizedBox(width: size, height: size),
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
+              ),
+
+              Selector<ChessBoardViewmodel, bool>(
+                selector: (context, viewmodel) =>
+                    viewmodel.boardState.isPromotion,
+                builder: (context, isPromotion, child) {
+                  if (isPromotion) {
+                    return Positioned.fill(
+                      child: PromotionOverlay(
+                        sideToMove: chessBoardViewmodel.boardState.activeSide,
+                        file: 4,
+                        boardSize: size,
+                        isBoardFlipped: false,
+                        onPieceSelected: (piece) => chessBoardViewmodel
+                            .promotePiece(piecePromotedTo: piece),
+                      ),
                     );
                   }
                   return SizedBox.shrink();

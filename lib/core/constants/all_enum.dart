@@ -89,7 +89,11 @@ enum MoveFlags {
   final int value;
   const MoveFlags(this.value);
 
-  static MoveFlags? fromValue(int value) => MoveFlags.values.asMap()[value];
+  static final Map<int, MoveFlags> _valueMap = {
+    for (var flag in MoveFlags.values) flag.value: flag,
+  };
+
+  static MoveFlags? fromValue(int value) => _valueMap[value];
 }
 
 enum SoundFXs { movePiece, capturePiece, castling }
