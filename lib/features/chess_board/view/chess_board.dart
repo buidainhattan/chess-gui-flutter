@@ -200,7 +200,9 @@ class ChessBoard extends StatelessWidget {
                     return Positioned.fill(
                       child: PromotionOverlay(
                         sideToMove: chessBoardViewmodel.boardState.activeSide,
-                        file: 4,
+                        file:
+                            chessBoardViewmodel.boardState.promoteSquareIndex! %
+                            8,
                         boardSize: size,
                         isBoardFlipped: false,
                         onPieceSelected: (piece) => chessBoardViewmodel

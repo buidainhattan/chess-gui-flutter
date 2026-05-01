@@ -1,7 +1,25 @@
 // promotion_overlay.dart
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/hovering_shade.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+@Preview(name: "promotion overlay")
+Widget promotionPreview() {
+  return Stack(
+    children: [
+      Positioned.fill(
+        child: PromotionOverlay(
+          sideToMove: Sides.white,
+          file: 2,
+          boardSize: 350,
+          onPieceSelected: (piece) {},
+        ),
+      ),
+    ],
+  );
+}
 
 const _promotionPieces = [
   PieceTypes.queen,
@@ -28,8 +46,8 @@ class PromotionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final squareSize = boardSize / 8;
-    final pickerWidth = squareSize * 4;
+    final double squareSize = boardSize / 8;
+    final double pickerWidth = squareSize * 4;
 
     // Clamp so picker never bleeds off the board edge
     final double rawLeft = (file * squareSize) - squareSize * 1.5;
@@ -40,17 +58,14 @@ class PromotionOverlay extends StatelessWidget {
     final bool promotesAtTop = sideToMove == Sides.white
         ? !isBoardFlipped
         : isBoardFlipped;
-    final double top = promotesAtTop ? 0.0 : boardSize - squareSize;
+    final double top = promotesAtTop
+        ? squareSize
+        : boardSize - (squareSize * 2);
 
     return Stack(
       children: [
         // Dim + input absorber
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {}, // promotion is mandatory — block all taps
-          ),
-        ),
+        Positioned.fill(child: AbsorbPointer()),
         ColoredBox(color: Colors.black.withValues(alpha: 0.3)),
 
         // Picker
@@ -91,7 +106,7 @@ class _AnimatedPicker extends StatefulWidget {
 
 class _AnimatedPickerState extends State<_AnimatedPicker>
     with TickerProviderStateMixin {
-  late final AnimationController _controller;
+  late final AnimationController _scaleController;
   late final List<Animation<double>> _scalesIn;
 
   // Slide-out state
@@ -103,15 +118,14 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _scaleController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 280),
+      duration: const Duration(milliseconds: 500),
     )..forward();
-
     _scalesIn = List.generate(_promotionPieces.length, (i) {
-      final start = i * 0.07;
+      final start = i * 0.05;
       return CurvedAnimation(
-        parent: _controller,
+        parent: _scaleController,
         curve: Interval(start, start + 0.6, curve: Curves.easeOutBack),
       );
     });
@@ -119,7 +133,7 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _scaleController.dispose();
     _slideController?.dispose();
     super.dispose();
   }
@@ -143,7 +157,7 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
 
     _slideController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 250),
     );
 
     _slideAnim =
@@ -162,8 +176,11 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
       _selectedIndex = index;
     });
 
-    await _slideController!.forward();
-    widget.onPieceSelected(piece); // fires completePromotion() after animation
+    await Future.wait([
+      _scaleController.reverse(),
+      _slideController!.forward(),
+    ]);
+    widget.onPieceSelected(piece);
   }
 
   @override
@@ -173,27 +190,19 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
       children: List.generate(_promotionPieces.length, (i) {
         final piece = _promotionPieces[i];
         final isSelected = _selectedIndex == i;
-        final isUnselected = _selectedPiece != null && !isSelected;
 
         Widget card = _PieceCard(
           pieceType: piece,
           sideToMove: widget.sideToMove,
           size: widget.squareSize,
+          isSelected: isSelected,
           onTap: () => _onPieceTapped(piece, i),
         );
-
-        // Fade out unselected pieces
-        if (isUnselected) {
-          card = AnimatedOpacity(
-            opacity: 0.0,
-            duration: const Duration(milliseconds: 120),
-            child: card,
-          );
-        }
 
         // Slide the selected piece toward the promotion square
         if (isSelected && _slideAnim != null) {
           card = SlideTransition(position: _slideAnim!, child: card);
+          return card;
         }
 
         return ScaleTransition(scale: _scalesIn[i], child: card);
@@ -206,12 +215,14 @@ class _PieceCard extends StatelessWidget {
   final PieceTypes pieceType;
   final Sides sideToMove;
   final double size;
+  final bool isSelected;
   final VoidCallback onTap;
 
   const _PieceCard({
     required this.pieceType,
     required this.sideToMove,
     required this.size,
+    this.isSelected = false,
     required this.onTap,
   });
 
@@ -223,26 +234,32 @@ class _PieceCard extends StatelessWidget {
     final bg = isWhite ? colorScheme.primaryContainer : colorScheme.primary;
     final fg = isWhite ? colorScheme.onPrimaryContainer : colorScheme.onPrimary;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: bg,
-          border: Border.all(color: fg.withValues(alpha: 0.2), width: 0.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.all(size * 0.1),
-        child: SvgPicture.asset(
-          // Same path convention as your existing PromotionDialog
-          "assets/images/chess_pieces/${sideToMove.name}/${pieceType.name}.svg",
+    return HoveringWrapper(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: isSelected ? null : bg,
+            border: isSelected
+                ? null
+                : Border.all(color: fg.withValues(alpha: 0.2), width: 0.5),
+            boxShadow: isSelected
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+          ),
+          padding: EdgeInsets.all(size * 0.1),
+          child: SvgPicture.asset(
+            // Same path convention as your existing PromotionDialog
+            "assets/images/chess_pieces/${sideToMove.name}/${pieceType.name}.svg",
+          ),
         ),
       ),
     );

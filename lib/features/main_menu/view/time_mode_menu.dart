@@ -2,6 +2,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/hovering_shade.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';
@@ -216,7 +217,7 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
                           endIndent: AppTheme.spaceS,
                           color: colorScheme.primary,
                         ),
-                        _HoveringWrapper(
+                        HoveringWrapper(
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: () {
@@ -256,7 +257,7 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
 
     return CompositedTransformTarget(
       link: layerLink,
-      child: _HoveringWrapper(
+      child: HoveringWrapper(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(8),
           bottom: isExpanded ? Radius.zero : Radius.circular(8),
@@ -313,61 +314,5 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
     overlayEntry?.remove();
     controller.dispose();
     super.dispose();
-  }
-}
-
-class _HoveringWrapper extends StatefulWidget {
-  final Widget child;
-  final BorderRadius? borderRadius;
-  final bool isPersisted;
-
-  const _HoveringWrapper({
-    required this.child,
-    this.borderRadius,
-    this.isPersisted = false,
-  });
-
-  @override
-  State<_HoveringWrapper> createState() => _HoveringWrapperState();
-}
-
-class _HoveringWrapperState extends State<_HoveringWrapper> {
-  bool isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color hoveringColor = Theme.of(
-      context,
-    ).colorScheme.onSurface.withValues(alpha: 0.08);
-
-    return MouseRegion(
-      onEnter: (event) {
-        setState(() {
-          isHovering = true;
-        });
-      },
-      onExit: (event) {
-        setState(() {
-          isHovering = false;
-        });
-      },
-      child: ClipRRect(
-        borderRadius: widget.borderRadius ?? BorderRadius.zero,
-        child: Stack(
-          children: [
-            Center(child: widget.child),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Container(
-                  color: isHovering || widget.isPersisted
-                      ? hoveringColor
-                      : Colors.transparent,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
