@@ -57,6 +57,7 @@ enum PieceTypes {
   const PieceTypes(this.value);
 
   static PieceTypes? fromValue(int value) => PieceTypes.values.asMap()[value];
+  static List<PieceTypes> promotionPieces() => [knight, bishop, rook, queen];
 }
 
 enum Squares {

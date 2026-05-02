@@ -350,7 +350,7 @@ class _CapturedPiecesDisplayer extends StatelessWidget {
             final PieceTypes piece = entry.value;
 
             return Align(
-              widthFactor: 0.5 + index * 0.8,
+              widthFactor: 0.7 + index * 0.8,
               child: AspectRatio(
                 aspectRatio: 1 / 1,
                 child: SvgPicture.asset(

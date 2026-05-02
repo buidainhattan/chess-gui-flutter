@@ -26,6 +26,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
   // <--- State to control GUI --->
   late Sides _playerOneSide;
   Sides get playerOneSide => _playerOneSide;
+  bool get isPOVTurn =>
+      _playerOneSide == _matchManagerService.matchState.activeSide;
 
   late BoardState _boardState;
   BoardState get boardState => _boardState;

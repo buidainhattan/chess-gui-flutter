@@ -338,19 +338,22 @@ class _MovesSidebarState extends State<_MovesSidebar> {
         ),
 
         // ── Sliding history panel ──
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          // If maxPanelWidth is null, it expands to available space (infinity)
-          width: isOpen ? (widget.maxPanelWidth ?? context.screenWidth / 2) : 0,
-          child: ClipRect(
-            child: Padding(
-              padding: EdgeInsets.only(left: 8),
-              child: _MoveHistoryPanel(
-                isPlayerOneWhite: isPlayerOneWhite,
-                backgroundColor: backgroundColor,
-                borderColor: borderColor,
-                textColor: textColor,
+        ClipRect(
+          child: AnimatedAlign(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.centerLeft,
+            widthFactor: isOpen ? 1.0 : 0.0,
+            child: SizedBox(
+              width: widget.maxPanelWidth ?? context.screenWidth / 2,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: _MoveHistoryPanel(
+                  isPlayerOneWhite: isPlayerOneWhite,
+                  backgroundColor: backgroundColor,
+                  borderColor: borderColor,
+                  textColor: textColor,
+                ),
               ),
             ),
           ),

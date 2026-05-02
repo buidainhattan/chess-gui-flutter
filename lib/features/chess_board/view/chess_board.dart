@@ -32,11 +32,8 @@ class ChessBoard extends StatelessWidget {
         );
 
         final double tileSize, pieceSize;
-        tileSize = size * 46 / 370;
+        tileSize = size / 8;
         pieceSize = tileSize * 0.75;
-
-        // final double rankOffset, fileOffset;
-        // rankOffset = fileOffset = tileSize / 2;
 
         return SizedBox(
           width: size,
@@ -44,8 +41,12 @@ class ChessBoard extends StatelessWidget {
           child: Stack(
             children: [
               Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: colorScheme.primary),
+                foregroundDecoration: BoxDecoration(
+                  border: Border.all(
+                    width: 2,
+                    color: colorScheme.primary,
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ClipRRect(
@@ -149,11 +150,10 @@ class ChessBoard extends StatelessWidget {
 
                     int rowIndex = (7 - index ~/ 8);
                     int colIndex = (index % 8 + 1);
-                    double topPosition =
-                        ((rowIndex * tileSize) + (tileSize - pieceSize) / 2);
+                    double offset = (tileSize - pieceSize) / 2;
+                    double topPosition = ((rowIndex * tileSize) + offset);
                     double leftPosition =
-                        (((colIndex - 1) * tileSize) +
-                        (tileSize - pieceSize) / 2);
+                        (((colIndex - 1) * tileSize) + offset);
 
                     return Piece(
                       piece: pieceModel,
@@ -203,8 +203,8 @@ class ChessBoard extends StatelessWidget {
                         file:
                             chessBoardViewmodel.boardState.promoteSquareIndex! %
                             8,
+                        isPOVPromote: chessBoardViewmodel.isPOVTurn,
                         boardSize: size,
-                        isBoardFlipped: false,
                         onPieceSelected: (piece) => chessBoardViewmodel
                             .promotePiece(piecePromotedTo: piece),
                       ),

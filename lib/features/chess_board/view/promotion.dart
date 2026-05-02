@@ -12,7 +12,8 @@ Widget promotionPreview() {
       Positioned.fill(
         child: PromotionOverlay(
           sideToMove: Sides.white,
-          file: 2,
+          file: 0,
+          isPOVPromote: true,
           boardSize: 350,
           onPieceSelected: (piece) {},
         ),
@@ -21,17 +22,12 @@ Widget promotionPreview() {
   );
 }
 
-const _promotionPieces = [
-  PieceTypes.queen,
-  PieceTypes.rook,
-  PieceTypes.bishop,
-  PieceTypes.knight,
-];
+final List<PieceTypes> _promotionPieces = PieceTypes.promotionPieces();
 
 class PromotionOverlay extends StatelessWidget {
   final Sides sideToMove;
   final int file; // 0–7, the column the pawn promoted on
-  final bool isBoardFlipped;
+  final bool isPOVPromote;
   final double boardSize;
   final ValueChanged<PieceTypes> onPieceSelected;
 
@@ -39,9 +35,9 @@ class PromotionOverlay extends StatelessWidget {
     super.key,
     required this.sideToMove,
     required this.file,
+    required this.isPOVPromote,
     required this.boardSize,
     required this.onPieceSelected,
-    this.isBoardFlipped = false,
   });
 
   @override
@@ -53,20 +49,18 @@ class PromotionOverlay extends StatelessWidget {
     final double rawLeft = (file * squareSize) - squareSize * 1.5;
     final double left = rawLeft.clamp(0.0, boardSize - pickerWidth);
 
-    // White promotes at rank 8 — visually row 0 when not flipped
-    // Show the picker coming down from the top edge
-    final bool promotesAtTop = sideToMove == Sides.white
-        ? !isBoardFlipped
-        : isBoardFlipped;
-    final double top = promotesAtTop
-        ? squareSize
-        : boardSize - (squareSize * 2);
+    // Position overlay vertically to fit pov
+    final double top = isPOVPromote ? squareSize : boardSize - (squareSize * 2);
 
     return Stack(
       children: [
         // Dim + input absorber
-        Positioned.fill(child: AbsorbPointer()),
-        ColoredBox(color: Colors.black.withValues(alpha: 0.3)),
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withValues(alpha: 0.3),
+            child: AbsorbPointer(),
+          ),
+        ),
 
         // Picker
         Positioned(
@@ -76,7 +70,7 @@ class PromotionOverlay extends StatelessWidget {
             sideToMove: sideToMove,
             squareSize: squareSize,
             file: file,
-            promotesAtTop: promotesAtTop,
+            povPromote: isPOVPromote,
             onPieceSelected: onPieceSelected,
           ),
         ),
@@ -89,14 +83,14 @@ class _AnimatedPicker extends StatefulWidget {
   final Sides sideToMove;
   final double squareSize;
   final int file; // needed to compute slide target
-  final bool promotesAtTop; // true = rank 8 at top of screen
-  final ValueChanged<PieceTypes> onPieceSelected;
+  final bool povPromote; // true = rank 8 at top of screen
+  final ValueSetter<PieceTypes> onPieceSelected;
 
   const _AnimatedPicker({
     required this.sideToMove,
     required this.squareSize,
     required this.file,
-    required this.promotesAtTop,
+    required this.povPromote,
     required this.onPieceSelected,
   });
 
@@ -141,17 +135,26 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
   void _onPieceTapped(PieceTypes piece, int index) async {
     if (_selectedPiece != null) return; // guard double-tap
 
-    // How far does the selected card need to slide to reach the promotion square?
-    // The picker's left edge is at: file * squareSize - squareSize * 1.5
-    // The selected card's left edge is at: pickerLeft + index * squareSize
-    // The promotion square's left edge is at: file * squareSize
-    // So horizontal delta = file * squareSize - (pickerLeft + index * squareSize)
-    //                      = (1.5 - index) * squareSize
-    final double dx = (1.5 - index) * widget.squareSize;
+    // offset accounts for position clamp near the board border
+    final double offset;
+    switch (widget.file) {
+      case 0:
+        offset = 0;
+      case 1:
+        offset = 1;
+      case 6:
+        offset = 2;
+      case 7:
+        offset = 3;
+      default:
+        offset = 1.5;
+    }
+    // horizontal slide toward promotion square
+    final double dx = (offset - index) * widget.squareSize;
 
-    // Vertical: slide toward the promotion rank edge
+    // vertical slide toward promotion square
     // promotesAtTop → slide up (negative dy), else slide down (positive dy)
-    final double dy = widget.promotesAtTop
+    final double dy = widget.povPromote
         ? -widget.squareSize.toDouble()
         : widget.squareSize.toDouble();
 
@@ -163,10 +166,7 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
     _slideAnim =
         Tween<Offset>(
           begin: Offset.zero,
-          end: Offset(
-            dx / widget.squareSize,
-            dy / widget.squareSize,
-          ), // fractional for SlideTransition
+          end: Offset(dx / widget.squareSize, dy / widget.squareSize),
         ).animate(
           CurvedAnimation(parent: _slideController!, curve: Curves.easeInBack),
         );
@@ -176,6 +176,7 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
       _selectedIndex = index;
     });
 
+    // let all animations finish before calling the selected callback
     await Future.wait([
       _scaleController.reverse(),
       _slideController!.forward(),
@@ -257,7 +258,6 @@ class _PieceCard extends StatelessWidget {
           ),
           padding: EdgeInsets.all(size * 0.1),
           child: SvgPicture.asset(
-            // Same path convention as your existing PromotionDialog
             "assets/images/chess_pieces/${sideToMove.name}/${pieceType.name}.svg",
           ),
         ),

@@ -81,7 +81,7 @@ String toAlgebraic(
 
   // 4. Promotion
   if (isPromotion && promotion.isNotEmpty) {
-    notation += promotion;
+    notation += promotion[0];
   }
 
   // 5. Check/Checkmate notation is added last
