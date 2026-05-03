@@ -302,7 +302,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                   ),
                 ),
                 RotatedBox(
-                  quarterTurns: 1,
+                  quarterTurns: 3,
                   child: Text(
                     'MOVES',
                     style: TextStyle(

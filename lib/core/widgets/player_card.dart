@@ -201,7 +201,7 @@ class _PlayerIndentity extends StatelessWidget {
               ),
               AutoSizeText(
                 name,
-                style: context.playerNameText(nameColor),
+                style: context.playerNameText(color: nameColor),
                 minFontSize: 10,
               ),
             ],
@@ -268,7 +268,7 @@ class _PlayerTimer extends StatelessWidget {
             child: AutoSizeText(
               formattedTimerText,
               maxLines: 1,
-              style: context.timerText(textColor),
+              style: context.timerText(color: textColor),
             ),
           );
         },
