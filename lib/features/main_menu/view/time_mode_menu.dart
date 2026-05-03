@@ -2,7 +2,7 @@ import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
-import 'package:chess_app/core/widgets/animation_wrapper/hovering_shade.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/hovering.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/features/main_menu/model/time_setting_model.dart';
 import 'package:flutter/material.dart';

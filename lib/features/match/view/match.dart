@@ -1,6 +1,8 @@
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/hovering.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/sliding.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/swiping_shader.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/core/widgets/player_card.dart';
@@ -52,34 +54,39 @@ class _MatchState extends State<Match> {
     final MatchViewmodel matchViewmodel = context.read<MatchViewmodel>();
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(
-          vertical: AppTheme.spaceS,
-          horizontal: AppTheme.spaceS,
-        ),
-        child: Stack(
-          children: [
-            // ── Main layout ──
-            _MatchLayout(matchViewmodel: matchViewmodel),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: AppTheme.spaceS,
+              horizontal: AppTheme.spaceS,
+            ),
+            child: Stack(
+              children: [
+                // ── Main layout ──
+                _MatchLayout(matchViewmodel: matchViewmodel),
 
-            Align(alignment: Alignment.topRight, child: _Menu()),
-            matchViewmodel.botEnabled
-                ? Align(
-                    alignment: Alignment.bottomLeft,
-                    child: SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: BarButton(
-                        icon: Icons.redo_sharp,
-                        label: 'Undo',
-                        tooltip: 'Undo last move',
-                        onPressed: () => matchViewmodel.relayUnMakeSignal(),
-                      ),
-                    ),
-                  )
-                : SizedBox.shrink(),
-          ],
-        ),
+                matchViewmodel.botEnabled
+                    ? Align(
+                        alignment: Alignment.bottomLeft,
+                        child: SizedBox(
+                          width: 100,
+                          height: 50,
+                          child: BarButton(
+                            icon: Icons.redo_sharp,
+                            label: 'Undo',
+                            tooltip: 'Undo last move',
+                            onPressed: () => matchViewmodel.relayUnMakeSignal(),
+                          ),
+                        ),
+                      )
+                    : SizedBox.shrink(),
+              ],
+            ),
+          ),
+
+          Positioned.fill(left: 0, top: 0, bottom: 0, child: _MenuSidebar()),
+        ],
       ),
     );
   }
@@ -493,66 +500,209 @@ class _MoveHistoryPanel extends StatelessWidget {
   }
 }
 
-class _Menu extends StatefulWidget {
-  const _Menu();
+// ─── Sidebar + Arrow Tab ──────────────────────────────────────────────────────
+const double kArrowTabWidth = 48.0;
+const Duration kSidebarDuration = Duration(milliseconds: 200);
+
+class _MenuSidebar extends StatefulWidget {
+  const _MenuSidebar();
 
   @override
-  State<_Menu> createState() => _MenuState();
+  State<_MenuSidebar> createState() => _MenuSidebarState();
 }
 
-class _MenuState extends State<_Menu> {
-  bool isOpen = false;
+class _MenuSidebarState extends State<_MenuSidebar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  bool _isOpen = false;
 
-  void _openMenu() {
-    setState(() {
-      isOpen = !isOpen;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: kSidebarDuration,
+      value: 0.0,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _isOpen = !_isOpen);
+    _isOpen ? _controller.forward() : _controller.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      width: isOpen ? 150 : 100,
-      height: isOpen ? 150 : 50,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        border: Border.all(color: Theme.of(context).colorScheme.primary),
-        borderRadius: BorderRadius.circular(4),
+    return Stack(
+      children: [
+        // ── Dim overlay ────────────────────────────────────────────────────
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            if (_controller.value == 0.0) return const SizedBox.shrink();
+            return GestureDetector(
+              onTap: _toggle,
+              child: Container(
+                color: Colors.black.withValues(alpha: _controller.value * 0.45),
+              ),
+            );
+          },
+        ),
+
+        // ── Sidebar ────────────────────────────────────────────────────────
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SlidingWrapper(
+              controller: _controller,
+              direction: AxisDirection.right,
+              child: IntrinsicWidth(
+                child: _SidebarPanel(isOpen: _isOpen, onToggle: _toggle),
+              ),
+            ),
+            // Arrow tab only visible when closed
+            if (!_isOpen) _ArrowTab(onTap: _toggle),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Panel content ────────────────────────────────────────────────────────────
+
+class _SidebarPanel extends StatelessWidget {
+  const _SidebarPanel({required this.isOpen, required this.onToggle});
+
+  final bool isOpen;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return Container(
+      color: color.surfaceContainerHigh,
+      child: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Spacer(),
+            HoveringWrapper(
+              child: _SidebarButton(
+                icon: Icons.settings_outlined,
+                label: 'Settings',
+                onPressed: () {},
+              ),
+            ),
+            HoveringWrapper(
+              child: _SidebarButton(
+                icon: Icons.home_outlined,
+                label: 'Main Menu',
+                onPressed: () => context.go('/'),
+              ),
+            ),
+            const Spacer(),
+            const Divider(height: 1, thickness: 1),
+            HoveringWrapper(
+              child: _SidebarButton(
+                icon: Icons.chevron_left,
+                label: 'Close',
+                onPressed: onToggle,
+              ),
+            ),
+          ],
+        ),
       ),
-      clipBehavior: Clip.hardEdge,
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
+    );
+  }
+}
+
+class _SidebarButton extends StatelessWidget {
+  const _SidebarButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: color.onSurface.withValues(alpha: 0.75),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: color.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Arrow tab ────────────────────────────────────────────────────────────────
+
+class _ArrowTab extends StatelessWidget {
+  const _ArrowTab({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return HoveringWrapper(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: kArrowTabWidth,
+          height: double.infinity,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                height: 50,
-                child: BarButton(
-                  icon: Icons.menu,
-                  label: "Menu",
-                  tooltip: "Expand menu",
-                  onPressed: () => _openMenu(),
-                ),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.35),
               ),
-              SizedBox(
-                height: 50,
-                child: BarButton(
-                  svgPath: 'assets/icons/home.svg',
-                  label: 'Home',
-                  tooltip: 'Back to home',
-                  onPressed: () => context.go("/"),
-                ),
-              ),
-              SizedBox(
-                height: 50,
-                child: BarButton(
-                  svgPath: 'assets/icons/resign.svg',
-                  label: 'Resign',
-                  tooltip: 'Resign the game',
-                  onPressed: () {},
-                ),
+              SizedBox(height: AppTheme.spaceM),
+              RotatedBox(quarterTurns: 3, child: Text("Open menu")),
+              SizedBox(height: AppTheme.spaceM),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.35),
               ),
             ],
           ),

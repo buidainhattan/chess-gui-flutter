@@ -1,6 +1,6 @@
 // promotion_overlay.dart
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/widgets/animation_wrapper/hovering_shade.dart';
+import 'package:chess_app/core/widgets/animation_wrapper/hovering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -107,7 +107,7 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
   PieceTypes? _selectedPiece;
   int? _selectedIndex;
   AnimationController? _slideController;
-  Animation<Offset>? _slideAnim;
+  Animation<Offset>? _slideAnimation;
 
   @override
   void initState() {
@@ -163,7 +163,7 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
       duration: const Duration(milliseconds: 250),
     );
 
-    _slideAnim =
+    _slideAnimation =
         Tween<Offset>(
           begin: Offset.zero,
           end: Offset(dx / widget.squareSize, dy / widget.squareSize),
@@ -201,8 +201,8 @@ class _AnimatedPickerState extends State<_AnimatedPicker>
         );
 
         // Slide the selected piece toward the promotion square
-        if (isSelected && _slideAnim != null) {
-          card = SlideTransition(position: _slideAnim!, child: card);
+        if (isSelected && _slideAnimation != null) {
+          card = SlideTransition(position: _slideAnimation!, child: card);
           return card;
         }
 
