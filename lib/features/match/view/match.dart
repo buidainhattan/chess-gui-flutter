@@ -304,13 +304,8 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                 RotatedBox(
                   quarterTurns: 3,
                   child: Text(
-                    'MOVES',
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.2,
-                      color: textColor,
-                    ),
+                    'moves',
+                    style: context.tabLabelText(color: textColor),
                   ),
                 ),
                 // Simplified Move Counter
@@ -331,11 +326,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                     ),
                     child: Text(
                       '$count',
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: context.badgeText(color: textColor),
                     ),
                   ),
                 ),
@@ -403,13 +394,10 @@ class _MoveHistoryPanel extends StatelessWidget {
           // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-            child: Text(
-              'MOVE HISTORY',
-              style: TextStyle(
-                color: textColor,
-                fontSize: 10.5,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w600,
+            child: Center(
+              child: Text(
+                'MOVE HISTORY',
+                style: context.sectionHeading(color: textColor),
               ),
             ),
           ),
@@ -424,7 +412,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                   return Center(
                     child: Text(
                       'No moves yet',
-                      style: TextStyle(color: textColor, fontSize: 13),
+                      style: context.emptyStateText(color: textColor),
                     ),
                   );
                 }
@@ -460,15 +448,14 @@ class _MoveHistoryPanel extends StatelessWidget {
                             width: 26,
                             child: Text(
                               '${i + 1}.',
-                              style: TextStyle(color: textColor, fontSize: 11),
+                              style: context.moveNumberText(color: textColor),
                             ),
                           ),
                           Expanded(
                             child: Text(
                               white,
-                              style: TextStyle(
+                              style: context.moveNotationText().copyWith(
                                 color: textColor,
-                                fontSize: 12,
                                 fontWeight: isLast
                                     ? FontWeight.w700
                                     : FontWeight.normal,
@@ -479,9 +466,8 @@ class _MoveHistoryPanel extends StatelessWidget {
                             child: black != null
                                 ? Text(
                                     black,
-                                    style: TextStyle(
+                                    style: context.moveNotationText(
                                       color: textColor,
-                                      fontSize: 12,
                                     ),
                                   )
                                 : const SizedBox(),
@@ -639,7 +625,7 @@ class _SidebarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return InkWell(
       onTap: onPressed,
@@ -651,15 +637,10 @@ class _SidebarButton extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: color.onSurface.withValues(alpha: 0.75),
+              color: colorScheme.onSurface.withValues(alpha: 0.75),
             ),
             const SizedBox(width: 12),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: color.onSurface.withValues(alpha: 0.75),
-              ),
-            ),
+            Text(label, style: context.tabLabelText()),
           ],
         ),
       ),
@@ -695,7 +676,10 @@ class _ArrowTab extends StatelessWidget {
                 ).colorScheme.onSurface.withValues(alpha: 0.35),
               ),
               SizedBox(height: AppTheme.spaceM),
-              RotatedBox(quarterTurns: 3, child: Text("Open menu")),
+              RotatedBox(
+                quarterTurns: 3,
+                child: Text("Open menu", style: context.tabLabelText()),
+              ),
               SizedBox(height: AppTheme.spaceM),
               Icon(
                 Icons.chevron_right,

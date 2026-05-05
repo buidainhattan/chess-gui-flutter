@@ -234,7 +234,7 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
                               child: Center(
                                 child: Text(
                                   widget.labelBuilder(item),
-                                  style: context.menuText(),
+                                  style: context.menuNavButtonText(),
                                 ),
                               ),
                             ),
@@ -287,7 +287,7 @@ class _ExpandingDropdownState<T> extends State<_ExpandingDropdown<T>>
                 const Spacer(),
                 Text(
                   widget.labelBuilder(selectedItem),
-                  style: context.menuText(),
+                  style: context.menuNavButtonText(),
                 ),
                 Expanded(
                   child: Align(

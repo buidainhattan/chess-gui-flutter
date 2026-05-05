@@ -36,7 +36,7 @@ class PrimaryNavButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: labelStyle ?? context.menuText(color: colorScheme.onPrimary),
+          style: labelStyle ?? context.menuNavButtonText(color: colorScheme.onPrimary),
         ),
       ),
     );
@@ -76,7 +76,7 @@ class SecondaryNavButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: labelStyle ?? context.menuText(color: colorScheme.primary),
+          style: labelStyle ?? context.menuNavButtonText(color: colorScheme.primary),
         ),
       ),
     );
@@ -112,7 +112,7 @@ class TertiaryNavButton extends StatelessWidget {
       child: Text(
         label,
         style:
-            labelStyle ?? context.menuText(color: color ?? colorScheme.primary),
+            labelStyle ?? context.menuNavButtonText(color: color ?? colorScheme.primary),
       ),
     );
   }
@@ -144,7 +144,7 @@ class DestructiveButton extends StatelessWidget {
       onPressed: route != null ? () => context.push(route!) : onPressed,
       child: Text(
         label,
-        style: labelStyle ?? context.menuText(color: colorScheme.error),
+        style: labelStyle ?? context.menuNavButtonText(color: colorScheme.error),
       ),
     );
   }
@@ -173,7 +173,7 @@ class SelectableButton extends StatelessWidget {
               backgroundColor: colorScheme.primary,
               shape: const StadiumBorder(),
             ),
-            child: Text(label, style: context.selectionText()),
+            child: Text(label, style: context.selectableButtonText()),
           )
         : OutlinedButton(
             onPressed: onPressed,
@@ -183,7 +183,7 @@ class SelectableButton extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: context.selectionText(color: colorScheme.primary),
+              style: context.selectableButtonText(color: colorScheme.primary),
             ),
           );
   }

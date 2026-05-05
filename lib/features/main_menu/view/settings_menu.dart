@@ -146,7 +146,7 @@ class _SettingTab extends StatelessWidget {
           ).colorScheme.primary.withValues(alpha: 0.15),
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: vPadding),
-            child: Center(child: Text(text, style: context.menuText())),
+            child: Center(child: Text(text, style: context.menuNavButtonText())),
           ),
         ),
       ),

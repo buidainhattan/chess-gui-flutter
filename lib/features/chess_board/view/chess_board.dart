@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
 import 'package:chess_app/features/chess_board/view/promotion.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
@@ -94,7 +95,7 @@ class ChessBoard extends StatelessWidget {
                         ),
                         child: Text(
                           "$rankNumber",
-                          style: TextStyle(fontSize: tileSize * 0.2),
+                          style: context.coordinateLabel(size: tileSize * 0.2),
                         ),
                       ),
                     );
@@ -124,7 +125,9 @@ class ChessBoard extends StatelessWidget {
                             ),
                             child: Text(
                               files[fileIndex],
-                              style: TextStyle(fontSize: tileSize * 0.2),
+                              style: context.coordinateLabel(
+                                size: tileSize * 0.2,
+                              ),
                             ),
                           ),
                         ),
