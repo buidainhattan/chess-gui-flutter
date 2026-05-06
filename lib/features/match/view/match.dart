@@ -4,7 +4,6 @@ import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/hovering.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/sliding.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/swiping_shader.dart';
-import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:chess_app/core/widgets/player_card.dart';
 import 'package:chess_app/features/chess_board/view/chess_board.dart';
 import 'package:chess_app/features/match/view/match_end.dart';
@@ -65,22 +64,6 @@ class _MatchState extends State<Match> {
               children: [
                 // ── Main layout ──
                 _MatchLayout(matchViewmodel: matchViewmodel),
-
-                matchViewmodel.botEnabled
-                    ? Align(
-                        alignment: Alignment.bottomLeft,
-                        child: SizedBox(
-                          width: 100,
-                          height: 50,
-                          child: BarButton(
-                            icon: Icons.redo_sharp,
-                            label: 'Undo',
-                            tooltip: 'Undo last move',
-                            onPressed: () => matchViewmodel.relayUnMakeSignal(),
-                          ),
-                        ),
-                      )
-                    : SizedBox.shrink(),
               ],
             ),
           ),

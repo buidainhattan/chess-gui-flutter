@@ -101,21 +101,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           ],
         ),
-        ShellRoute(
-          builder: (context, state, child) {
-            return Background(child: child);
+        GoRoute(
+          path: "/settings",
+          builder: (context, state) {
+            return ChangeNotifierProvider(
+              create: (_) => SettingsMenuViewmodel(settingsService),
+              child: SettingsMenu(),
+            );
           },
-          routes: [
-            GoRoute(
-              path: "/settings",
-              builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (_) => SettingsMenuViewmodel(settingsService),
-                  child: SettingsMenu(),
-                );
-              },
-            ),
-          ],
         ),
       ],
     );

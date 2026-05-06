@@ -2,7 +2,8 @@ import 'dart:io' show Platform;
 import 'package:chess_app/app_viewmodel.dart';
 import 'package:chess_app/core/services/session_service.dart';
 import 'package:chess_app/core/services/settings_service.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:chess_app/app.dart';
 import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
@@ -43,13 +44,20 @@ void main() async {
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(
-    MultiProvider(
-      providers: [
-        Provider.value(value: settingsService),
-        ChangeNotifierProvider(create: (_) => SessionService()),
-        ChangeNotifierProvider(create: (_) => AppViewmodel(settingsService))
-      ],
-      child: const MyApp(),
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) {
+        return MultiProvider(
+          providers: [
+            Provider.value(value: settingsService),
+            ChangeNotifierProvider(create: (_) => SessionService()),
+            ChangeNotifierProvider(
+              create: (_) => AppViewmodel(settingsService),
+            ),
+          ],
+          child: const MyApp(),
+        );
+      },
     ),
   );
 }

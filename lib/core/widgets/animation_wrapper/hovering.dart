@@ -40,7 +40,7 @@ class _HoveringWrapperState extends State<HoveringWrapper> {
         borderRadius: widget.borderRadius ?? BorderRadius.zero,
         child: Stack(
           children: [
-            Center(child: widget.child),
+            widget.child,
             Positioned.fill(
               child: IgnorePointer(
                 child: Container(

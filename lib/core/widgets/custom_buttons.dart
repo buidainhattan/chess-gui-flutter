@@ -1,6 +1,5 @@
 import 'package:chess_app/core/styles/text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 /// The main navigation target
@@ -36,7 +35,9 @@ class PrimaryNavButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: labelStyle ?? context.menuNavButtonText(color: colorScheme.onPrimary),
+          style:
+              labelStyle ??
+              context.menuNavButtonText(color: colorScheme.onPrimary),
         ),
       ),
     );
@@ -76,7 +77,9 @@ class SecondaryNavButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: labelStyle ?? context.menuNavButtonText(color: colorScheme.primary),
+          style:
+              labelStyle ??
+              context.menuNavButtonText(color: colorScheme.primary),
         ),
       ),
     );
@@ -112,7 +115,8 @@ class TertiaryNavButton extends StatelessWidget {
       child: Text(
         label,
         style:
-            labelStyle ?? context.menuNavButtonText(color: color ?? colorScheme.primary),
+            labelStyle ??
+            context.menuNavButtonText(color: color ?? colorScheme.primary),
       ),
     );
   }
@@ -144,7 +148,8 @@ class DestructiveButton extends StatelessWidget {
       onPressed: route != null ? () => context.push(route!) : onPressed,
       child: Text(
         label,
-        style: labelStyle ?? context.menuNavButtonText(color: colorScheme.error),
+        style:
+            labelStyle ?? context.menuNavButtonText(color: colorScheme.error),
       ),
     );
   }
@@ -173,7 +178,10 @@ class SelectableButton extends StatelessWidget {
               backgroundColor: colorScheme.primary,
               shape: const StadiumBorder(),
             ),
-            child: Text(label, style: context.selectableButtonText()),
+            child: Text(
+              label,
+              style: context.selectableButtonText(color: colorScheme.onPrimary),
+            ),
           )
         : OutlinedButton(
             onPressed: onPressed,
@@ -189,53 +197,3 @@ class SelectableButton extends StatelessWidget {
   }
 }
 
-class BarButton extends StatelessWidget {
-  final IconData? icon;
-  final String? svgPath;
-  final String label;
-  final String tooltip;
-  final Decoration? decoration;
-  final VoidCallback onPressed;
-
-  const BarButton({
-    super.key,
-    this.icon,
-    this.svgPath,
-    required this.label,
-    this.tooltip = "",
-    this.decoration,
-    required this.onPressed,
-  }) : assert(
-         (icon == null) != (svgPath == null),
-         "Only either icon or svgPath can be provided!",
-       );
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          child: Container(
-            decoration: decoration,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                icon != null
-                    ? Icon(icon)
-                    : SvgPicture.asset(svgPath!, width: 15, height: 15),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

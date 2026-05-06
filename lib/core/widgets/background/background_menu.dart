@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:chess_app/core/styles/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -74,9 +75,12 @@ class BackgroundMenu extends StatelessWidget {
             ),
             Expanded(
               flex: 5,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: child,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: child,
+                ),
               ),
             ),
           ],
