@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsService {
   late SharedPreferencesAsync _asyncPrefs;
 
+  // Profile
   late String _playerName;
   String get playerName => _playerName;
 
@@ -70,7 +71,7 @@ class SettingsService {
     _gameReminders = await loadGameReminders();
   }
 
-  // ── Existing ───────────────────────────────────────────────────────────────
+  // ── Profile ───────────────────────────────────────────────────────────────
 
   Future<void> savePlayerName(String value) async {
     _playerName = value;
@@ -89,7 +90,7 @@ class SettingsService {
   }
 
   Future<bool> loadConfirmMoves() async =>
-      await _asyncPrefs.getBool('confirm_moves') ?? true;
+      await _asyncPrefs.getBool('confirm_moves') ?? false;
 
   Future<void> saveAutoPromote(bool value) async {
     _autoPromote = value;
@@ -113,7 +114,7 @@ class SettingsService {
   }
 
   Future<int> loadMovementStyle() async =>
-      await _asyncPrefs.getInt('movement_style') ?? 0;
+      await _asyncPrefs.getInt('movement_style') ?? 1;
 
   // ── Appearance ─────────────────────────────────────────────────────────────
   Future<void> saveColorHexToList(int value) async {
@@ -175,7 +176,7 @@ class SettingsService {
   }
 
   Future<bool> loadGameEndSound() async =>
-      await _asyncPrefs.getBool('game_end_sound') ?? true;
+      await _asyncPrefs.getBool('game_end_sound') ?? false;
 
   Future<void> saveLowTimeWarning(bool value) async {
     _lowTimeWarning = value;
@@ -193,7 +194,7 @@ class SettingsService {
   }
 
   Future<bool> loadOpponentMoved() async =>
-      await _asyncPrefs.getBool('notif_opponent_moved') ?? true;
+      await _asyncPrefs.getBool('notif_opponent_moved') ?? false;
 
   Future<void> saveGameReminders(bool value) async {
     _gameReminders = value;

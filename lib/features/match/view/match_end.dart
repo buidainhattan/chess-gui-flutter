@@ -1,6 +1,5 @@
 import 'package:chess_app/core/basics/duration_extensions.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
-import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -199,7 +198,6 @@ class MatchEndDialog extends StatelessWidget {
                   Expanded(
                     child: SecondaryNavButton(
                       label: "Main menu",
-                      labelStyle: context.menuButtonText(),
                       onPressed: () {
                         context.pop();
                         context.go("/");
@@ -213,7 +211,6 @@ class MatchEndDialog extends StatelessWidget {
                   Expanded(
                     child: PrimaryNavButton(
                       label: _isOnline ? 'Rematch' : 'Play again',
-                      labelStyle: context.menuButtonText(),
                       onPressed: () => context.pop(),
                     ),
                   ),

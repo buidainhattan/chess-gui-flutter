@@ -8,12 +8,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-// ---------------------------------------------------------------------------
-// SettingsMenu — full-screen redesign
-// Viewmodel is unchanged. New gameplay/sound toggles are local UI state for
-// now; wire them into SettingsService when you're ready.
-// ---------------------------------------------------------------------------
-
 const List<IconData> _presetIcons = [
   Icons.person_outline,
   Icons.face_outlined,
@@ -34,7 +28,7 @@ class SettingsMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +81,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(label.toUpperCase(), style: context.screenSubtitle()),
+      child: Text(label.toUpperCase(), style: context.settingsSectionHeader()),
     );
   }
 }
@@ -102,7 +96,7 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
@@ -131,7 +125,7 @@ class _SettingsCard extends StatelessWidget {
 // Row types
 // ---------------------------------------------------------------------------
 
-/// A row with a leading icon, title, optional subtitle, and a trailing widget.
+/// A row with a leading icon, title, optional subtitle, optional child widget and a trailing widget.
 class _SettingsRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -151,7 +145,7 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -178,13 +172,10 @@ class _SettingsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: context.itemLevelOne(fontWeight: FontWeight.w500),
-                  ),
+                  Text(label, style: context.settingsRowLabel()),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!, style: context.itemLevelThree(alpha: 0.6)),
+                    Text(subtitle!, style: context.settingsRowSublabel()),
                   ],
                 ],
               ),
@@ -247,7 +238,7 @@ class _ChipGroupRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return _SettingsRow(
       icon: icon,
@@ -280,7 +271,7 @@ class _ChipGroupRow extends StatelessWidget {
                 ),
                 child: Text(
                   options[i],
-                  style: context.itemLevelThree(
+                  style: context.settingsChipLabel(
                     color: selected ? colorScheme.onPrimary : null,
                   ),
                 ),
@@ -319,8 +310,8 @@ class _EditNameDialogState extends State<_EditNameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme tt = Theme.of(context).textTheme;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -336,11 +327,11 @@ class _EditNameDialogState extends State<_EditNameDialog> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: cs.primaryContainer,
+                    backgroundColor: colorScheme.primaryContainer,
                     child: Icon(
                       Icons.person_outline,
                       size: 24,
-                      color: cs.onPrimaryContainer,
+                      color: colorScheme.onPrimaryContainer,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -348,7 +339,9 @@ class _EditNameDialogState extends State<_EditNameDialog> {
                   const SizedBox(height: 4),
                   Text(
                     'Shown during local games',
-                    style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    style: tt.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -367,7 +360,7 @@ class _EditNameDialogState extends State<_EditNameDialog> {
                 decoration: InputDecoration(
                   hintText: 'Enter your name',
                   counterStyle: tt.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -438,7 +431,7 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return Dialog(
@@ -455,11 +448,11 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: cs.primaryContainer,
+                    backgroundColor: colorScheme.primaryContainer,
                     child: Icon(
                       _presetIcons[_selectedIndex],
                       size: 24,
-                      color: cs.onPrimaryContainer,
+                      color: colorScheme.onPrimaryContainer,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -467,7 +460,9 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                   const SizedBox(height: 4),
                   Text(
                     'Pick an icon to represent you',
-                    style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    style: tt.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -492,11 +487,13 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                       duration: const Duration(milliseconds: 150),
                       decoration: BoxDecoration(
                         color: selected
-                            ? cs.primaryContainer
-                            : cs.surfaceContainerHighest,
+                            ? colorScheme.primaryContainer
+                            : colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: selected ? cs.primary : cs.outlineVariant,
+                          color: selected
+                              ? colorScheme.primary
+                              : colorScheme.outlineVariant,
                           width: selected ? 1.5 : 0.5,
                         ),
                       ),
@@ -504,8 +501,8 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                         _presetIcons[i],
                         size: 28,
                         color: selected
-                            ? cs.onPrimaryContainer
-                            : cs.onSurfaceVariant,
+                            ? colorScheme.onPrimaryContainer
+                            : colorScheme.onSurfaceVariant,
                       ),
                     ),
                   );
@@ -569,25 +566,18 @@ class _ProfileSection extends StatelessWidget {
     return _SettingsCard(
       children: [
         Selector<SettingsMenuViewmodel, String>(
-          selector: (_, viewmodel) => viewmodel.playerName,
+          selector: (context, viewmodel) => viewmodel.playerName,
           builder: (context, name, child) => _SettingsRow(
             icon: Icons.person_outline,
             label: 'Player name',
             subtitle: 'Shown during local games',
-            trailing: GestureDetector(
-              onTap: () => _showEditNameDialog(context, name),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(name, style: context.itemLevelTwo()),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 16,
-                    color: colorScheme.primary,
-                  ),
-                ],
-              ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(name, style: context.settingsRowValue()),
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right, size: 16, color: colorScheme.primary),
+              ],
             ),
             onTap: () => _showEditNameDialog(context, name),
           ),
@@ -635,44 +625,71 @@ class _GameplaySection extends StatefulWidget {
 }
 
 class _GameplaySectionState extends State<_GameplaySection> {
-  bool confirmMoves = false;
-  bool autoPromote = false;
-  bool showLegalMoves = true;
-  int movementStyle = 1; // 0=Drag, 1=Tap, 2=Both
+  late bool confirmMoves;
+  late bool autoPromote;
+  late bool showLegalMoves;
+  late int movementStyle; // 0=Drag, 1=Tap, 2=Both
+
+  @override
+  void initState() {
+    super.initState();
+    final SettingsMenuViewmodel viewmodel = context
+        .read<SettingsMenuViewmodel>();
+    confirmMoves = viewmodel.confirmMoves;
+    autoPromote = viewmodel.autoPromote;
+    showLegalMoves = viewmodel.showLegalMoves;
+    movementStyle = viewmodel.movementStyle;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return _SettingsCard(
-      children: [
-        _ToggleRow(
-          icon: Icons.touch_app_outlined,
-          label: 'Confirm moves',
-          subtitle: 'Tap again to confirm before submitting',
-          value: confirmMoves,
-          onChanged: (v) => setState(() => confirmMoves = v),
-        ),
-        _ToggleRow(
-          icon: Icons.auto_awesome_outlined,
-          label: 'Auto-promote to queen',
-          subtitle: 'Skip the promotion dialog',
-          value: autoPromote,
-          onChanged: (v) => setState(() => autoPromote = v),
-        ),
-        _ToggleRow(
-          icon: Icons.circle_outlined,
-          label: 'Show legal moves',
-          subtitle: 'Highlight valid squares on select',
-          value: showLegalMoves,
-          onChanged: (v) => setState(() => showLegalMoves = v),
-        ),
-        _ChipGroupRow(
-          icon: Icons.open_with,
-          label: 'Piece movement',
-          options: const ['Drag', 'Tap', 'Both'],
-          selectedIndex: movementStyle,
-          onSelected: (i) => setState(() => movementStyle = i),
-        ),
-      ],
+    return Consumer<SettingsMenuViewmodel>(
+      builder: (context, viewmodel, child) {
+        return _SettingsCard(
+          children: [
+            _ToggleRow(
+              icon: Icons.touch_app_outlined,
+              label: 'Confirm moves',
+              subtitle: 'Confirm before making move',
+              value: confirmMoves,
+              onChanged: (v) {
+                viewmodel.updateConfirmMoves(v);
+                setState(() => confirmMoves = v);
+              },
+            ),
+            _ToggleRow(
+              icon: Icons.auto_awesome_outlined,
+              label: 'Auto-promote to queen',
+              subtitle: 'Skip the promotion dialog',
+              value: autoPromote,
+              onChanged: (v) {
+                viewmodel.updateAutoPromote(v);
+                setState(() => autoPromote = v);
+              },
+            ),
+            _ToggleRow(
+              icon: Icons.circle_outlined,
+              label: 'Show legal moves',
+              subtitle: 'Highlight valid squares on select',
+              value: showLegalMoves,
+              onChanged: (v) {
+                viewmodel.updateShowLegalMoves(v);
+                setState(() => showLegalMoves = v);
+              },
+            ),
+            _ChipGroupRow(
+              icon: Icons.open_with,
+              label: 'Piece movement',
+              options: const ['Drag', 'Tap', 'Both'],
+              selectedIndex: movementStyle,
+              onSelected: (i) {
+                viewmodel.updateMovementStyle(i);
+                setState(() => movementStyle = i);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -689,12 +706,20 @@ class _AppearanceSection extends StatefulWidget {
 }
 
 class _AppearanceSectionState extends State<_AppearanceSection> {
-  int animSpeed = 1; // 0=Off, 1=Normal, 2=Slow
   bool deleteMode = false;
+  late int animSpeed; // 0=Off, 1=Normal, 2=Slow
+
+  @override
+  void initState() {
+    super.initState();
+    final SettingsMenuViewmodel viewmodel = context
+        .read<SettingsMenuViewmodel>();
+    animSpeed = viewmodel.animationSpeed;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<SettingsMenuViewmodel>(
       builder: (context, viewmodel, child) {
@@ -734,7 +759,10 @@ class _AppearanceSectionState extends State<_AppearanceSection> {
               label: 'Move animation',
               options: const ['Off', 'Normal', 'Slow'],
               selectedIndex: animSpeed,
-              onSelected: (i) => setState(() => animSpeed = i),
+              onSelected: (i) {
+                viewmodel.updateAnimationSpeed(i);
+                setState(() => animSpeed = i);
+              },
             ),
           ],
         );
@@ -755,41 +783,68 @@ class _SoundSection extends StatefulWidget {
 }
 
 class _SoundSectionState extends State<_SoundSection> {
-  bool moveSounds = true;
-  bool captureSounds = true;
-  bool gameEndSound = true;
-  bool lowTimeWarning = false;
+  late bool moveSounds;
+  late bool captureSounds;
+  late bool gameEndSound;
+  late bool lowTimeWarning;
+
+  @override
+  void initState() {
+    super.initState();
+    final SettingsMenuViewmodel viewmodel = context
+        .read<SettingsMenuViewmodel>();
+    moveSounds = viewmodel.moveSounds;
+    captureSounds = viewmodel.captureSounds;
+    gameEndSound = viewmodel.gameEndSound;
+    lowTimeWarning = viewmodel.lowTimeWarning;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return _SettingsCard(
-      children: [
-        _ToggleRow(
-          icon: Icons.volume_up_outlined,
-          label: 'Move sounds',
-          value: moveSounds,
-          onChanged: (v) => setState(() => moveSounds = v),
-        ),
-        _ToggleRow(
-          icon: Icons.sports_martial_arts_outlined,
-          label: 'Capture sounds',
-          value: captureSounds,
-          onChanged: (v) => setState(() => captureSounds = v),
-        ),
-        _ToggleRow(
-          icon: Icons.emoji_events_outlined,
-          label: 'Game end sound',
-          value: gameEndSound,
-          onChanged: (v) => setState(() => gameEndSound = v),
-        ),
-        _ToggleRow(
-          icon: Icons.timer_outlined,
-          label: 'Low time warning',
-          subtitle: 'Sound when clock drops below 10s',
-          value: lowTimeWarning,
-          onChanged: (v) => setState(() => lowTimeWarning = v),
-        ),
-      ],
+    return Consumer<SettingsMenuViewmodel>(
+      builder: (context, viewmodel, child) {
+        return _SettingsCard(
+          children: [
+            _ToggleRow(
+              icon: Icons.volume_up_outlined,
+              label: 'Move sounds',
+              value: moveSounds,
+              onChanged: (v) {
+                viewmodel.updateMoveSounds(v);
+                setState(() => moveSounds = v);
+              },
+            ),
+            _ToggleRow(
+              icon: Icons.sports_martial_arts_outlined,
+              label: 'Capture sounds',
+              value: captureSounds,
+              onChanged: (v) {
+                viewmodel.updateCaptureSounds(v);
+                setState(() => captureSounds = v);
+              },
+            ),
+            _ToggleRow(
+              icon: Icons.emoji_events_outlined,
+              label: 'Game end sound',
+              value: gameEndSound,
+              onChanged: (v) {
+                viewmodel.updateGameEndSound(v);
+                setState(() => gameEndSound = v);
+              },
+            ),
+            _ToggleRow(
+              icon: Icons.timer_outlined,
+              label: 'Low time warning',
+              subtitle: 'Sound when clock drops below 10s',
+              value: lowTimeWarning,
+              onChanged: (v) {
+                viewmodel.updateLowTimeWarning(v);
+                setState(() => lowTimeWarning = v);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -806,28 +861,47 @@ class _NotificationsSection extends StatefulWidget {
 }
 
 class _NotificationsSectionState extends State<_NotificationsSection> {
-  bool opponentMoved = true;
-  bool gameReminders = false;
+  late bool opponentMoved;
+  late bool gameReminders;
+
+  @override
+  void initState() {
+    super.initState();
+    final SettingsMenuViewmodel viewmodel = context
+        .read<SettingsMenuViewmodel>();
+    opponentMoved = viewmodel.opponentMoved;
+    gameReminders = viewmodel.gameReminders;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return _SettingsCard(
-      children: [
-        _ToggleRow(
-          icon: Icons.notifications_outlined,
-          label: 'Opponent moved',
-          subtitle: 'For correspondence games',
-          value: opponentMoved,
-          onChanged: (v) => setState(() => opponentMoved = v),
-        ),
-        _ToggleRow(
-          icon: Icons.alarm_outlined,
-          label: 'Game reminders',
-          subtitle: "Nudge when it's your turn",
-          value: gameReminders,
-          onChanged: (v) => setState(() => gameReminders = v),
-        ),
-      ],
+    return Consumer<SettingsMenuViewmodel>(
+      builder: (context, viewmodel, child) {
+        return _SettingsCard(
+          children: [
+            _ToggleRow(
+              icon: Icons.notifications_outlined,
+              label: 'Opponent moved',
+              subtitle: 'For correspondence games',
+              value: opponentMoved,
+              onChanged: (v) {
+                viewmodel.updateOpponentMoved(v);
+                setState(() => opponentMoved = v);
+              },
+            ),
+            _ToggleRow(
+              icon: Icons.alarm_outlined,
+              label: 'Game reminders',
+              subtitle: "Nudge when it's your turn",
+              value: gameReminders,
+              onChanged: (v) {
+                viewmodel.updateGameReminders(v);
+                setState(() => gameReminders = v);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -857,7 +931,7 @@ class _ThemeColorPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final colors = colorHexList.map((e) => Color(e)).toList();
 
     return Wrap(

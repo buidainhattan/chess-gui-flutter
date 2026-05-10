@@ -288,7 +288,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                   quarterTurns: 3,
                   child: Text(
                     'moves',
-                    style: context.itemLevelTwo(color: textColor),
+                    style: context.menuButtonLabel(color: textColor),
                   ),
                 ),
                 // Simplified Move Counter
@@ -380,7 +380,7 @@ class _MoveHistoryPanel extends StatelessWidget {
             child: Center(
               child: Text(
                 'MOVE HISTORY',
-                style: context.screenTitle(color: textColor),
+                style: context.panelTitle(color: textColor),
               ),
             ),
           ),
@@ -395,7 +395,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                   return Center(
                     child: Text(
                       'No moves yet',
-                      style: context.emptyStateText(color: textColor),
+                      style: context.panelBodyText(color: textColor),
                     ),
                   );
                 }
@@ -620,10 +620,10 @@ class _SidebarButton extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: colorScheme.onSurface.withValues(alpha: 0.75),
+              color: colorScheme.primary.withValues(alpha: 0.75),
             ),
             const SizedBox(width: 12),
-            Text(label, style: context.itemLevelTwo()),
+            Text(label, style: context.menuButtonLabel()),
           ],
         ),
       ),
@@ -656,12 +656,17 @@ class _ArrowTab extends StatelessWidget {
                 size: 18,
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withValues(alpha: 0.35),
+                ).colorScheme.onPrimary.withValues(alpha: 0.35),
               ),
               SizedBox(height: AppTheme.spaceM),
               RotatedBox(
                 quarterTurns: 3,
-                child: Text("Open menu", style: context.itemLevelTwo()),
+                child: Text(
+                  "Open menu",
+                  style: context.menuButtonLabel(
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                ),
               ),
               SizedBox(height: AppTheme.spaceM),
               Icon(
@@ -669,7 +674,7 @@ class _ArrowTab extends StatelessWidget {
                 size: 18,
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withValues(alpha: 0.35),
+                ).colorScheme.surface.withValues(alpha: 0.35),
               ),
             ],
           ),
