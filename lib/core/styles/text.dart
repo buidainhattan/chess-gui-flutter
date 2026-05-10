@@ -5,28 +5,16 @@ import 'package:flutter/material.dart';
 // ─────────────────────────────────────────────
 
 extension NavigationTextStyles on BuildContext {
-  /// Top-level menu items, nav rail labels
-  TextStyle menuNavButtonText({Color? color}) =>
+  /// Menu navigation items
+  TextStyle menuButtonText({Color? color}) =>
       Theme.of(this).textTheme.titleMedium!.copyWith(
-        fontWeight: FontWeight.w600,
         color: color ?? Theme.of(this).colorScheme.primary,
-        letterSpacing: 0.5,
+        fontWeight: FontWeight.bold,
       );
 
-  /// Dropdown/selection items
-  TextStyle selectableButtonText({Color? color}) => Theme.of(this)
-      .textTheme
-      .bodyMedium!
-      .copyWith(fontWeight: FontWeight.w600, color: color, letterSpacing: 0.3);
-
-  /// Tab labels, bottom nav
-  TextStyle tabLabelText({Color? color}) =>
-      Theme.of(this).textTheme.labelMedium!.copyWith(
-        color:
-            color ??
-            Theme.of(this).colorScheme.onSurface.withValues(alpha: 0.75),
-        letterSpacing: 0.4,
-      );
+  /// Radio selection items
+  TextStyle radioButtonText({Color? color}) =>
+      Theme.of(this).textTheme.bodyMedium!.copyWith(color: color);
 
   /// Tooltip / contextual hints in menus
   TextStyle menuHintText({Color? color}) =>
@@ -127,26 +115,46 @@ extension PlayerTextStyles on BuildContext {
 // ─────────────────────────────────────────────
 
 extension ContentTextStyles on BuildContext {
-  /// Body / paragraph text
-  TextStyle mainTextStyle({Color? color}) =>
-      Theme.of(this).textTheme.bodyLarge!.copyWith(color: color, height: 1.5);
+  TextStyle screenTitle({Color? color}) =>
+      Theme.of(this).textTheme.titleLarge!.copyWith(
+        color: color ?? Theme.of(this).colorScheme.primary,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.5,
+      );
 
-  /// Section headings inside screens
-  TextStyle sectionHeading({Color? color}) =>
+  TextStyle screenSubtitle({Color? color}) =>
       Theme.of(this).textTheme.titleMedium!.copyWith(
-        fontWeight: FontWeight.w700,
-        color: color,
-        letterSpacing: 0.2,
-        height: 1.3,
+        color: color ?? Theme.of(this).colorScheme.primary,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1,
       );
 
-  /// Captions, timestamps, secondary metadata
-  TextStyle captionText({Color? color}) =>
-      Theme.of(this).textTheme.labelSmall!.copyWith(
-        color: color ?? Theme.of(this).colorScheme.onSurfaceVariant,
-        height: 1.4,
-        letterSpacing: 0.2,
-      );
+  TextStyle itemLevelOne({
+    Color? color,
+    FontWeight? fontWeight,
+    double? alpha,
+  }) => Theme.of(this).textTheme.bodyLarge!.copyWith(
+    color: color ?? Theme.of(this).colorScheme.primary.withValues(alpha: alpha),
+    fontWeight: fontWeight,
+  );
+
+  TextStyle itemLevelTwo({
+    Color? color,
+    FontWeight? fontWeight,
+    double? alpha,
+  }) => Theme.of(this).textTheme.bodyMedium!.copyWith(
+    color: color ?? Theme.of(this).colorScheme.primary.withValues(alpha: alpha),
+    fontWeight: fontWeight,
+  );
+
+  TextStyle itemLevelThree({
+    Color? color,
+    FontWeight? fontWeight,
+    double? alpha,
+  }) => Theme.of(this).textTheme.bodySmall!.copyWith(
+    color: color ?? Theme.of(this).colorScheme.primary.withValues(alpha: alpha),
+    fontWeight: fontWeight,
+  );
 
   /// Button labels
   TextStyle buttonText({Color? color}) => Theme.of(this).textTheme.labelLarge!

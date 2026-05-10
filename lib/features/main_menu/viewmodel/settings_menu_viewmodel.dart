@@ -4,15 +4,11 @@ import 'package:flutter/material.dart';
 class SettingsMenuViewmodel extends ChangeNotifier {
   late final SettingsService _settingsService;
 
-  // ── Existing ───────────────────────────────────────────────────────────────
+  // ── Profile ───────────────────────────────────────────────────────────────
   late String _playerName;
   String get playerName => _playerName;
-
-  late List<int> _colorHexList;
-  List<int> get colorHexList => _colorHexList;
-
-  late int _themeColorHexValue;
-  int get themeColorHexValue => _themeColorHexValue;
+  late int _profileIconIndex;
+  int get profileIconIndex => _profileIconIndex;
 
   // ── Gameplay ───────────────────────────────────────────────────────────────
   late bool _confirmMoves;
@@ -29,6 +25,12 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   int get movementStyle => _movementStyle;
 
   // ── Appearance ─────────────────────────────────────────────────────────────
+  late List<int> _colorHexList;
+  List<int> get colorHexList => _colorHexList;
+
+  late int _themeColorHexValue;
+  int get themeColorHexValue => _themeColorHexValue;
+
   /// 0 = Off, 1 = Normal, 2 = Slow
   late int _animationSpeed;
   int get animationSpeed => _animationSpeed;
@@ -60,10 +62,9 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   }
 
   void _init() {
-    // Existing
+    // Profile
     _playerName = _settingsService.playerName;
-    _colorHexList = _settingsService.colorHexList;
-    _themeColorHexValue = _settingsService.themeColorHexValue.value;
+    _profileIconIndex = 0;
 
     // Gameplay
     _confirmMoves = _settingsService.confirmMoves;
@@ -72,6 +73,8 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     _movementStyle = _settingsService.movementStyle;
 
     // Appearance
+    _colorHexList = _settingsService.colorHexList;
+    _themeColorHexValue = _settingsService.themeColorHexValue.value;
     _animationSpeed = _settingsService.animationSpeed;
 
     // Sound
@@ -85,18 +88,60 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     _gameReminders = _settingsService.gameReminders;
   }
 
-  // ── Existing update methods ────────────────────────────────────────────────
+  // ── Profile ────────────────────────────────────────────────
+  void updatePlayerName(String newName) async {
+    if (_playerName == newName) return;
+
+    _playerName = newName;
+    notifyListeners();
+    await _settingsService.savePlayerName(newName);
+  }
+
+  void updateProfileIconIndex(int index) async {
+    if (_profileIconIndex == index) return;
+
+    _profileIconIndex = index;
+    notifyListeners();
+  }
+
+  // ── Gameplay ───────────────────────────────────────────────────────────────
+  void updateConfirmMoves(bool value) async {
+    if (_confirmMoves == value) return;
+
+    _confirmMoves = value;
+    notifyListeners();
+    await _settingsService.saveConfirmMoves(value);
+  }
+
+  void updateAutoPromote(bool value) async {
+    if (_autoPromote == value) return;
+
+    _autoPromote = value;
+    notifyListeners();
+    await _settingsService.saveAutoPromote(value);
+  }
+
+  void updateShowLegalMoves(bool value) async {
+    if (_showLegalMoves == value) return;
+
+    _showLegalMoves = value;
+    notifyListeners();
+    await _settingsService.saveShowLegalMoves(value);
+  }
+
+  void updateMovementStyle(int value) async {
+    if (_movementStyle == value) return;
+
+    _movementStyle = value;
+    notifyListeners();
+    await _settingsService.saveMovementStyle(value);
+  }
+
+  // ── Appearance ─────────────────────────────────────────────────────────────
   void updateActiveThemeColor(int selectedColorHex) async {
     _themeColorHexValue = selectedColorHex;
     notifyListeners();
     await _settingsService.saveThemeColorHex(selectedColorHex);
-  }
-
-  void updatePlayerName(String newName) async {
-    if (_playerName == newName) return;
-    _playerName = newName;
-    notifyListeners();
-    await _settingsService.savePlayerName(newName);
   }
 
   void addThemeColor(int newColorHex) async {
@@ -109,41 +154,12 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void deleteThemeColor(int colorHexToDelete) async {
     if (_themeColorHexValue == colorHexToDelete) return;
+
     _colorHexList = [..._colorHexList.where((e) => e != colorHexToDelete)];
     notifyListeners();
     await _settingsService.deleteColorHexFromList(colorHexToDelete);
   }
 
-  // ── Gameplay ───────────────────────────────────────────────────────────────
-  void updateConfirmMoves(bool value) async {
-    if (_confirmMoves == value) return;
-    _confirmMoves = value;
-    notifyListeners();
-    await _settingsService.saveConfirmMoves(value);
-  }
-
-  void updateAutoPromote(bool value) async {
-    if (_autoPromote == value) return;
-    _autoPromote = value;
-    notifyListeners();
-    await _settingsService.saveAutoPromote(value);
-  }
-
-  void updateShowLegalMoves(bool value) async {
-    if (_showLegalMoves == value) return;
-    _showLegalMoves = value;
-    notifyListeners();
-    await _settingsService.saveShowLegalMoves(value);
-  }
-
-  void updateMovementStyle(int value) async {
-    if (_movementStyle == value) return;
-    _movementStyle = value;
-    notifyListeners();
-    await _settingsService.saveMovementStyle(value);
-  }
-
-  // ── Appearance ─────────────────────────────────────────────────────────────
   void updateAnimationSpeed(int value) async {
     if (_animationSpeed == value) return;
     _animationSpeed = value;
@@ -154,6 +170,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   // ── Sound ──────────────────────────────────────────────────────────────────
   void updateMoveSounds(bool value) async {
     if (_moveSounds == value) return;
+
     _moveSounds = value;
     notifyListeners();
     await _settingsService.saveMoveSounds(value);
@@ -161,6 +178,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void updateCaptureSounds(bool value) async {
     if (_captureSounds == value) return;
+
     _captureSounds = value;
     notifyListeners();
     await _settingsService.saveCaptureSounds(value);
@@ -168,6 +186,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void updateGameEndSound(bool value) async {
     if (_gameEndSound == value) return;
+
     _gameEndSound = value;
     notifyListeners();
     await _settingsService.saveGameEndSound(value);
@@ -175,6 +194,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void updateLowTimeWarning(bool value) async {
     if (_lowTimeWarning == value) return;
+
     _lowTimeWarning = value;
     notifyListeners();
     await _settingsService.saveLowTimeWarning(value);
@@ -183,6 +203,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   // ── Notifications ──────────────────────────────────────────────────────────
   void updateOpponentMoved(bool value) async {
     if (_opponentMoved == value) return;
+
     _opponentMoved = value;
     notifyListeners();
     await _settingsService.saveOpponentMoved(value);
@@ -190,6 +211,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
   void updateGameReminders(bool value) async {
     if (_gameReminders == value) return;
+
     _gameReminders = value;
     notifyListeners();
     await _settingsService.saveGameReminders(value);

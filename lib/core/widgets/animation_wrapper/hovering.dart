@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 class HoveringWrapper extends StatefulWidget {
   final Widget child;
-  final BorderRadius? borderRadius;
   final bool isPersisted;
+  final Color? color;
+  final BorderRadius? borderRadius;
 
   const HoveringWrapper({
     super.key,
     required this.child,
-    this.borderRadius,
     this.isPersisted = false,
+    this.color,
+    this.borderRadius,
   });
 
   @override
@@ -45,7 +47,7 @@ class _HoveringWrapperState extends State<HoveringWrapper> {
               child: IgnorePointer(
                 child: Container(
                   color: isHovering || widget.isPersisted
-                      ? hoveringColor
+                      ? widget.color ?? hoveringColor
                       : Colors.transparent,
                 ),
               ),

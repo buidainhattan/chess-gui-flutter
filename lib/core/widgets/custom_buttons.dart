@@ -37,7 +37,7 @@ class PrimaryNavButton extends StatelessWidget {
           label,
           style:
               labelStyle ??
-              context.menuNavButtonText(color: colorScheme.onPrimary),
+              context.menuButtonText(color: colorScheme.onPrimary),
         ),
       ),
     );
@@ -79,7 +79,7 @@ class SecondaryNavButton extends StatelessWidget {
           label,
           style:
               labelStyle ??
-              context.menuNavButtonText(color: colorScheme.primary),
+              context.menuButtonText(color: colorScheme.primary),
         ),
       ),
     );
@@ -116,7 +116,7 @@ class TertiaryNavButton extends StatelessWidget {
         label,
         style:
             labelStyle ??
-            context.menuNavButtonText(color: color ?? colorScheme.primary),
+            context.menuButtonText(color: color ?? colorScheme.primary),
       ),
     );
   }
@@ -149,7 +149,7 @@ class DestructiveButton extends StatelessWidget {
       child: Text(
         label,
         style:
-            labelStyle ?? context.menuNavButtonText(color: colorScheme.error),
+            labelStyle ?? context.menuButtonText(color: colorScheme.error),
       ),
     );
   }
@@ -180,7 +180,7 @@ class SelectableButton extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: context.selectableButtonText(color: colorScheme.onPrimary),
+              style: context.radioButtonText(color: colorScheme.onPrimary),
             ),
           )
         : OutlinedButton(
@@ -191,7 +191,7 @@ class SelectableButton extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: context.selectableButtonText(color: colorScheme.primary),
+              style: context.radioButtonText(color: colorScheme.primary),
             ),
           );
   }

@@ -288,7 +288,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                   quarterTurns: 3,
                   child: Text(
                     'moves',
-                    style: context.tabLabelText(color: textColor),
+                    style: context.itemLevelTwo(color: textColor),
                   ),
                 ),
                 // Simplified Move Counter
@@ -380,7 +380,7 @@ class _MoveHistoryPanel extends StatelessWidget {
             child: Center(
               child: Text(
                 'MOVE HISTORY',
-                style: context.sectionHeading(color: textColor),
+                style: context.screenTitle(color: textColor),
               ),
             ),
           ),
@@ -623,7 +623,7 @@ class _SidebarButton extends StatelessWidget {
               color: colorScheme.onSurface.withValues(alpha: 0.75),
             ),
             const SizedBox(width: 12),
-            Text(label, style: context.tabLabelText()),
+            Text(label, style: context.itemLevelTwo()),
           ],
         ),
       ),
@@ -661,7 +661,7 @@ class _ArrowTab extends StatelessWidget {
               SizedBox(height: AppTheme.spaceM),
               RotatedBox(
                 quarterTurns: 3,
-                child: Text("Open menu", style: context.tabLabelText()),
+                child: Text("Open menu", style: context.itemLevelTwo()),
               ),
               SizedBox(height: AppTheme.spaceM),
               Icon(

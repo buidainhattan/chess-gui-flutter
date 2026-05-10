@@ -199,7 +199,7 @@ class MatchEndDialog extends StatelessWidget {
                   Expanded(
                     child: SecondaryNavButton(
                       label: "Main menu",
-                      labelStyle: context.mainTextStyle(),
+                      labelStyle: context.menuButtonText(),
                       onPressed: () {
                         context.pop();
                         context.go("/");
@@ -213,7 +213,7 @@ class MatchEndDialog extends StatelessWidget {
                   Expanded(
                     child: PrimaryNavButton(
                       label: _isOnline ? 'Rematch' : 'Play again',
-                      labelStyle: context.mainTextStyle(),
+                      labelStyle: context.menuButtonText(),
                       onPressed: () => context.pop(),
                     ),
                   ),
