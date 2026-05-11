@@ -42,6 +42,7 @@ class _LoadingState extends State<Loading> {
       widget.enableBot,
     );
     final chessBoardViewmodel = ChessBoardViewmodel(
+      settingsService,
       matchManagerService,
       sessionService,
     );

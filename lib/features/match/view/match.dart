@@ -198,7 +198,7 @@ class _TurnStrip extends StatelessWidget {
                     sideToMove == playerOneSide
                         ? 'Your turn'
                         : "Opponent's turn",
-                    style: context.turnStripText(),
+                    style: context.matchTurnStripText(),
                   ),
                 ),
                 const SizedBox(width: AppTheme.spaceS),
@@ -288,7 +288,7 @@ class _MovesSidebarState extends State<_MovesSidebar> {
                   quarterTurns: 3,
                   child: Text(
                     'moves',
-                    style: context.menuButtonLabel(color: textColor),
+                    style: context.menuLabel(color: textColor),
                   ),
                 ),
                 // Simplified Move Counter
@@ -431,13 +431,15 @@ class _MoveHistoryPanel extends StatelessWidget {
                             width: 26,
                             child: Text(
                               '${i + 1}.',
-                              style: context.moveNumberText(color: textColor),
+                              style: context.matchMoveDisplayText(
+                                color: textColor,
+                              ),
                             ),
                           ),
                           Expanded(
                             child: Text(
                               white,
-                              style: context.moveNotationText().copyWith(
+                              style: context.matchMoveDisplayText().copyWith(
                                 color: textColor,
                                 fontWeight: isLast
                                     ? FontWeight.w700
@@ -449,7 +451,7 @@ class _MoveHistoryPanel extends StatelessWidget {
                             child: black != null
                                 ? Text(
                                     black,
-                                    style: context.moveNotationText(
+                                    style: context.matchMoveDisplayText(
                                       color: textColor,
                                     ),
                                   )
@@ -623,7 +625,7 @@ class _SidebarButton extends StatelessWidget {
               color: colorScheme.primary.withValues(alpha: 0.75),
             ),
             const SizedBox(width: 12),
-            Text(label, style: context.menuButtonLabel()),
+            Text(label, style: context.menuLabel()),
           ],
         ),
       ),
@@ -663,7 +665,7 @@ class _ArrowTab extends StatelessWidget {
                 quarterTurns: 3,
                 child: Text(
                   "Open menu",
-                  style: context.menuButtonLabel(
+                  style: context.menuLabel(
                     color: Theme.of(context).colorScheme.surface,
                   ),
                 ),

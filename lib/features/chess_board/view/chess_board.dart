@@ -95,7 +95,9 @@ class ChessBoard extends StatelessWidget {
                         ),
                         child: Text(
                           "$rankNumber",
-                          style: context.coordinateLabel(size: tileSize * 0.2),
+                          style: context.matchCoordinateLabel(
+                            size: tileSize * 0.2,
+                          ),
                         ),
                       ),
                     );
@@ -125,7 +127,7 @@ class ChessBoard extends StatelessWidget {
                             ),
                             child: Text(
                               files[fileIndex],
-                              style: context.coordinateLabel(
+                              style: context.matchCoordinateLabel(
                                 size: tileSize * 0.2,
                               ),
                             ),
@@ -196,8 +198,7 @@ class ChessBoard extends StatelessWidget {
               ),
 
               Selector<ChessBoardViewmodel, bool>(
-                selector: (context, viewmodel) =>
-                    viewmodel.boardState.isPromotion,
+                selector: (context, viewmodel) => viewmodel.isPromotion,
                 builder: (context, isPromotion, child) {
                   if (isPromotion) {
                     return Positioned.fill(

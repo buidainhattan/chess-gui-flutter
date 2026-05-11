@@ -81,7 +81,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(label.toUpperCase(), style: context.settingsSectionHeader()),
+      child: Text(label.toUpperCase(), style: context.settingSectionHeader()),
     );
   }
 }
@@ -172,10 +172,10 @@ class _SettingsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: context.settingsRowLabel()),
+                  Text(label, style: context.settingRowLabel()),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!, style: context.settingsRowSublabel()),
+                    Text(subtitle!, style: context.settingowSublabel()),
                   ],
                 ],
               ),
@@ -271,7 +271,7 @@ class _ChipGroupRow extends StatelessWidget {
                 ),
                 child: Text(
                   options[i],
-                  style: context.settingsChipLabel(
+                  style: context.settingChipLabel(
                     color: selected ? colorScheme.onPrimary : null,
                   ),
                 ),
@@ -574,7 +574,7 @@ class _ProfileSection extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(name, style: context.settingsRowValue()),
+                Text(name, style: context.settingRowValue()),
                 const SizedBox(width: 4),
                 Icon(Icons.chevron_right, size: 16, color: colorScheme.primary),
               ],

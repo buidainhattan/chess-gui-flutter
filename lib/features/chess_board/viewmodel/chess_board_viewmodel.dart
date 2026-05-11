@@ -6,6 +6,7 @@ import 'package:chess_app/core/controllers/audio_controller.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_factory.dart';
 import 'package:chess_app/core/engine_interface/engine_bridge_interface.dart';
 import 'package:chess_app/core/services/session_service.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:chess_app/features/chess_board/model/board_state_model.dart';
 import 'package:chess_app/features/chess_board/model/move_model.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
@@ -14,11 +15,13 @@ import 'package:chess_app/features/chess_board/helper/move_manager.dart';
 import 'package:flutter/material.dart';
 
 class ChessBoardViewmodel extends ChangeNotifier {
+  final SettingsService _settingsService;
+  final SessionService _sessionService;
+  final MatchManagerService _matchManagerService;
+
   final AudioController _audioController = AudioController();
   final EngineBridgeInterface _engineBridge = getEngineBridge();
   final MoveManager _moveManager = MoveManager();
-  final SessionService _sessionService;
-  final MatchManagerService _matchManagerService;
 
   late final StreamSubscription _opponentMoveSubscription;
   late final StreamSubscription _redoSignalSubscription;
@@ -33,6 +36,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
   BoardState get boardState => _boardState;
   late final List<BoardState> _boardStateHistory;
 
+  bool _isPromotion = false;
+  bool get isPromotion => _isPromotion;
+
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
@@ -42,7 +48,11 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;
 
-  ChessBoardViewmodel(this._matchManagerService, this._sessionService);
+  ChessBoardViewmodel(
+    this._settingsService,
+    this._matchManagerService,
+    this._sessionService,
+  );
 
   // <===== Initialize ChessBoard ====>
   Future<void> initializeChessBoard() async {
@@ -131,7 +141,13 @@ class ChessBoardViewmodel extends ChangeNotifier {
         _matchManagerService.setEnPassantTarget(toSquare);
       case (MoveFlags.promotion || MoveFlags.promotionCapture):
         if (!_matchManagerService.botEnabled) {
-          _openPromotionDialog();
+          _boardState = _boardState.copyWith(
+            isPromotion: true,
+            promoteSquareIndex: toSquare,
+          );
+          if (!_settingsService.autoPromote) {
+            _openPromotionDialog();
+          }
         } else {
           if (_matchManagerService.isPlayerTwoTurn()) {
             PieceTypes? piecePromotedTo = move.piecePromotedTo;
@@ -154,7 +170,14 @@ class ChessBoardViewmodel extends ChangeNotifier {
     _deSelectPiece();
     notifyListeners();
 
-    if (_boardState.isPromotion) return;
+    if (_boardState.isPromotion) {
+      if (!_settingsService.autoPromote) {
+        return;
+      } else {
+        await promotePiece();
+        return;
+      }
+    }
 
     _engineBridge.makeMove(move.index);
     await _endTurn(pieceToMove.type, move);
@@ -281,6 +304,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
       promoteSquareIndex: _boardState.to,
     );
 
+    _isPromotion = true;
+
     notifyListeners();
   }
 
@@ -305,6 +330,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
       pieceList: {..._boardState.pieceList, key: newPieceModel},
       isPromotion: false,
     );
+    _isPromotion = false;
 
     notifyListeners();
 

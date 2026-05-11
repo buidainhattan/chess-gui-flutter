@@ -7,15 +7,19 @@ class Background extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            radius: 1.1,
+            radius: 1,
             colors: [
-              Theme.of(context).colorScheme.inversePrimary,
-              Theme.of(context).colorScheme.primary,
+              colorScheme.inversePrimary,
+              colorScheme.inversePrimary,
+              colorScheme.primary,
             ],
+            stops: const [0, 0.2, 1],
           ),
         ),
         child: child,
