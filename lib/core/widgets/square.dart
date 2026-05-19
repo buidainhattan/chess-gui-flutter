@@ -38,110 +38,153 @@ class Square extends StatelessWidget {
     final Color inCheckColor = boardTheme.checkOverlay(colorScheme);
     final Color hintColor = boardTheme.selectedOverlay(colorScheme);
 
-    return GestureDetector(
-      onTap: () {
-        chessBoardViewmodel.onSquareTapped(index);
+    return DragTarget<int>(
+      onWillAcceptWithDetails: (details) {
+        if (chessBoardViewmodel.pieceMovementType == 1) {
+          return false;
+        }
+        return !chessBoardViewmodel.lockBoard &&
+            chessBoardViewmodel.result == POVResult.ongoing;
       },
-      child: SizedBox(
-        width: tileSize,
-        height: tileSize,
-        child: Stack(
-          children: [
-            Container(decoration: BoxDecoration(color: fillColor)),
-            Selector<ChessBoardViewmodel, ({bool isSelected, bool isLastMove})>(
-              selector: (context, viewmodel) {
-                final bool isSelected = viewmodel.boardState.from == index;
-                final bool isLastMove =
-                    viewmodel.boardState.preFrom == index ||
-                    viewmodel.boardState.to == index;
+      onAcceptWithDetails: (details) {
+        chessBoardViewmodel.onPieceDropped(
+          fromIndex: details.data,
+          toIndex: index,
+        );
+      },
+      builder: (context, candidateData, rejectedData) {
+        // Check if a piece is hovering over this square
+        final bool isHovered = candidateData.isNotEmpty;
 
-                return (isSelected: isSelected, isLastMove: isLastMove);
-              },
-              builder: (context, state, child) {
-                if (state.isSelected) {
-                  return Container(
-                    decoration: BoxDecoration(color: selectedColor),
-                  );
-                }
+        return GestureDetector(
+          onTap: () {
+            // Disable square click selection if mode is 0 (Drag only)
+            if (chessBoardViewmodel.pieceMovementType != 0) {
+              chessBoardViewmodel.onSquareTapped(index);
+            }
+          },
+          child: SizedBox(
+            width: tileSize,
+            height: tileSize,
+            child: Stack(
+              children: [
+                Container(decoration: BoxDecoration(color: fillColor)),
+                Selector<
+                  ChessBoardViewmodel,
+                  ({bool isSelected, bool isLastMove})
+                >(
+                  selector: (context, viewmodel) {
+                    final bool isSelected = viewmodel.boardState.from == index;
+                    final bool isLastMove =
+                        viewmodel.boardState.preFrom == index ||
+                        viewmodel.boardState.to == index;
 
-                if (state.isLastMove) {
-                  return Container(
-                    decoration: BoxDecoration(color: lastMoveColor),
-                  );
-                }
+                    return (isSelected: isSelected, isLastMove: isLastMove);
+                  },
+                  builder: (context, state, child) {
+                    if (state.isSelected) {
+                      return Container(
+                        decoration: BoxDecoration(color: selectedColor),
+                      );
+                    }
 
-                return SizedBox.shrink();
-              },
-            ),
+                    if (state.isLastMove) {
+                      return Container(
+                        decoration: BoxDecoration(color: lastMoveColor),
+                      );
+                    }
 
-            Selector<
-              ChessBoardViewmodel,
-              ({bool isMoveableTo, bool isCapture})
-            >(
-              selector: (context, viewmodel) {
-                final bool isMoveableTo = viewmodel.boardState.moveList
-                    .contains(index);
-                final bool isCapture =
-                    viewmodel.boardState.pieceKeys[index].isNotEmpty;
+                    return SizedBox.shrink();
+                  },
+                ),
 
-                return (isMoveableTo: isMoveableTo, isCapture: isCapture);
-              },
-              builder: (context, state, child) {
-                if (!state.isMoveableTo) {
-                  return const SizedBox.shrink();
-                }
+                Selector<
+                  ChessBoardViewmodel,
+                  ({bool isMoveableTo, bool isCapture})
+                >(
+                  selector: (context, viewmodel) {
+                    final bool isMoveableTo = viewmodel.boardState.moveList
+                        .contains(index);
+                    final bool isCapture =
+                        viewmodel.boardState.pieceKeys[index].isNotEmpty;
 
-                double hintPosition, hintSize;
-                String hintName;
-                if (state.isCapture) {
-                  hintPosition = 0;
-                  hintSize = tileSize;
-                  hintName = "assets/images/tiles/tile_hint_capture.svg";
-                } else {
-                  hintPosition = (tileSize / 3);
-                  hintSize = (tileSize / 3);
-                  hintName = "assets/images/tiles/tile_hint_move.svg";
-                }
+                    return (isMoveableTo: isMoveableTo, isCapture: isCapture);
+                  },
+                  builder: (context, state, child) {
+                    if (!state.isMoveableTo ||
+                        !chessBoardViewmodel.showLegalMoves) {
+                      return const SizedBox.shrink();
+                    }
 
-                return Positioned(
-                  top: hintPosition,
-                  left: hintPosition,
-                  child: SvgPicture.asset(
-                    hintName,
-                    width: hintSize,
-                    height: hintSize,
-                    colorFilter: ColorFilter.mode(hintColor, BlendMode.srcIn),
+                    double hintPosition, hintSize;
+                    String hintName;
+                    if (state.isCapture) {
+                      hintPosition = 0;
+                      hintSize = tileSize;
+                      hintName = "assets/images/tiles/tile_hint_capture.svg";
+                    } else {
+                      hintPosition = (tileSize / 3);
+                      hintSize = (tileSize / 3);
+                      hintName = "assets/images/tiles/tile_hint_move.svg";
+                    }
+
+                    return Positioned(
+                      top: hintPosition,
+                      left: hintPosition,
+                      child: SvgPicture.asset(
+                        hintName,
+                        width: hintSize,
+                        height: hintSize,
+                        colorFilter: ColorFilter.mode(
+                          hintColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                Selector<ChessBoardViewmodel, bool>(
+                  selector: (context, viewmodel) {
+                    if (viewmodel.boardState.checkedKingSquare != null &&
+                        viewmodel.boardState.checkedKingSquare == index) {
+                      return true;
+                    }
+                    return false;
+                  },
+                  builder: (context, isChecked, child) {
+                    if (!isChecked) {
+                      return SizedBox.shrink();
+                    }
+                    final String hintName =
+                        "assets/images/tiles/tile_hint_checking.svg";
+
+                    return SvgPicture.asset(
+                      hintName,
+                      width: tileSize,
+                      height: tileSize,
+                      colorFilter: ColorFilter.mode(
+                        inCheckColor,
+                        BlendMode.srcIn,
+                      ),
+                    );
+                  },
+                ),
+
+                // DRAG HOVER HINT OVERLAY
+                if (isHovered)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.blue.withValues(
+                        alpha: 0.3,
+                      ), // Customizable hover tint
+                    ),
                   ),
-                );
-              },
+              ],
             ),
-
-            Selector<ChessBoardViewmodel, bool>(
-              selector: (context, viewmodel) {
-                if (viewmodel.boardState.checkedKingSquare != null &&
-                    viewmodel.boardState.checkedKingSquare == index) {
-                  return true;
-                }
-                return false;
-              },
-              builder: (context, isChecked, child) {
-                if (!isChecked) {
-                  return SizedBox.shrink();
-                }
-                final String hintName =
-                    "assets/images/tiles/tile_hint_checking.svg";
-
-                return SvgPicture.asset(
-                  hintName,
-                  width: tileSize,
-                  height: tileSize,
-                  colorFilter: ColorFilter.mode(inCheckColor, BlendMode.srcIn),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

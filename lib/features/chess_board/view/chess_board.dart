@@ -8,11 +8,17 @@ import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.d
 import 'package:chess_app/core/widgets/piece.dart';
 import 'package:chess_app/core/widgets/square.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-class ChessBoard extends StatelessWidget {
+class ChessBoard extends StatefulWidget {
   const ChessBoard({super.key});
 
+  @override
+  State<ChessBoard> createState() => _ChessBoardState();
+}
+
+class _ChessBoardState extends State<ChessBoard> {
   @override
   Widget build(BuildContext context) {
     final ChessBoardViewmodel chessBoardViewmodel = context
@@ -140,34 +146,101 @@ class ChessBoard extends StatelessWidget {
               ),
 
               ...chessBoardViewmodel.boardState.pieceList.entries.map(
-                (entry) => Selector<ChessBoardViewmodel, PieceModel?>(
-                  key: ValueKey(entry.key),
+                (entry) =>
+                    Selector<
+                      ChessBoardViewmodel,
+                      ({PieceModel? piece, bool skipAnimation})
+                    >(
+                      selector: (context, viewModel) => (
+                        piece: viewModel.boardState.pieceList[entry.key],
+                        skipAnimation: viewModel.isDragMove,
+                      ),
+                      builder: (context, state, child) {
+                        final pieceModel = state.piece;
+                        final skipAnimation = state.skipAnimation;
 
-                  selector: (context, viewModel) =>
-                      viewModel.boardState.pieceList[entry.key],
-                  builder: (context, pieceModel, child) {
-                    if (pieceModel == null || pieceModel.isCaptured) {
-                      return SizedBox.shrink();
-                    }
-                    int index = isPlayerOneWhite
-                        ? pieceModel.index
-                        : 63 - pieceModel.index;
+                        if (pieceModel == null || pieceModel.isCaptured) {
+                          return const SizedBox.shrink();
+                        }
 
-                    int rowIndex = (7 - index ~/ 8);
-                    int colIndex = (index % 8 + 1);
-                    double offset = (tileSize - pieceSize) / 2;
-                    double topPosition = ((rowIndex * tileSize) + offset);
-                    double leftPosition =
-                        (((colIndex - 1) * tileSize) + offset);
+                        // Flip the isDragMove flag as soon as render finished
+                        if (skipAnimation) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            chessBoardViewmodel.clearDragMoveFlag();
+                          });
+                        }
 
-                    return Piece(
-                      piece: pieceModel,
-                      pieceSize: pieceSize,
-                      topPosition: topPosition,
-                      leftPosition: leftPosition,
-                    );
-                  },
-                ),
+                        int index = isPlayerOneWhite
+                            ? pieceModel.index
+                            : 63 - pieceModel.index;
+                        int rowIndex = (7 - index ~/ 8);
+                        int colIndex = (index % 8 + 1);
+                        double offset = (tileSize - pieceSize) / 2;
+                        double topPosition = ((rowIndex * tileSize) + offset);
+                        double leftPosition =
+                            (((colIndex - 1) * tileSize) + offset);
+
+                        final int mode = chessBoardViewmodel.pieceMovementType;
+
+                        return AnimatedPositioned(
+                          duration: skipAnimation
+                              ? Duration.zero
+                              : const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          top: topPosition,
+                          left: leftPosition,
+                          child: Draggable<int>(
+                            data: pieceModel.index,
+                            maxSimultaneousDrags: mode == 1 ? 0 : 1,
+                            onDragStarted: () {
+                              if (chessBoardViewmodel.boardState.from != null &&
+                                  chessBoardViewmodel.boardState.from !=
+                                      pieceModel.index) {
+                                chessBoardViewmodel.onSquareTapped(
+                                  chessBoardViewmodel.boardState.from!,
+                                );
+                              }
+                              if (chessBoardViewmodel.boardState.from == null) {
+                                chessBoardViewmodel.onSquareTapped(
+                                  pieceModel.index,
+                                );
+                              }
+                            },
+                            onDraggableCanceled: (_, _) {
+                              if (chessBoardViewmodel.boardState.from ==
+                                  pieceModel.index) {
+                                chessBoardViewmodel.onSquareTapped(
+                                  pieceModel.index,
+                                );
+                              }
+                            },
+                            feedback: Material(
+                              color: Colors.transparent,
+                              child: SvgPicture.asset(
+                                "assets/images/chess_pieces/${pieceModel.color.name}/${pieceModel.type.name}.svg",
+                                width: pieceSize,
+                                height: pieceSize,
+                              ),
+                            ),
+                            childWhenDragging: const SizedBox.shrink(),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                if (mode != 0) {
+                                  chessBoardViewmodel.onSquareTapped(
+                                    pieceModel.index,
+                                  );
+                                }
+                              },
+                              child: Piece(
+                                piece: pieceModel,
+                                pieceSize: pieceSize,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
               ),
 
               Selector<ChessBoardViewmodel, bool>(

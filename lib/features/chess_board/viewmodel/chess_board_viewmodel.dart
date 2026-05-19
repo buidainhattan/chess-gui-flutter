@@ -36,6 +36,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
   BoardState get boardState => _boardState;
   late final List<BoardState> _boardStateHistory;
 
+  bool _isDragMove = false;
+  bool get isDragMove => _isDragMove;
+
   bool _isPromotion = false;
   bool get isPromotion => _isPromotion;
 
@@ -48,6 +51,11 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;
 
+  late bool _showLegalMoves;
+  bool get showLegalMoves => _showLegalMoves;
+  late int _pieceMovementType;
+  int get pieceMovementType => _pieceMovementType;
+
   ChessBoardViewmodel(
     this._settingsService,
     this._matchManagerService,
@@ -57,6 +65,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
   // <===== Initialize ChessBoard ====>
   Future<void> initializeChessBoard() async {
     if (_isInitialized) return;
+
+    _showLegalMoves = _settingsService.showLegalMoves;
+    _pieceMovementType = _settingsService.movementStyle;
 
     _boardStateHistory = [];
 
@@ -296,6 +307,16 @@ class ChessBoardViewmodel extends ChangeNotifier {
     String moveString = toCustomMoveData(move);
     _sessionService.makeMove(moveString);
     await _makeMove(move);
+  }
+
+  void onPieceDropped({required int fromIndex, required int toIndex}) {
+    _isDragMove = true;
+
+    onSquareTapped(toIndex);
+  }
+
+  void clearDragMoveFlag() {
+    _isDragMove = false;
   }
 
   Future<void> _openPromotionDialog() async {
