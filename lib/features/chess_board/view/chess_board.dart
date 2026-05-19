@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:chess_app/core/constants/all_enum.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/features/chess_board/model/piece_model.dart';
-import 'package:chess_app/features/chess_board/view/promotion.dart';
+import 'package:chess_app/features/chess_board/view/confirm_overlay.dart';
+import 'package:chess_app/features/chess_board/view/promotion_overlay.dart';
 import 'package:chess_app/features/chess_board/viewmodel/chess_board_viewmodel.dart';
 import 'package:chess_app/core/widgets/piece.dart';
 import 'package:chess_app/core/widgets/square.dart';
@@ -180,7 +182,8 @@ class _ChessBoardState extends State<ChessBoard> {
                         double leftPosition =
                             (((colIndex - 1) * tileSize) + offset);
 
-                        final int mode = chessBoardViewmodel.pieceMovementType;
+                        final int mode =
+                            chessBoardViewmodel.pieceMovementTypeSetting;
 
                         return AnimatedPositioned(
                           duration: skipAnimation
@@ -288,6 +291,23 @@ class _ChessBoardState extends State<ChessBoard> {
                     );
                   }
                   return SizedBox.shrink();
+                },
+              ),
+
+              Selector<ChessBoardViewmodel, Completer<bool>?>(
+                selector: (context, viewmodel) =>
+                    viewmodel.moveConfirmCompleter,
+                builder: (context, moveCompleter, child) {
+                  if (moveCompleter != null) {
+                    return Positioned.fill(
+                      child: ConfirmOverlay(
+                        squareIndex: chessBoardViewmodel.boardState.to!,
+                        boardSize: size,
+                        confirmCompleter: moveCompleter, // Handshake complete
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
             ],

@@ -34,10 +34,12 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   late BoardState _boardState;
   BoardState get boardState => _boardState;
+  BoardState? _rollbackState;
   late final List<BoardState> _boardStateHistory;
 
   bool _isDragMove = false;
   bool get isDragMove => _isDragMove;
+  Completer<bool>? moveConfirmCompleter;
 
   bool _isPromotion = false;
   bool get isPromotion => _isPromotion;
@@ -51,10 +53,12 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;
 
-  late bool _showLegalMoves;
-  bool get showLegalMoves => _showLegalMoves;
-  late int _pieceMovementType;
-  int get pieceMovementType => _pieceMovementType;
+  late bool _confirmMovesSetting;
+  bool get confirmMovesSetting => _confirmMovesSetting;
+  late bool _showLegalMovesSetting;
+  bool get showLegalMovesSetting => _showLegalMovesSetting;
+  late int _pieceMovementTypeSetting;
+  int get pieceMovementTypeSetting => _pieceMovementTypeSetting;
 
   ChessBoardViewmodel(
     this._settingsService,
@@ -66,8 +70,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
   Future<void> initializeChessBoard() async {
     if (_isInitialized) return;
 
-    _showLegalMoves = _settingsService.showLegalMoves;
-    _pieceMovementType = _settingsService.movementStyle;
+    _confirmMovesSetting = _settingsService.confirmMoves;
+    _showLegalMovesSetting = _settingsService.showLegalMoves;
+    _pieceMovementTypeSetting = _settingsService.movementStyle;
 
     _boardStateHistory = [];
 
@@ -147,6 +152,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     if (pieceToMove == null) return;
 
+    if (_confirmMovesSetting) {
+      _rollbackState = _boardState;
+    }
+
     switch (flag) {
       case MoveFlags.doublePawnPush:
         _matchManagerService.setEnPassantTarget(toSquare);
@@ -156,8 +165,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
             isPromotion: true,
             promoteSquareIndex: toSquare,
           );
-          if (!_settingsService.autoPromote) {
-            _openPromotionDialog();
+          if (!_settingsService.autoPromote && !_confirmMovesSetting) {
+            _openPromotionOverlay();
           }
         } else {
           if (_matchManagerService.isPlayerTwoTurn()) {
@@ -178,8 +187,23 @@ class ChessBoardViewmodel extends ChangeNotifier {
     }
     _movePiece(pieceToMoveKey, fromSquare, toSquare);
     _audioController.playSoundEffect(_getSound(move.moveFlag));
+
     _deSelectPiece();
     notifyListeners();
+
+    if (_confirmMovesSetting) {
+      moveConfirmCompleter = Completer<bool>();
+      final bool isConfirmed = await moveConfirmCompleter!.future;
+      moveConfirmCompleter = null; // Clean up
+
+      if (!isConfirmed) {
+        _boardState = _rollbackState!;
+        _rollbackState = null;
+        notifyListeners();
+        return;
+      }
+      notifyListeners();
+    }
 
     if (_boardState.isPromotion) {
       if (!_settingsService.autoPromote) {
@@ -305,6 +329,14 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     MoveModel move = _moveManager.getMove(from, to);
     String moveString = toCustomMoveData(move);
+
+    if (_confirmMovesSetting) {
+      await _makeMove(move).then((_) {
+        _sessionService.makeMove(moveString);
+      });
+      return;
+    }
+
     _sessionService.makeMove(moveString);
     await _makeMove(move);
   }
@@ -319,7 +351,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     _isDragMove = false;
   }
 
-  Future<void> _openPromotionDialog() async {
+  Future<void> _openPromotionOverlay() async {
     _boardState = _boardState.copyWith(
       isPromotion: true,
       promoteSquareIndex: _boardState.to,

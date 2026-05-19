@@ -40,7 +40,7 @@ class Square extends StatelessWidget {
 
     return DragTarget<int>(
       onWillAcceptWithDetails: (details) {
-        if (chessBoardViewmodel.pieceMovementType == 1) {
+        if (chessBoardViewmodel.pieceMovementTypeSetting == 1) {
           return false;
         }
         return !chessBoardViewmodel.lockBoard &&
@@ -59,7 +59,7 @@ class Square extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             // Disable square click selection if mode is 0 (Drag only)
-            if (chessBoardViewmodel.pieceMovementType != 0) {
+            if (chessBoardViewmodel.pieceMovementTypeSetting != 0) {
               chessBoardViewmodel.onSquareTapped(index);
             }
           },
@@ -112,7 +112,7 @@ class Square extends StatelessWidget {
                   },
                   builder: (context, state, child) {
                     if (!state.isMoveableTo ||
-                        !chessBoardViewmodel.showLegalMoves) {
+                        !chessBoardViewmodel.showLegalMovesSetting) {
                       return const SizedBox.shrink();
                     }
 
