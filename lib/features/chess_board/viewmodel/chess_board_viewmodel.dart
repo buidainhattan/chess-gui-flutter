@@ -37,8 +37,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
   BoardState? _rollbackState;
   late final List<BoardState> _boardStateHistory;
 
-  bool _isDragMove = false;
-  bool get isDragMove => _isDragMove;
+  bool _isDragged = false;
+  bool get isDragged => _isDragged;
   Completer<bool>? moveConfirmCompleter;
 
   bool _isPromotion = false;
@@ -152,10 +152,6 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     if (pieceToMove == null) return;
 
-    if (_confirmMovesSetting) {
-      _rollbackState = _boardState;
-    }
-
     switch (flag) {
       case MoveFlags.doublePawnPush:
         _matchManagerService.setEnPassantTarget(toSquare);
@@ -192,6 +188,11 @@ class ChessBoardViewmodel extends ChangeNotifier {
     notifyListeners();
 
     if (_confirmMovesSetting) {
+      if (!_isDragged) {
+        await Future.delayed(Duration(milliseconds: 200));
+        notifyListeners();
+      }
+
       moveConfirmCompleter = Completer<bool>();
       final bool isConfirmed = await moveConfirmCompleter!.future;
       moveConfirmCompleter = null; // Clean up
@@ -341,14 +342,12 @@ class ChessBoardViewmodel extends ChangeNotifier {
     await _makeMove(move);
   }
 
-  void onPieceDropped({required int fromIndex, required int toIndex}) {
-    _isDragMove = true;
-
-    onSquareTapped(toIndex);
+  void draggingStart() {
+    _isDragged = true;
   }
 
-  void clearDragMoveFlag() {
-    _isDragMove = false;
+  void draggingEnd() {
+    _isDragged = false;
   }
 
   Future<void> _openPromotionOverlay() async {
@@ -449,6 +448,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
   }
 
   void _selectPiece(int squareIndex) {
+    if (_confirmMovesSetting) {
+      _rollbackState = _boardState;
+    }
     // Select piece
     _boardState = _boardState.copyWith(
       selectedPieceKey: _boardState.pieceKeys[squareIndex],

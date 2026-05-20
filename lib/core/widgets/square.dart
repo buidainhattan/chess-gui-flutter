@@ -43,29 +43,27 @@ class Square extends StatelessWidget {
         if (chessBoardViewmodel.pieceMovementTypeSetting == 1) {
           return false;
         }
-        return !chessBoardViewmodel.lockBoard &&
-            chessBoardViewmodel.result == POVResult.ongoing;
+        return true;
       },
       onAcceptWithDetails: (details) {
-        chessBoardViewmodel.onPieceDropped(
-          fromIndex: details.data,
-          toIndex: index,
-        );
+        if (!chessBoardViewmodel.boardState.moveList.contains(index)) {
+          chessBoardViewmodel.draggingEnd();
+        }
+        chessBoardViewmodel.onSquareTapped(index);
       },
       builder: (context, candidateData, rejectedData) {
         // Check if a piece is hovering over this square
         final bool isHovered = candidateData.isNotEmpty;
 
-        return GestureDetector(
-          onTap: () {
-            // Disable square click selection if mode is 0 (Drag only)
-            if (chessBoardViewmodel.pieceMovementTypeSetting != 0) {
-              chessBoardViewmodel.onSquareTapped(index);
-            }
-          },
-          child: SizedBox(
-            width: tileSize,
-            height: tileSize,
+        return SizedBox(
+          width: tileSize,
+          height: tileSize,
+          child: GestureDetector(
+            onTap: () {
+              if (chessBoardViewmodel.pieceMovementTypeSetting != 0) {
+                chessBoardViewmodel.onSquareTapped(index);
+              }
+            },
             child: Stack(
               children: [
                 Container(decoration: BoxDecoration(color: fillColor)),
@@ -74,11 +72,12 @@ class Square extends StatelessWidget {
                   ({bool isSelected, bool isLastMove})
                 >(
                   selector: (context, viewmodel) {
-                    final bool isSelected = viewmodel.boardState.from == index;
+                    final bool isSelected =
+                        viewmodel.boardState.from == index;
                     final bool isLastMove =
                         viewmodel.boardState.preFrom == index ||
                         viewmodel.boardState.to == index;
-
+          
                     return (isSelected: isSelected, isLastMove: isLastMove);
                   },
                   builder: (context, state, child) {
@@ -87,17 +86,17 @@ class Square extends StatelessWidget {
                         decoration: BoxDecoration(color: selectedColor),
                       );
                     }
-
+          
                     if (state.isLastMove) {
                       return Container(
                         decoration: BoxDecoration(color: lastMoveColor),
                       );
                     }
-
+          
                     return SizedBox.shrink();
                   },
                 ),
-
+          
                 Selector<
                   ChessBoardViewmodel,
                   ({bool isMoveableTo, bool isCapture})
@@ -107,7 +106,7 @@ class Square extends StatelessWidget {
                         .contains(index);
                     final bool isCapture =
                         viewmodel.boardState.pieceKeys[index].isNotEmpty;
-
+          
                     return (isMoveableTo: isMoveableTo, isCapture: isCapture);
                   },
                   builder: (context, state, child) {
@@ -115,7 +114,7 @@ class Square extends StatelessWidget {
                         !chessBoardViewmodel.showLegalMovesSetting) {
                       return const SizedBox.shrink();
                     }
-
+          
                     double hintPosition, hintSize;
                     String hintName;
                     if (state.isCapture) {
@@ -127,7 +126,7 @@ class Square extends StatelessWidget {
                       hintSize = (tileSize / 3);
                       hintName = "assets/images/tiles/tile_hint_move.svg";
                     }
-
+          
                     return Positioned(
                       top: hintPosition,
                       left: hintPosition,
@@ -143,7 +142,7 @@ class Square extends StatelessWidget {
                     );
                   },
                 ),
-
+          
                 Selector<ChessBoardViewmodel, bool>(
                   selector: (context, viewmodel) {
                     if (viewmodel.boardState.checkedKingSquare != null &&
@@ -158,7 +157,7 @@ class Square extends StatelessWidget {
                     }
                     final String hintName =
                         "assets/images/tiles/tile_hint_checking.svg";
-
+          
                     return SvgPicture.asset(
                       hintName,
                       width: tileSize,
@@ -170,13 +169,13 @@ class Square extends StatelessWidget {
                     );
                   },
                 ),
-
+          
                 // DRAG HOVER HINT OVERLAY
                 if (isHovered)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.blue.withValues(
-                        alpha: 0.3,
+                      color: colorScheme.onSurface.withValues(
+                        alpha: 0.08,
                       ), // Customizable hover tint
                     ),
                   ),

@@ -10,12 +10,10 @@ class Piece extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: SvgPicture.asset(
-        "assets/images/chess_pieces/${piece.color.name}/${piece.type.name}.svg",
-        width: pieceSize,
-        height: pieceSize,
-      ),
+    return SvgPicture.asset(
+      "assets/images/chess_pieces/${piece.color.name}/${piece.type.name}.svg",
+      width: pieceSize,
+      height: pieceSize,
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/hovering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
@@ -22,9 +21,6 @@ Widget confirmPreview() {
               width: size / 8,
               height: size / 8,
               color: Colors.brown.shade400,
-              child: const Center(
-                child: Text("♞", style: TextStyle(fontSize: 24)),
-              ),
             ),
           ),
           Positioned.fill(
@@ -32,6 +28,10 @@ Widget confirmPreview() {
               squareIndex: squareIndex,
               boardSize: size,
               confirmCompleter: Completer(),
+              // Pass the piece here to be highlighted above the dim overlay
+              pieceWidget: const Center(
+                child: Text("♞", style: TextStyle(fontSize: 24)),
+              ),
             ),
           ),
         ],
@@ -44,12 +44,14 @@ class ConfirmOverlay extends StatelessWidget {
   final int squareIndex;
   final double boardSize;
   final Completer<bool> confirmCompleter;
+  final Widget pieceWidget;
 
   const ConfirmOverlay({
     super.key,
     required this.squareIndex,
     required this.boardSize,
     required this.confirmCompleter,
+    required this.pieceWidget,
   });
 
   @override
@@ -62,14 +64,12 @@ class ConfirmOverlay extends StatelessWidget {
     final double left = file * squareSize;
     final double squareTop = boardSize - ((rank + 1) * squareSize);
 
-    final double top = squareTop - 20;
-
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color textColor = colorScheme.onSurfaceVariant;
+    final Color textColor = colorScheme.onPrimary;
 
     return Stack(
       children: [
-        // Clickable Dim Blocker
+        // 1. Clickable Dim Blocker
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -78,73 +78,75 @@ class ConfirmOverlay extends StatelessWidget {
           ),
         ),
 
-        // Floating Action Framework (Hollow center)
+        // 2. The Highlighted Piece (Placed EXACTLY over the board square)
         Positioned(
           left: left,
-          top: top,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          top: squareTop,
+          width: squareSize,
+          height: squareSize,
+          child: Center(child: pieceWidget),
+        ),
+
+        // 3. UI Prompts (Positioned relative to the square to avoid shifting the piece)
+        Positioned(
+          left: left,
+          top: squareTop - 24, // Placed strictly above the square
+          width: squareSize,
+          child: Center(
+            child: Text(
+              "Move?",
+              style: TextStyle(
+                color: textColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                shadows: const [Shadow(color: Colors.black26, blurRadius: 4)],
+              ),
+            ),
+          ),
+        ),
+
+        Positioned(
+          left: left,
+          top: squareTop + squareSize + 4, // Placed strictly below the square
+          width: squareSize,
+          child: Row(
             children: [
-              Text(
-                "Move?",
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  shadows: const [Shadow(color: Colors.black26, blurRadius: 4)],
+              // Cancel Button
+              Expanded(
+                child: HoveringWrapper(
+                  child: Center(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => confirmCompleter.complete(false),
+                      child: SizedBox(
+                        height: squareSize * 0.5,
+                        child: Icon(
+                          Icons.close,
+                          color: colorScheme.error,
+                          size: squareSize * 0.35,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
-
-              SizedBox(
-                width: squareSize,
-                height: squareSize + AppTheme.spaceXS,
-              ),
-
-              Container(
-                width: squareSize,
-                color: Colors.transparent,
-                child: Row(
-                  children: [
-                    // Cancel Button
-                    Expanded(
-                      child: HoveringWrapper(
-                        child: Center(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => confirmCompleter.complete(false),
-                            child: SizedBox(
-                              height: squareSize * 0.5,
-                              child: Icon(
-                                Icons.close,
-                                color: colorScheme.error,
-                                size: squareSize * 0.35,
-                              ),
-                            ),
-                          ),
+              // Confirm Button
+              Expanded(
+                child: HoveringWrapper(
+                  child: Center(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => confirmCompleter.complete(true),
+                      child: SizedBox(
+                        height: squareSize * 0.5,
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.lightGreen,
+                          size: squareSize * 0.35,
                         ),
                       ),
                     ),
-                    // Confirm Button
-                    Expanded(
-                      child: HoveringWrapper(
-                        child: Center(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => confirmCompleter.complete(true),
-                            child: SizedBox(
-                              height: squareSize * 0.5,
-                              child: Icon(
-                                Icons.check,
-                                color: Colors.lightGreen,
-                                size: squareSize * 0.35,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
