@@ -56,7 +56,33 @@ class SettingsMenu extends StatelessWidget {
           const _AppearanceSection(),
           const SizedBox(height: 20),
 
-          _SectionLabel(label: 'Sound'),
+          Consumer<SettingsMenuViewmodel>(
+            builder: (context, viewmodel, child) {
+              final ColorScheme colorScheme = Theme.of(context).colorScheme;
+              return Row(
+                children: [
+                  Expanded(child: _SectionLabel(label: 'Sound')),
+                  IconButton(
+                    onPressed: () =>
+                        viewmodel.updateMuteAll(!viewmodel.allSoundsMuted),
+                    icon: Icon(
+                      viewmodel.allSoundsMuted
+                          ? Icons.volume_off_outlined
+                          : Icons.volume_up_outlined,
+                      size: 16,
+                      color: viewmodel.allSoundsMuted
+                          ? colorScheme.error
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: viewmodel.allSoundsMuted
+                        ? 'Unmute all'
+                        : 'Mute all',
+                  ),
+                ],
+              );
+            },
+          ),
           const _SoundSection(),
           const SizedBox(height: 20),
 
@@ -168,7 +194,7 @@ class _SettingsRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              flex: child != null ? 0 : 1,
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -180,8 +206,18 @@ class _SettingsRow extends StatelessWidget {
                 ],
               ),
             ),
-            if (child != null) Expanded(child: Center(child: child!)),
-            trailing,
+            Expanded(
+              flex: 7,
+              child: Row(
+                children: [
+                  if (child != null)
+                    Expanded(child: Center(child: child!))
+                  else
+                    Spacer(),
+                  trailing,
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -279,6 +315,174 @@ class _ChipGroupRow extends StatelessWidget {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+/// A row with a label, a volume slider (0–100 display / 0.0–1.0 internal),
+/// a value text field, and a mute icon button at the trailing end.
+class _SoundRow extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final String? subtitle;
+  final double volume;
+  final bool muted;
+  final ValueChanged<double> onVolumeChanged;
+  final VoidCallback onMuteToggle;
+
+  const _SoundRow({
+    required this.icon,
+    required this.label,
+    this.subtitle,
+    required this.volume,
+    required this.muted,
+    required this.onVolumeChanged,
+    required this.onMuteToggle,
+  });
+
+  @override
+  State<_SoundRow> createState() => _SoundRowState();
+}
+
+class _SoundRowState extends State<_SoundRow> {
+  late TextEditingController _controller;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _toDisplay(widget.volume));
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(_SoundRow old) {
+    super.didUpdateWidget(old);
+    if (!_focusNode.hasFocus && old.volume != widget.volume) {
+      _controller.text = _toDisplay(widget.volume);
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String _toDisplay(double v) => (v * 100).round().toString();
+
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus) _commit(_controller.text);
+  }
+
+  void _commit(String raw) {
+    final parsed = int.tryParse(raw);
+    final clamped = (parsed ?? (widget.volume * 100).round()).clamp(0, 100);
+    _controller.text = clamped.toString();
+    widget.onVolumeChanged(clamped / 100);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final effectiveVolume = widget.muted ? 0.0 : widget.volume;
+
+    return _SettingsRow(
+      icon: widget.icon,
+      label: widget.label,
+      subtitle: widget.subtitle,
+      trailing: IconButton(
+        onPressed: widget.onMuteToggle,
+        icon: Icon(
+          widget.muted || widget.volume == 0
+              ? Icons.volume_off_outlined
+              : widget.volume < 0.5
+              ? Icons.volume_down_outlined
+              : Icons.volume_up_outlined,
+          size: 18,
+          color: widget.muted
+              ? colorScheme.onSurfaceVariant
+              : colorScheme.primary,
+        ),
+        visualDensity: VisualDensity.compact,
+        tooltip: widget.muted ? 'Unmute' : 'Mute',
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 2,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+              ),
+              child: Slider(
+                value: effectiveVolume,
+                min: 0,
+                max: 1,
+                onChanged: widget.muted ? null : widget.onVolumeChanged,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          SizedBox(
+            width: 40,
+            height: 28,
+            child: Center(
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                enabled: !widget.muted,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: widget.muted
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onSurface,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: 0.5,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: 0.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 1,
+                    ),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                onSubmitted: _commit,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -617,29 +821,8 @@ class _ProfileSection extends StatelessWidget {
 // Gameplay section
 // ---------------------------------------------------------------------------
 
-class _GameplaySection extends StatefulWidget {
+class _GameplaySection extends StatelessWidget {
   const _GameplaySection();
-
-  @override
-  State<_GameplaySection> createState() => _GameplaySectionState();
-}
-
-class _GameplaySectionState extends State<_GameplaySection> {
-  late bool confirmMoves;
-  late bool autoPromote;
-  late bool showLegalMoves;
-  late int movementStyle; // 0=Drag, 1=Tap, 2=Both
-
-  @override
-  void initState() {
-    super.initState();
-    final SettingsMenuViewmodel viewmodel = context
-        .read<SettingsMenuViewmodel>();
-    confirmMoves = viewmodel.confirmMoves;
-    autoPromote = viewmodel.autoPromote;
-    showLegalMoves = viewmodel.showLegalMoves;
-    movementStyle = viewmodel.movementStyle;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -651,41 +834,29 @@ class _GameplaySectionState extends State<_GameplaySection> {
               icon: Icons.touch_app_outlined,
               label: 'Confirm moves',
               subtitle: 'Confirm before making move',
-              value: confirmMoves,
-              onChanged: (v) {
-                viewmodel.updateConfirmMoves(v);
-                setState(() => confirmMoves = v);
-              },
+              value: viewmodel.confirmMoves,
+              onChanged: viewmodel.updateConfirmMoves,
             ),
             _ToggleRow(
               icon: Icons.auto_awesome_outlined,
               label: 'Auto-promote to queen',
               subtitle: 'Skip the promotion dialog',
-              value: autoPromote,
-              onChanged: (v) {
-                viewmodel.updateAutoPromote(v);
-                setState(() => autoPromote = v);
-              },
+              value: viewmodel.autoPromote,
+              onChanged: viewmodel.updateAutoPromote,
             ),
             _ToggleRow(
               icon: Icons.circle_outlined,
               label: 'Show legal moves',
               subtitle: 'Highlight valid squares on select',
-              value: showLegalMoves,
-              onChanged: (v) {
-                viewmodel.updateShowLegalMoves(v);
-                setState(() => showLegalMoves = v);
-              },
+              value: viewmodel.showLegalMoves,
+              onChanged: viewmodel.updateShowLegalMoves,
             ),
             _ChipGroupRow(
               icon: Icons.open_with,
               label: 'Piece movement',
               options: const ['Drag', 'Tap', 'Both'],
-              selectedIndex: movementStyle,
-              onSelected: (i) {
-                viewmodel.updateMovementStyle(i);
-                setState(() => movementStyle = i);
-              },
+              selectedIndex: viewmodel.movementStyle,
+              onSelected: viewmodel.updateMovementStyle,
             ),
           ],
         );
@@ -707,15 +878,6 @@ class _AppearanceSection extends StatefulWidget {
 
 class _AppearanceSectionState extends State<_AppearanceSection> {
   bool deleteMode = false;
-  late int animSpeed; // 0=Off, 1=Normal, 2=Slow
-
-  @override
-  void initState() {
-    super.initState();
-    final SettingsMenuViewmodel viewmodel = context
-        .read<SettingsMenuViewmodel>();
-    animSpeed = viewmodel.animationSpeed;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -758,11 +920,8 @@ class _AppearanceSectionState extends State<_AppearanceSection> {
               icon: Icons.animation,
               label: 'Move animation',
               options: const ['Off', 'Normal', 'Slow'],
-              selectedIndex: animSpeed,
-              onSelected: (i) {
-                viewmodel.updateAnimationSpeed(i);
-                setState(() => animSpeed = i);
-              },
+              selectedIndex: viewmodel.animationSpeed,
+              onSelected: viewmodel.updateAnimationSpeed,
             ),
           ],
         );
@@ -783,20 +942,20 @@ class _SoundSection extends StatefulWidget {
 }
 
 class _SoundSectionState extends State<_SoundSection> {
-  late bool moveSounds;
-  late bool captureSounds;
-  late bool gameEndSound;
-  late bool lowTimeWarning;
+  late double moveSoundsVolume;
+  late double captureSoundsVolume;
+  late double gameEndSoundVolume;
+  late double lowTimeWarningVolume;
 
   @override
   void initState() {
     super.initState();
     final SettingsMenuViewmodel viewmodel = context
         .read<SettingsMenuViewmodel>();
-    moveSounds = viewmodel.moveSounds;
-    captureSounds = viewmodel.captureSounds;
-    gameEndSound = viewmodel.gameEndSound;
-    lowTimeWarning = viewmodel.lowTimeWarning;
+    moveSoundsVolume = viewmodel.moveSoundsVolume;
+    captureSoundsVolume = viewmodel.captureSoundsVolume;
+    gameEndSoundVolume = viewmodel.gameEndSoundVolume;
+    lowTimeWarningVolume = viewmodel.lowTimeWarningVolume;
   }
 
   @override
@@ -805,41 +964,61 @@ class _SoundSectionState extends State<_SoundSection> {
       builder: (context, viewmodel, child) {
         return _SettingsCard(
           children: [
-            _ToggleRow(
-              icon: Icons.volume_up_outlined,
+            _SoundRow(
+              icon: Icons.music_note_outlined,
               label: 'Move sounds',
-              value: moveSounds,
-              onChanged: (v) {
-                viewmodel.updateMoveSounds(v);
-                setState(() => moveSounds = v);
+              volume: moveSoundsVolume,
+              muted: viewmodel.moveSoundsMuted,
+              onVolumeChanged: (v) {
+                viewmodel.updateMoveSoundsVolume(v);
+                setState(() => moveSoundsVolume = v);
+              },
+              onMuteToggle: () {
+                viewmodel.updateMoveSoundsMuted(!viewmodel.moveSoundsMuted);
               },
             ),
-            _ToggleRow(
+            _SoundRow(
               icon: Icons.sports_martial_arts_outlined,
               label: 'Capture sounds',
-              value: captureSounds,
-              onChanged: (v) {
-                viewmodel.updateCaptureSounds(v);
-                setState(() => captureSounds = v);
+              volume: captureSoundsVolume,
+              muted: viewmodel.captureSoundsMuted,
+              onVolumeChanged: (v) {
+                viewmodel.updateCaptureSoundsVolume(v);
+                setState(() => captureSoundsVolume = v);
+              },
+              onMuteToggle: () {
+                viewmodel.updateCaptureSoundsMuted(
+                  !viewmodel.captureSoundsMuted,
+                );
               },
             ),
-            _ToggleRow(
+            _SoundRow(
               icon: Icons.emoji_events_outlined,
               label: 'Game end sound',
-              value: gameEndSound,
-              onChanged: (v) {
-                viewmodel.updateGameEndSound(v);
-                setState(() => gameEndSound = v);
+              volume: gameEndSoundVolume,
+              muted: viewmodel.gameEndSoundMuted,
+              onVolumeChanged: (v) {
+                viewmodel.updateGameEndSoundVolume(v);
+                setState(() => gameEndSoundVolume = v);
+              },
+              onMuteToggle: () {
+                viewmodel.updateGameEndSoundMuted(!viewmodel.gameEndSoundMuted);
               },
             ),
-            _ToggleRow(
+            _SoundRow(
               icon: Icons.timer_outlined,
               label: 'Low time warning',
               subtitle: 'Sound when clock drops below 10s',
-              value: lowTimeWarning,
-              onChanged: (v) {
-                viewmodel.updateLowTimeWarning(v);
-                setState(() => lowTimeWarning = v);
+              volume: lowTimeWarningVolume,
+              muted: viewmodel.lowTimeWarningMuted,
+              onVolumeChanged: (v) {
+                viewmodel.updateLowTimeWarningVolume(v);
+                setState(() => lowTimeWarningVolume = v);
+              },
+              onMuteToggle: () {
+                viewmodel.updateLowTimeWarningMuted(
+                  !viewmodel.lowTimeWarningMuted,
+                );
               },
             ),
           ],
@@ -853,25 +1032,8 @@ class _SoundSectionState extends State<_SoundSection> {
 // Notifications section
 // ---------------------------------------------------------------------------
 
-class _NotificationsSection extends StatefulWidget {
+class _NotificationsSection extends StatelessWidget {
   const _NotificationsSection();
-
-  @override
-  State<_NotificationsSection> createState() => _NotificationsSectionState();
-}
-
-class _NotificationsSectionState extends State<_NotificationsSection> {
-  late bool opponentMoved;
-  late bool gameReminders;
-
-  @override
-  void initState() {
-    super.initState();
-    final SettingsMenuViewmodel viewmodel = context
-        .read<SettingsMenuViewmodel>();
-    opponentMoved = viewmodel.opponentMoved;
-    gameReminders = viewmodel.gameReminders;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -883,21 +1045,15 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
               icon: Icons.notifications_outlined,
               label: 'Opponent moved',
               subtitle: 'For correspondence games',
-              value: opponentMoved,
-              onChanged: (v) {
-                viewmodel.updateOpponentMoved(v);
-                setState(() => opponentMoved = v);
-              },
+              value: viewmodel.opponentMoved,
+              onChanged: viewmodel.updateOpponentMoved,
             ),
             _ToggleRow(
               icon: Icons.alarm_outlined,
               label: 'Game reminders',
               subtitle: "Nudge when it's your turn",
-              value: gameReminders,
-              onChanged: (v) {
-                viewmodel.updateGameReminders(v);
-                setState(() => gameReminders = v);
-              },
+              value: viewmodel.gameReminders,
+              onChanged: viewmodel.updateGameReminders,
             ),
           ],
         );
