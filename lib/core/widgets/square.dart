@@ -8,19 +8,20 @@ import 'package:provider/provider.dart';
 class Square extends StatelessWidget {
   const Square({
     super.key,
-    required this.chessBoardViewmodel,
     required this.tileSize,
     required this.index,
     required this.squareColor,
   });
 
-  final ChessBoardViewmodel chessBoardViewmodel;
   final double tileSize;
   final int index;
   final Sides squareColor;
 
   @override
   Widget build(BuildContext context) {
+    final ChessBoardViewmodel chessBoardViewmodel = context
+        .read<ChessBoardViewmodel>();
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     final BoardTheme boardTheme = BoardThemes.classic;
@@ -72,12 +73,11 @@ class Square extends StatelessWidget {
                   ({bool isSelected, bool isLastMove})
                 >(
                   selector: (context, viewmodel) {
-                    final bool isSelected =
-                        viewmodel.boardState.from == index;
+                    final bool isSelected = viewmodel.boardState.from == index;
                     final bool isLastMove =
                         viewmodel.boardState.preFrom == index ||
                         viewmodel.boardState.to == index;
-          
+
                     return (isSelected: isSelected, isLastMove: isLastMove);
                   },
                   builder: (context, state, child) {
@@ -86,17 +86,17 @@ class Square extends StatelessWidget {
                         decoration: BoxDecoration(color: selectedColor),
                       );
                     }
-          
+
                     if (state.isLastMove) {
                       return Container(
                         decoration: BoxDecoration(color: lastMoveColor),
                       );
                     }
-          
+
                     return SizedBox.shrink();
                   },
                 ),
-          
+
                 Selector<
                   ChessBoardViewmodel,
                   ({bool isMoveableTo, bool isCapture})
@@ -106,7 +106,7 @@ class Square extends StatelessWidget {
                         .contains(index);
                     final bool isCapture =
                         viewmodel.boardState.pieceKeys[index].isNotEmpty;
-          
+
                     return (isMoveableTo: isMoveableTo, isCapture: isCapture);
                   },
                   builder: (context, state, child) {
@@ -114,7 +114,7 @@ class Square extends StatelessWidget {
                         !chessBoardViewmodel.showLegalMovesSetting) {
                       return const SizedBox.shrink();
                     }
-          
+
                     double hintPosition, hintSize;
                     String hintName;
                     if (state.isCapture) {
@@ -126,7 +126,7 @@ class Square extends StatelessWidget {
                       hintSize = (tileSize / 3);
                       hintName = "assets/images/tiles/tile_hint_move.svg";
                     }
-          
+
                     return Positioned(
                       top: hintPosition,
                       left: hintPosition,
@@ -142,7 +142,7 @@ class Square extends StatelessWidget {
                     );
                   },
                 ),
-          
+
                 Selector<ChessBoardViewmodel, bool>(
                   selector: (context, viewmodel) {
                     if (viewmodel.boardState.checkedKingSquare != null &&
@@ -157,7 +157,7 @@ class Square extends StatelessWidget {
                     }
                     final String hintName =
                         "assets/images/tiles/tile_hint_checking.svg";
-          
+
                     return SvgPicture.asset(
                       hintName,
                       width: tileSize,
@@ -169,7 +169,7 @@ class Square extends StatelessWidget {
                     );
                   },
                 ),
-          
+
                 // DRAG HOVER HINT OVERLAY
                 if (isHovered)
                   Positioned.fill(

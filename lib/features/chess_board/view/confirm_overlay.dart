@@ -64,6 +64,29 @@ class ConfirmOverlay extends StatelessWidget {
     final double left = file * squareSize;
     final double squareTop = boardSize - ((rank + 1) * squareSize);
 
+    // Rank 8 (rank index 7): no room above — flip entire UI block below the square.
+    // Rank 1 (rank index 0): no room below — flip entire UI block above the square.
+    // Label and buttons always stay together on the same side.
+    final bool flipBelow = rank == 7;
+    final bool flipAbove = rank == 0;
+
+    // Default layout: label above square, buttons below.
+    // flipBelow (rank 8): buttons just below square, label below buttons.
+    // flipAbove (rank 1): buttons just above square, label above buttons.
+    final double buttonsTop;
+    final double labelTop;
+
+    if (flipBelow) {
+      buttonsTop = squareTop + squareSize + 4;
+      labelTop = buttonsTop + squareSize * 0.5 + 2;
+    } else if (flipAbove) {
+      buttonsTop = squareTop - squareSize * 0.5 - 4;
+      labelTop = buttonsTop - 18;
+    } else {
+      buttonsTop = squareTop + squareSize + 4;
+      labelTop = squareTop - 24;
+    }
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color textColor = colorScheme.onPrimary;
 
@@ -90,7 +113,7 @@ class ConfirmOverlay extends StatelessWidget {
         // 3. UI Prompts (Positioned relative to the square to avoid shifting the piece)
         Positioned(
           left: left,
-          top: squareTop - 24, // Placed strictly above the square
+          top: labelTop,
           width: squareSize,
           child: Center(
             child: Text(
@@ -107,7 +130,7 @@ class ConfirmOverlay extends StatelessWidget {
 
         Positioned(
           left: left,
-          top: squareTop + squareSize + 4, // Placed strictly below the square
+          top: buttonsTop,
           width: squareSize,
           child: Row(
             children: [

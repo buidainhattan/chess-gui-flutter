@@ -40,6 +40,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _isDragged = false;
   bool get isDragged => _isDragged;
   Completer<bool>? moveConfirmCompleter;
+  Completer<bool>? promotetionCompleter;
 
   bool _isPromotion = false;
   bool get isPromotion => _isPromotion;
@@ -208,6 +209,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     if (_boardState.isPromotion) {
       if (!_settingsService.autoPromote) {
+        if (_confirmMovesSetting) {
+          _openPromotionOverlay();
+        }
         return;
       } else {
         await promotePiece();
@@ -344,10 +348,12 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   void draggingStart() {
     _isDragged = true;
+    notifyListeners();
   }
 
   void draggingEnd() {
     _isDragged = false;
+    notifyListeners();
   }
 
   Future<void> _openPromotionOverlay() async {
