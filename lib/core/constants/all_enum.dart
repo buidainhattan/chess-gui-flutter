@@ -32,9 +32,7 @@ enum TimeMode {
 }
 
 enum Sides {
-  white(0),
-  black(1),
-  color_NB(2); // ignore: constant_identifier_names
+  white(0), black(1), color_NB(2); // ignore: constant_identifier_names
 
   final int value;
   const Sides(this.value);
@@ -45,12 +43,7 @@ enum Sides {
 }
 
 enum PieceTypes {
-  pawn(0),
-  knight(1),
-  bishop(2),
-  rook(3),
-  queen(4),
-  king(5),
+  pawn(0), knight(1), bishop(2), rook(3), queen(4), king(5),
   pieceType_NB(6); // ignore: constant_identifier_names
 
   final int value;
@@ -78,14 +71,8 @@ enum Squares {
 }
 
 enum MoveFlags {
-  quietMove(0),
-  doublePawnPush(1),
-  kingCastle(2),
-  queenCastle(3),
-  capture(4),
-  enPassant(5),
-  promotion(8),
-  promotionCapture(12);
+  quietMove(0), doublePawnPush(1), kingCastle(2), queenCastle(3), capture(4),
+  enPassant(5), promotion(8), promotionCapture(12);
 
   final int value;
   const MoveFlags(this.value);
@@ -97,10 +84,27 @@ enum MoveFlags {
   static MoveFlags? fromValue(int value) => _valueMap[value];
 }
 
-enum SoundFXs { movePiece, capturePiece, castling }
-
-enum POVResult { win, lose, draw, ongoing }
-
 enum MatchResult {
   checkmate, resignation, timeout, draw; 
 }
+
+enum PieceMovementType {
+  drag(0), tap(1), both(2);
+
+  final int value;
+  const PieceMovementType(this.value);
+
+  static PieceMovementType? fromValue(int value) => PieceMovementType.values.asMap()[value];
+  static PieceMovementType? fromName(String name) => PieceMovementType.values.asNameMap()[name];
+}
+
+enum MoveAnimationSpeed {
+  off(0), normal(200), slow(500);
+
+  final int value;
+  const MoveAnimationSpeed(this.value);
+}
+
+enum SoundFXs { movePiece, capturePiece, castling }
+
+enum POVResult { win, lose, draw, ongoing }

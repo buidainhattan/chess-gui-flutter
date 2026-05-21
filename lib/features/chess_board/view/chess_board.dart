@@ -59,11 +59,11 @@ class ChessBoard extends StatelessWidget {
                     return Row(
                       children: List.generate(8, (colIndex) {
                         int squareIndex = rowIndex * 8 + 7 - colIndex;
-                
+
                         Sides squareColor = (rowIndex + colIndex).isEven
                             ? Sides.black
                             : Sides.white;
-                
+
                         return Square(
                           tileSize: tileSize,
                           squareColor: squareColor,
@@ -169,7 +169,10 @@ class ChessBoard extends StatelessWidget {
                         return AnimatedPositioned(
                           duration: state.isDragged
                               ? Duration.zero
-                              : const Duration(milliseconds: 200),
+                              : Duration(
+                                  milliseconds:
+                                      chessBoardViewmodel.animationSpeed.value,
+                                ),
                           curve: Curves.easeOut,
                           top: topPosition,
                           left: leftPosition,
@@ -182,7 +185,7 @@ class ChessBoard extends StatelessWidget {
                             data: pieceModel.index,
                             maxSimultaneousDrags:
                                 chessBoardViewmodel.pieceMovementTypeSetting ==
-                                    1
+                                    PieceMovementType.tap
                                 ? 0
                                 : 1,
                             onDragStarted: () {
@@ -210,7 +213,7 @@ class ChessBoard extends StatelessWidget {
                               onTap: () {
                                 if (chessBoardViewmodel
                                         .pieceMovementTypeSetting !=
-                                    0) {
+                                    PieceMovementType.drag) {
                                   chessBoardViewmodel.onSquareTapped(index);
                                 }
                               },

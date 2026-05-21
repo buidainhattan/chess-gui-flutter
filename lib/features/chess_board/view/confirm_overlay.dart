@@ -90,92 +90,95 @@ class ConfirmOverlay extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color textColor = colorScheme.onPrimary;
 
-    return Stack(
-      children: [
-        // 1. Clickable Dim Blocker
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => confirmCompleter.complete(false),
-            child: Container(color: Colors.black.withValues(alpha: 0.3)),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Stack(
+        children: [
+          // 1. Clickable Dim Blocker
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => confirmCompleter.complete(false),
+              child: Container(color: Colors.black.withValues(alpha: 0.3)),
+            ),
           ),
-        ),
-
-        // 2. The Highlighted Piece (Placed EXACTLY over the board square)
-        Positioned(
-          left: left,
-          top: squareTop,
-          width: squareSize,
-          height: squareSize,
-          child: Center(child: pieceWidget),
-        ),
-
-        // 3. UI Prompts (Positioned relative to the square to avoid shifting the piece)
-        Positioned(
-          left: left,
-          top: labelTop,
-          width: squareSize,
-          child: Center(
-            child: Text(
-              "Move?",
-              style: TextStyle(
-                color: textColor,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                shadows: const [Shadow(color: Colors.black26, blurRadius: 4)],
+      
+          // 2. The Highlighted Piece (Placed EXACTLY over the board square)
+          Positioned(
+            left: left,
+            top: squareTop,
+            width: squareSize,
+            height: squareSize,
+            child: Center(child: pieceWidget),
+          ),
+      
+          // 3. UI Prompts (Positioned relative to the square to avoid shifting the piece)
+          Positioned(
+            left: left,
+            top: labelTop,
+            width: squareSize,
+            child: Center(
+              child: Text(
+                "Move?",
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  shadows: const [Shadow(color: Colors.black26, blurRadius: 4)],
+                ),
               ),
             ),
           ),
-        ),
-
-        Positioned(
-          left: left,
-          top: buttonsTop,
-          width: squareSize,
-          child: Row(
-            children: [
-              // Cancel Button
-              Expanded(
-                child: HoveringWrapper(
-                  child: Center(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => confirmCompleter.complete(false),
-                      child: SizedBox(
-                        height: squareSize * 0.5,
-                        child: Icon(
-                          Icons.close,
-                          color: colorScheme.error,
-                          size: squareSize * 0.35,
+      
+          Positioned(
+            left: left,
+            top: buttonsTop,
+            width: squareSize,
+            child: Row(
+              children: [
+                // Cancel Button
+                Expanded(
+                  child: HoveringWrapper(
+                    child: Center(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => confirmCompleter.complete(false),
+                        child: SizedBox(
+                          height: squareSize * 0.5,
+                          child: Icon(
+                            Icons.close,
+                            color: colorScheme.error,
+                            size: squareSize * 0.35,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // Confirm Button
-              Expanded(
-                child: HoveringWrapper(
-                  child: Center(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => confirmCompleter.complete(true),
-                      child: SizedBox(
-                        height: squareSize * 0.5,
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.lightGreen,
-                          size: squareSize * 0.35,
+                // Confirm Button
+                Expanded(
+                  child: HoveringWrapper(
+                    child: Center(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => confirmCompleter.complete(true),
+                        child: SizedBox(
+                          height: squareSize * 0.5,
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.lightGreen,
+                            size: squareSize * 0.35,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -52,29 +52,32 @@ class PromotionOverlay extends StatelessWidget {
     // Position overlay vertically to fit pov
     final double top = isPOVPromote ? squareSize : boardSize - (squareSize * 2);
 
-    return Stack(
-      children: [
-        // Dim + input absorber
-        Positioned.fill(
-          child: Container(
-            color: Colors.black.withValues(alpha: 0.3),
-            child: AbsorbPointer(),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Stack(
+        children: [
+          // Dim + input absorber
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: AbsorbPointer(),
+            ),
           ),
-        ),
-
-        // Picker
-        Positioned(
-          left: left,
-          top: top,
-          child: _AnimatedPicker(
-            sideToMove: sideToMove,
-            squareSize: squareSize,
-            file: file,
-            povPromote: isPOVPromote,
-            onPieceSelected: onPieceSelected,
+      
+          // Picker
+          Positioned(
+            left: left,
+            top: top,
+            child: _AnimatedPicker(
+              sideToMove: sideToMove,
+              squareSize: squareSize,
+              file: file,
+              povPromote: isPOVPromote,
+              onPieceSelected: onPieceSelected,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

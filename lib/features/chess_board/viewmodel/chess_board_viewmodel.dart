@@ -54,12 +54,16 @@ class ChessBoardViewmodel extends ChangeNotifier {
   bool _lockBoard = false;
   bool get lockBoard => _lockBoard;
 
+  // <--- Settings enforcers --->
   late bool _confirmMovesSetting;
   bool get confirmMovesSetting => _confirmMovesSetting;
   late bool _showLegalMovesSetting;
   bool get showLegalMovesSetting => _showLegalMovesSetting;
-  late int _pieceMovementTypeSetting;
-  int get pieceMovementTypeSetting => _pieceMovementTypeSetting;
+  late PieceMovementType _pieceMovementTypeSetting;
+  PieceMovementType get pieceMovementTypeSetting => _pieceMovementTypeSetting;
+
+  late MoveAnimationSpeed _animationSpeed;
+  MoveAnimationSpeed get animationSpeed => _animationSpeed;
 
   ChessBoardViewmodel(
     this._settingsService,
@@ -73,7 +77,10 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     _confirmMovesSetting = _settingsService.confirmMoves;
     _showLegalMovesSetting = _settingsService.showLegalMoves;
-    _pieceMovementTypeSetting = _settingsService.movementStyle;
+    _pieceMovementTypeSetting =
+        PieceMovementType.values[_settingsService.movementStyle];
+    _animationSpeed =
+        MoveAnimationSpeed.values[_settingsService.animationSpeed];
 
     _boardStateHistory = [];
 
@@ -190,7 +197,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
     if (_confirmMovesSetting) {
       if (!_isDragged) {
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: _animationSpeed.value));
         notifyListeners();
       }
 

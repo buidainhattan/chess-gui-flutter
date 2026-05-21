@@ -41,7 +41,8 @@ class Square extends StatelessWidget {
 
     return DragTarget<int>(
       onWillAcceptWithDetails: (details) {
-        if (chessBoardViewmodel.pieceMovementTypeSetting == 1) {
+        if (chessBoardViewmodel.pieceMovementTypeSetting ==
+            PieceMovementType.tap) {
           return false;
         }
         return true;
@@ -61,7 +62,8 @@ class Square extends StatelessWidget {
           height: tileSize,
           child: GestureDetector(
             onTap: () {
-              if (chessBoardViewmodel.pieceMovementTypeSetting != 0) {
+              if (chessBoardViewmodel.pieceMovementTypeSetting !=
+                  PieceMovementType.drag) {
                 chessBoardViewmodel.onSquareTapped(index);
               }
             },
