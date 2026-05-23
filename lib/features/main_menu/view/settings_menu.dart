@@ -942,9 +942,9 @@ class _SoundSection extends StatefulWidget {
 }
 
 class _SoundSectionState extends State<_SoundSection> {
-  late double moveSoundsVolume;
+  late double gameFXsVolume;
   late double captureSoundsVolume;
-  late double gameEndSoundVolume;
+  late double overallVolume;
   late double lowTimeWarningVolume;
 
   @override
@@ -952,9 +952,8 @@ class _SoundSectionState extends State<_SoundSection> {
     super.initState();
     final SettingsMenuViewmodel viewmodel = context
         .read<SettingsMenuViewmodel>();
-    moveSoundsVolume = viewmodel.moveSoundsVolume;
-    captureSoundsVolume = viewmodel.captureSoundsVolume;
-    gameEndSoundVolume = viewmodel.gameEndSoundVolume;
+    gameFXsVolume = viewmodel.gameFXsVolume;
+    overallVolume = viewmodel.overallVolume;
     lowTimeWarningVolume = viewmodel.lowTimeWarningVolume;
   }
 
@@ -965,44 +964,29 @@ class _SoundSectionState extends State<_SoundSection> {
         return _SettingsCard(
           children: [
             _SoundRow(
+              icon: Icons.volume_up,
+              label: 'Overall',
+              volume: overallVolume,
+              muted: viewmodel.overallMuted,
+              onVolumeChanged: (v) {
+                viewmodel.updateOverallVolume(v);
+                setState(() => overallVolume = v);
+              },
+              onMuteToggle: () {
+                viewmodel.updateOverallMuted(!viewmodel.overallMuted);
+              },
+            ),
+            _SoundRow(
               icon: Icons.music_note_outlined,
-              label: 'Move sounds',
-              volume: moveSoundsVolume,
-              muted: viewmodel.moveSoundsMuted,
+              label: 'Game sound effects',
+              volume: gameFXsVolume,
+              muted: viewmodel.gameFXsMuted,
               onVolumeChanged: (v) {
-                viewmodel.updateMoveSoundsVolume(v);
-                setState(() => moveSoundsVolume = v);
+                viewmodel.updateGameFXsVolume(v);
+                setState(() => gameFXsVolume = v);
               },
               onMuteToggle: () {
-                viewmodel.updateMoveSoundsMuted(!viewmodel.moveSoundsMuted);
-              },
-            ),
-            _SoundRow(
-              icon: Icons.sports_martial_arts_outlined,
-              label: 'Capture sounds',
-              volume: captureSoundsVolume,
-              muted: viewmodel.captureSoundsMuted,
-              onVolumeChanged: (v) {
-                viewmodel.updateCaptureSoundsVolume(v);
-                setState(() => captureSoundsVolume = v);
-              },
-              onMuteToggle: () {
-                viewmodel.updateCaptureSoundsMuted(
-                  !viewmodel.captureSoundsMuted,
-                );
-              },
-            ),
-            _SoundRow(
-              icon: Icons.emoji_events_outlined,
-              label: 'Game end sound',
-              volume: gameEndSoundVolume,
-              muted: viewmodel.gameEndSoundMuted,
-              onVolumeChanged: (v) {
-                viewmodel.updateGameEndSoundVolume(v);
-                setState(() => gameEndSoundVolume = v);
-              },
-              onMuteToggle: () {
-                viewmodel.updateGameEndSoundMuted(!viewmodel.gameEndSoundMuted);
+                viewmodel.updateGameFXsMuted(!viewmodel.gameFXsMuted);
               },
             ),
             _SoundRow(

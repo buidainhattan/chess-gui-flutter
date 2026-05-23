@@ -57,6 +57,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
   // <--- Settings enforcers --->
   late bool _confirmMovesSetting;
   bool get confirmMovesSetting => _confirmMovesSetting;
+  late bool _autoPromote;
   late bool _showLegalMovesSetting;
   bool get showLegalMovesSetting => _showLegalMovesSetting;
   late PieceMovementType _pieceMovementTypeSetting;
@@ -64,6 +65,34 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   late MoveAnimationSpeed _animationSpeed;
   MoveAnimationSpeed get animationSpeed => _animationSpeed;
+
+  // <--- Settings handlers --->
+  void _onConfirmMovesChanged() {
+    _confirmMovesSetting = _settingsService.confirmMovesValue.value;
+    notifyListeners();
+  }
+
+  void _onAutoPromoteChanged() {
+    _autoPromote = _settingsService.autoPromoteValue.value;
+    notifyListeners();
+  }
+
+  void _onShowLegalMovesChanged() {
+    _showLegalMovesSetting = _settingsService.showLegalMovesValue.value;
+    notifyListeners();
+  }
+
+  void _onMovementStyleChanged() {
+    _pieceMovementTypeSetting =
+        PieceMovementType.values[_settingsService.movementStyleValue.value];
+    notifyListeners();
+  }
+
+  void _onAnimationSpeedChanged() {
+    _animationSpeed =
+        MoveAnimationSpeed.values[_settingsService.animationSpeedValue.value];
+    notifyListeners();
+  }
 
   ChessBoardViewmodel(
     this._settingsService,
@@ -75,12 +104,19 @@ class ChessBoardViewmodel extends ChangeNotifier {
   Future<void> initializeChessBoard() async {
     if (_isInitialized) return;
 
-    _confirmMovesSetting = _settingsService.confirmMoves;
-    _showLegalMovesSetting = _settingsService.showLegalMoves;
+    _confirmMovesSetting = _settingsService.confirmMovesValue.value;
+    _showLegalMovesSetting = _settingsService.showLegalMovesValue.value;
     _pieceMovementTypeSetting =
-        PieceMovementType.values[_settingsService.movementStyle];
+        PieceMovementType.values[_settingsService.movementStyleValue.value];
     _animationSpeed =
-        MoveAnimationSpeed.values[_settingsService.animationSpeed];
+        MoveAnimationSpeed.values[_settingsService.animationSpeedValue.value];
+    _autoPromote = _settingsService.autoPromoteValue.value;
+
+    _settingsService.confirmMovesValue.addListener(_onConfirmMovesChanged);
+    _settingsService.autoPromoteValue.addListener(_onAutoPromoteChanged);
+    _settingsService.showLegalMovesValue.addListener(_onShowLegalMovesChanged);
+    _settingsService.movementStyleValue.addListener(_onMovementStyleChanged);
+    _settingsService.animationSpeedValue.addListener(_onAnimationSpeedChanged);
 
     _boardStateHistory = [];
 
@@ -169,7 +205,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
             isPromotion: true,
             promoteSquareIndex: toSquare,
           );
-          if (!_settingsService.autoPromote && !_confirmMovesSetting) {
+          if (!_autoPromote && !_confirmMovesSetting) {
             _openPromotionOverlay();
           }
         } else {
@@ -215,7 +251,7 @@ class ChessBoardViewmodel extends ChangeNotifier {
     }
 
     if (_boardState.isPromotion) {
-      if (!_settingsService.autoPromote) {
+      if (!_autoPromote) {
         if (_confirmMovesSetting) {
           _openPromotionOverlay();
         }
@@ -258,15 +294,12 @@ class ChessBoardViewmodel extends ChangeNotifier {
     );
   }
 
-  // Capture a piece at destination square
-  void _capturePiece(int to) {
-    String pieceKey = _boardState.pieceKeys[to];
-    PieceModel newPieceModel = _boardState.pieceList[pieceKey]!.copyWith(
-      isCaptured: true,
-    );
-
+  void _capturePiece(int squareIndex) {
+    String capturedPieceKey = _boardState.pieceKeys[squareIndex];
+    PieceModel capturedPiece = _boardState.pieceList[capturedPieceKey]!;
+    PieceModel newPieceModel = capturedPiece.copyWith(isCaptured: true);
     _boardState = _boardState.copyWith(
-      pieceList: {..._boardState.pieceList, pieceKey: newPieceModel},
+      pieceList: {..._boardState.pieceList, capturedPieceKey: newPieceModel},
     );
     _matchManagerService.updatePieceCaptured(newPieceModel.type);
   }
@@ -518,6 +551,15 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _settingsService.autoPromoteValue.removeListener(_onAutoPromoteChanged);
+    _settingsService.confirmMovesValue.removeListener(_onConfirmMovesChanged);
+    _settingsService.showLegalMovesValue.removeListener(
+      _onShowLegalMovesChanged,
+    );
+    _settingsService.movementStyleValue.removeListener(_onMovementStyleChanged);
+    _settingsService.animationSpeedValue.removeListener(
+      _onAnimationSpeedChanged,
+    );
     _opponentMoveSubscription.cancel();
     _redoSignalSubscription.cancel();
     _matchManagerService.resultNotifier.removeListener(_onMatchEnd);

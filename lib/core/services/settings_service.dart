@@ -9,14 +9,10 @@ class SettingsService {
   String get playerName => _playerName;
 
   // Gameplay
-  late bool _confirmMoves;
-  bool get confirmMoves => _confirmMoves;
-  late bool _autoPromote;
-  bool get autoPromote => _autoPromote;
-  late bool _showLegalMoves;
-  bool get showLegalMoves => _showLegalMoves;
-  late int _movementStyle;
-  int get movementStyle => _movementStyle;
+  late final ValueNotifier<bool> confirmMovesValue;
+  late final ValueNotifier<bool> autoPromoteValue;
+  late final ValueNotifier<bool> showLegalMovesValue;
+  late final ValueNotifier<int> movementStyleValue;
 
   // Appearance
   final List<int> _defaultColorHexList = <int>[
@@ -29,61 +25,49 @@ class SettingsService {
   late List<int> _colorHexList;
   List<int> get colorHexList => _colorHexList;
   late final ValueNotifier<int> themeColorHexValue;
-  late int _animationSpeed;
-  int get animationSpeed => _animationSpeed;
+  late final ValueNotifier<int> animationSpeedValue;
 
   // Sound
-  late double _moveSoundsVolume;
-  double get moveSoundsVolume => _moveSoundsVolume;
-  late bool _moveSoundsMuted;
-  bool get moveSoundsMuted => _moveSoundsMuted;
+  late final ValueNotifier<double> overallVolumeValue;
+  late final ValueNotifier<bool> overallMutedValue;
 
-  late double _captureSoundsVolume;
-  double get captureSoundsVolume => _captureSoundsVolume;
-  late bool _captureSoundsMuted;
-  bool get captureSoundsMuted => _captureSoundsMuted;
+  late final ValueNotifier<double> gameFXsVolumeValue;
+  late final ValueNotifier<bool> gameFXsMutedValue;
 
-  late double _gameEndSoundVolume;
-  double get gameEndSoundVolume => _gameEndSoundVolume;
-  late bool _gameEndSoundMuted;
-  bool get gameEndSoundMuted => _gameEndSoundMuted;
-
-  late double _lowTimeWarningVolume;
-  double get lowTimeWarningVolume => _lowTimeWarningVolume;
-  late bool _lowTimeWarningMuted;
-  bool get lowTimeWarningMuted => _lowTimeWarningMuted;
+  late final ValueNotifier<double> lowTimeWarningVolumeValue;
+  late final ValueNotifier<bool> lowTimeWarningMutedValue;
 
   // Notifications
-  late bool _opponentMoved;
-  bool get opponentMoved => _opponentMoved;
-  late bool _gameReminders;
-  bool get gameReminders => _gameReminders;
+  late final ValueNotifier<bool> opponentMovedValue;
+  late final ValueNotifier<bool> gameRemindersValue;
 
   Future<void> init() async {
     _asyncPrefs = SharedPreferencesAsync();
 
     _playerName = await loadPlayerName();
 
-    _confirmMoves = await loadConfirmMoves();
-    _autoPromote = await loadAutoPromote();
-    _showLegalMoves = await loadShowLegalMoves();
-    _movementStyle = await loadMovementStyle();
+    confirmMovesValue = ValueNotifier<bool>(await loadConfirmMoves());
+    autoPromoteValue = ValueNotifier<bool>(await loadAutoPromote());
+    showLegalMovesValue = ValueNotifier<bool>(await loadShowLegalMoves());
+    movementStyleValue = ValueNotifier<int>(await loadMovementStyle());
 
     _colorHexList = await loadColorHexToList();
     themeColorHexValue = ValueNotifier<int>(await loadThemeColorHex());
-    _animationSpeed = await loadAnimationSpeed();
+    animationSpeedValue = ValueNotifier<int>(await loadAnimationSpeed());
 
-    _moveSoundsVolume = await loadMoveSoundsVolume();
-    _moveSoundsMuted = await loadMoveSoundsMuted();
-    _captureSoundsVolume = await loadCaptureSoundsVolume();
-    _captureSoundsMuted = await loadCaptureSoundsMuted();
-    _gameEndSoundVolume = await loadGameEndSoundVolume();
-    _gameEndSoundMuted = await loadGameEndSoundMuted();
-    _lowTimeWarningVolume = await loadLowTimeWarningVolume();
-    _lowTimeWarningMuted = await loadLowTimeWarningMuted();
+    overallVolumeValue = ValueNotifier<double>(await loadOverallVolume());
+    overallMutedValue = ValueNotifier<bool>(await loadOverallMuted());
+    gameFXsVolumeValue = ValueNotifier<double>(await loadGameFXsVolume());
+    gameFXsMutedValue = ValueNotifier<bool>(await loadGameFXsMuted());
+    lowTimeWarningVolumeValue = ValueNotifier<double>(
+      await loadLowTimeWarningVolume(),
+    );
+    lowTimeWarningMutedValue = ValueNotifier<bool>(
+      await loadLowTimeWarningMuted(),
+    );
 
-    _opponentMoved = await loadOpponentMoved();
-    _gameReminders = await loadGameReminders();
+    opponentMovedValue = ValueNotifier<bool>(await loadOpponentMoved());
+    gameRemindersValue = ValueNotifier<bool>(await loadGameReminders());
   }
 
   // ── Profile ───────────────────────────────────────────────────────────────
@@ -100,7 +84,7 @@ class SettingsService {
   // ── Gameplay ───────────────────────────────────────────────────────────────
 
   Future<void> saveConfirmMoves(bool value) async {
-    _confirmMoves = value;
+    confirmMovesValue.value = value;
     await _asyncPrefs.setBool('confirm_moves', value);
   }
 
@@ -108,7 +92,7 @@ class SettingsService {
       await _asyncPrefs.getBool('confirm_moves') ?? false;
 
   Future<void> saveAutoPromote(bool value) async {
-    _autoPromote = value;
+    autoPromoteValue.value = value;
     await _asyncPrefs.setBool('auto_promote', value);
   }
 
@@ -116,7 +100,7 @@ class SettingsService {
       await _asyncPrefs.getBool('auto_promote') ?? false;
 
   Future<void> saveShowLegalMoves(bool value) async {
-    _showLegalMoves = value;
+    showLegalMovesValue.value = value;
     await _asyncPrefs.setBool('show_legal_moves', value);
   }
 
@@ -124,7 +108,7 @@ class SettingsService {
       await _asyncPrefs.getBool('show_legal_moves') ?? true;
 
   Future<void> saveMovementStyle(int value) async {
-    _movementStyle = value;
+    movementStyleValue.value = value;
     await _asyncPrefs.setInt('movement_style', value);
   }
 
@@ -132,6 +116,7 @@ class SettingsService {
       await _asyncPrefs.getInt('movement_style') ?? 1;
 
   // ── Appearance ─────────────────────────────────────────────────────────────
+
   Future<void> saveColorHexToList(int value) async {
     _colorHexList.add(value);
     final colorHexStrList = _colorHexList.map((e) => e.toString()).toList();
@@ -160,7 +145,7 @@ class SettingsService {
   }
 
   Future<void> saveAnimationSpeed(int value) async {
-    _animationSpeed = value;
+    animationSpeedValue.value = value;
     await _asyncPrefs.setInt('animation_speed', value);
   }
 
@@ -169,56 +154,40 @@ class SettingsService {
 
   // ── Sound ──────────────────────────────────────────────────────────────────
 
-  Future<void> saveMoveSoundsVolume(double value) async {
-    _moveSoundsVolume = value;
-    await _asyncPrefs.setDouble('move_sounds_volume', value);
+  Future<void> saveOverallVolume(double value) async {
+    overallVolumeValue.value = value;
+    await _asyncPrefs.setDouble('overall_volume', value);
   }
 
-  Future<double> loadMoveSoundsVolume() async =>
-      await _asyncPrefs.getDouble('move_sounds_volume') ?? 1.0;
+  Future<double> loadOverallVolume() async =>
+      await _asyncPrefs.getDouble('overall_volume') ?? 1.0;
 
-  Future<void> saveMoveSoundsMuted(bool value) async {
-    _moveSoundsMuted = value;
-    await _asyncPrefs.setBool('move_sounds_muted', value);
+  Future<void> saveOverallMuted(bool value) async {
+    overallMutedValue.value = value;
+    await _asyncPrefs.setBool('overall_muted', value);
   }
 
-  Future<bool> loadMoveSoundsMuted() async =>
-      await _asyncPrefs.getBool('move_sounds_muted') ?? false;
+  Future<bool> loadOverallMuted() async =>
+      await _asyncPrefs.getBool('overall_muted') ?? false;
 
-  Future<void> saveCaptureSoundsVolume(double value) async {
-    _captureSoundsVolume = value;
-    await _asyncPrefs.setDouble('capture_sounds_volume', value);
+  Future<void> saveGameFXsVolume(double value) async {
+    gameFXsVolumeValue.value = value;
+    await _asyncPrefs.setDouble('game_fxs_volume', value);
   }
 
-  Future<double> loadCaptureSoundsVolume() async =>
-      await _asyncPrefs.getDouble('capture_sounds_volume') ?? 1.0;
+  Future<double> loadGameFXsVolume() async =>
+      await _asyncPrefs.getDouble('game_fxs_volume') ?? 1.0;
 
-  Future<void> saveCaptureSoundsMuted(bool value) async {
-    _captureSoundsMuted = value;
-    await _asyncPrefs.setBool('capture_sounds_muted', value);
+  Future<void> saveGameFXsMuted(bool value) async {
+    gameFXsMutedValue.value = value;
+    await _asyncPrefs.setBool('game_fxs_muted', value);
   }
 
-  Future<bool> loadCaptureSoundsMuted() async =>
-      await _asyncPrefs.getBool('capture_sounds_muted') ?? false;
-
-  Future<void> saveGameEndSoundVolume(double value) async {
-    _gameEndSoundVolume = value;
-    await _asyncPrefs.setDouble('game_end_sound_volume', value);
-  }
-
-  Future<double> loadGameEndSoundVolume() async =>
-      await _asyncPrefs.getDouble('game_end_sound_volume') ?? 1.0;
-
-  Future<void> saveGameEndSoundMuted(bool value) async {
-    _gameEndSoundMuted = value;
-    await _asyncPrefs.setBool('game_end_sound_muted', value);
-  }
-
-  Future<bool> loadGameEndSoundMuted() async =>
-      await _asyncPrefs.getBool('game_end_sound_muted') ?? false;
+  Future<bool> loadGameFXsMuted() async =>
+      await _asyncPrefs.getBool('game_fxs_muted') ?? false;
 
   Future<void> saveLowTimeWarningVolume(double value) async {
-    _lowTimeWarningVolume = value;
+    lowTimeWarningVolumeValue.value = value;
     await _asyncPrefs.setDouble('low_time_warning_volume', value);
   }
 
@@ -226,7 +195,7 @@ class SettingsService {
       await _asyncPrefs.getDouble('low_time_warning_volume') ?? 1.0;
 
   Future<void> saveLowTimeWarningMuted(bool value) async {
-    _lowTimeWarningMuted = value;
+    lowTimeWarningMutedValue.value = value;
     await _asyncPrefs.setBool('low_time_warning_muted', value);
   }
 
@@ -236,7 +205,7 @@ class SettingsService {
   // ── Notifications ──────────────────────────────────────────────────────────
 
   Future<void> saveOpponentMoved(bool value) async {
-    _opponentMoved = value;
+    opponentMovedValue.value = value;
     await _asyncPrefs.setBool('notif_opponent_moved', value);
   }
 
@@ -244,7 +213,7 @@ class SettingsService {
       await _asyncPrefs.getBool('notif_opponent_moved') ?? false;
 
   Future<void> saveGameReminders(bool value) async {
-    _gameReminders = value;
+    gameRemindersValue.value = value;
     await _asyncPrefs.setBool('notif_game_reminders', value);
   }
 

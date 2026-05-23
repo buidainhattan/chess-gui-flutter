@@ -36,20 +36,15 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   int get animationSpeed => _animationSpeed;
 
   // ── Sound ──────────────────────────────────────────────────────────────────
-  late double _moveSoundsVolume;
-  double get moveSoundsVolume => _moveSoundsVolume;
-  late bool _moveSoundsMuted;
-  bool get moveSoundsMuted => _moveSoundsMuted;
+  late double _overallVolume;
+  double get overallVolume => _overallVolume;
+  late bool _overallMuted;
+  bool get overallMuted => _overallMuted;
 
-  late double _captureSoundsVolume;
-  double get captureSoundsVolume => _captureSoundsVolume;
-  late bool _captureSoundsMuted;
-  bool get captureSoundsMuted => _captureSoundsMuted;
-
-  late double _gameEndSoundVolume;
-  double get gameEndSoundVolume => _gameEndSoundVolume;
-  late bool _gameEndSoundMuted;
-  bool get gameEndSoundMuted => _gameEndSoundMuted;
+  late double _gameFXsVolume;
+  double get gameFXsVolume => _gameFXsVolume;
+  late bool _gameFXsMuted;
+  bool get gameFXsMuted => _gameFXsMuted;
 
   late double _lowTimeWarningVolume;
   double get lowTimeWarningVolume => _lowTimeWarningVolume;
@@ -57,10 +52,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   bool get lowTimeWarningMuted => _lowTimeWarningMuted;
 
   bool get allSoundsMuted =>
-      _moveSoundsMuted &&
-      _captureSoundsMuted &&
-      _gameEndSoundMuted &&
-      _lowTimeWarningMuted;
+      _overallMuted && _gameFXsMuted && _lowTimeWarningMuted;
 
   // ── Notifications ──────────────────────────────────────────────────────────
   late bool _opponentMoved;
@@ -81,29 +73,27 @@ class SettingsMenuViewmodel extends ChangeNotifier {
     _profileIconIndex = 0;
 
     // Gameplay
-    _confirmMoves = _settingsService.confirmMoves;
-    _autoPromote = _settingsService.autoPromote;
-    _showLegalMoves = _settingsService.showLegalMoves;
-    _movementStyle = _settingsService.movementStyle;
+    _confirmMoves = _settingsService.confirmMovesValue.value;
+    _autoPromote = _settingsService.autoPromoteValue.value;
+    _showLegalMoves = _settingsService.showLegalMovesValue.value;
+    _movementStyle = _settingsService.movementStyleValue.value;
 
     // Appearance
     _colorHexList = _settingsService.colorHexList;
     _themeColorHexValue = _settingsService.themeColorHexValue.value;
-    _animationSpeed = _settingsService.animationSpeed;
+    _animationSpeed = _settingsService.animationSpeedValue.value;
 
     // Sound
-    _moveSoundsVolume = _settingsService.moveSoundsVolume;
-    _moveSoundsMuted = _settingsService.moveSoundsMuted;
-    _captureSoundsVolume = _settingsService.captureSoundsVolume;
-    _captureSoundsMuted = _settingsService.captureSoundsMuted;
-    _gameEndSoundVolume = _settingsService.gameEndSoundVolume;
-    _gameEndSoundMuted = _settingsService.gameEndSoundMuted;
-    _lowTimeWarningVolume = _settingsService.lowTimeWarningVolume;
-    _lowTimeWarningMuted = _settingsService.lowTimeWarningMuted;
+    _gameFXsVolume = _settingsService.gameFXsVolumeValue.value;
+    _gameFXsMuted = _settingsService.gameFXsMutedValue.value;
+    _overallVolume = _settingsService.overallVolumeValue.value;
+    _overallMuted = _settingsService.overallMutedValue.value;
+    _lowTimeWarningVolume = _settingsService.lowTimeWarningVolumeValue.value;
+    _lowTimeWarningMuted = _settingsService.lowTimeWarningMutedValue.value;
 
     // Notifications
-    _opponentMoved = _settingsService.opponentMoved;
-    _gameReminders = _settingsService.gameReminders;
+    _opponentMoved = _settingsService.opponentMovedValue.value;
+    _gameReminders = _settingsService.gameRemindersValue.value;
   }
 
   // ── Profile ────────────────────────────────────────────────
@@ -186,46 +176,32 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   }
 
   // ── Sound ──────────────────────────────────────────────────────────────────
-  void updateMoveSoundsVolume(double value) async {
-    if (_moveSoundsVolume == value) return;
-    _moveSoundsVolume = value;
+  void updateOverallVolume(double value) async {
+    if (_overallVolume == value) return;
+    _overallVolume = value;
     notifyListeners();
-    await _settingsService.saveMoveSoundsVolume(value);
+    await _settingsService.saveOverallVolume(value);
   }
 
-  void updateMoveSoundsMuted(bool value) async {
-    if (_moveSoundsMuted == value) return;
-    _moveSoundsMuted = value;
+  void updateOverallMuted(bool value) async {
+    if (_overallMuted == value) return;
+    _overallMuted = value;
     notifyListeners();
-    await _settingsService.saveMoveSoundsMuted(value);
+    await _settingsService.saveOverallMuted(value);
   }
 
-  void updateCaptureSoundsVolume(double value) async {
-    if (_captureSoundsVolume == value) return;
-    _captureSoundsVolume = value;
+  void updateGameFXsVolume(double value) async {
+    if (_gameFXsVolume == value) return;
+    _gameFXsVolume = value;
     notifyListeners();
-    await _settingsService.saveCaptureSoundsVolume(value);
+    await _settingsService.saveGameFXsVolume(value);
   }
 
-  void updateCaptureSoundsMuted(bool value) async {
-    if (_captureSoundsMuted == value) return;
-    _captureSoundsMuted = value;
+  void updateGameFXsMuted(bool value) async {
+    if (_gameFXsMuted == value) return;
+    _gameFXsMuted = value;
     notifyListeners();
-    await _settingsService.saveCaptureSoundsMuted(value);
-  }
-
-  void updateGameEndSoundVolume(double value) async {
-    if (_gameEndSoundVolume == value) return;
-    _gameEndSoundVolume = value;
-    notifyListeners();
-    await _settingsService.saveGameEndSoundVolume(value);
-  }
-
-  void updateGameEndSoundMuted(bool value) async {
-    if (_gameEndSoundMuted == value) return;
-    _gameEndSoundMuted = value;
-    notifyListeners();
-    await _settingsService.saveGameEndSoundMuted(value);
+    await _settingsService.saveGameFXsMuted(value);
   }
 
   void updateLowTimeWarningVolume(double value) async {
@@ -243,15 +219,13 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   }
 
   void updateMuteAll(bool value) async {
-    _moveSoundsMuted = value;
-    _captureSoundsMuted = value;
-    _gameEndSoundMuted = value;
+    _overallMuted = value;
+    _gameFXsMuted = value;
     _lowTimeWarningMuted = value;
     notifyListeners();
     await Future.wait([
-      _settingsService.saveMoveSoundsMuted(value),
-      _settingsService.saveCaptureSoundsMuted(value),
-      _settingsService.saveGameEndSoundMuted(value),
+      _settingsService.saveOverallMuted(value),
+      _settingsService.saveGameFXsMuted(value),
       _settingsService.saveLowTimeWarningMuted(value),
     ]);
   }

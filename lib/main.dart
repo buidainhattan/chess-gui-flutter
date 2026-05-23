@@ -14,10 +14,10 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await AudioController().initialize();
-
   final SettingsService settingsService = SettingsService();
   await settingsService.init();
+
+  await AudioController().initialize(settingsService);
 
   // Check for Desktop Platform (Windows, macOS, Linux)
   bool isDesktop;

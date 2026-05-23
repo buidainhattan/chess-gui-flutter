@@ -1,9 +1,12 @@
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 
 class AudioController {
   final SoLoud _soLoud = SoLoud.instance;
-  final Map<SoundFXs, AudioSource> _sounds = {};
+  late final SettingsService _settingsService;
+
+  final Map<SoundFXs, AudioSource> _soundEffects = {};
 
   // 1. Singleton pattern
   static final AudioController _instance = AudioController._internal();
@@ -12,20 +15,49 @@ class AudioController {
   }
   AudioController._internal();
 
-  Future<void> initialize() async {
+  // <--- Settings handlers --->
+  void _onOverallVolumeChanged() {
+    final overallMuted = _settingsService.overallMutedValue.value;
+    final overallVolume = _settingsService.overallVolumeValue.value;
+    _soLoud.setGlobalVolume(overallMuted ? 0.0 : overallVolume);
+  }
+
+  void _onOverallMutedChanged() {
+    final overallMuted = _settingsService.overallMutedValue.value;
+    final overallVolume = _settingsService.overallVolumeValue.value;
+    _soLoud.setGlobalVolume(overallMuted ? 0.0 : overallVolume);
+  }
+
+  Future<void> initialize(SettingsService settingsService) async {
+    _settingsService = settingsService;
     await _soLoud.init();
     await _preloadSounds();
+
+    _soLoud.setGlobalVolume(
+      _settingsService.overallMutedValue.value
+          ? 0.0
+          : _settingsService.overallVolumeValue.value,
+    );
+
+    _settingsService.overallVolumeValue.addListener(_onOverallVolumeChanged);
+    _settingsService.overallMutedValue.addListener(_onOverallMutedChanged);
   }
 
   void playSoundEffect(SoundFXs sound) {
-    if (_sounds[sound] == null) {
+    if (_soundEffects[sound] == null) {
       return;
     }
 
-    _soLoud.play(_sounds[sound]!);
+    final gameFXsMuted = _settingsService.gameFXsMutedValue.value;
+    final gameFXsVolume = _settingsService.gameFXsVolumeValue.value;
+    final volume = gameFXsMuted ? 0.0 : gameFXsVolume;
+
+    _soLoud.play(_soundEffects[sound]!, volume: volume);
   }
 
   void dispose() {
+    _settingsService.overallVolumeValue.removeListener(_onOverallVolumeChanged);
+    _settingsService.overallMutedValue.removeListener(_onOverallMutedChanged);
     _soLoud.deinit();
   }
 
@@ -38,7 +70,7 @@ class AudioController {
 
     for (var entry in soundsToLoad.entries) {
       final source = await _soLoud.loadAsset(entry.value);
-      _sounds[entry.key] = source;
+      _soundEffects[entry.key] = source;
     }
   }
 }
