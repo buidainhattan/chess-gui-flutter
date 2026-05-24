@@ -1,5 +1,7 @@
 import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:chess_app/core/constants/all_enum.dart';
+import 'package:chess_app/core/constants/icons.dart';
+import 'package:chess_app/core/services/settings_service.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/features/match/viewmodel/match_viewmodel.dart';
@@ -131,6 +133,8 @@ class _PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SettingsService settingsService = context.read<SettingsService>();
+
     return AspectRatio(
       aspectRatio: 3 / 4,
       child: Container(
@@ -146,14 +150,8 @@ class _PlayerAvatar extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: isBot
-                  ? Text(
-                      '🤖',
-                      style: TextStyle(fontSize: 100, color: iconColor),
-                    )
-                  : SvgPicture.asset(
-                      "assets/images/chess_pieces/black/pawn.svg",
-                      colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-                    ),
+                  ? Icon(presetProfileIcons[8])
+                  : Icon(presetProfileIcons[settingsService.profileIconIndex]),
             ),
           ),
         ),

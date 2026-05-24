@@ -17,9 +17,8 @@ class AudioController {
 
   // <--- Settings handlers --->
   void _onOverallVolumeChanged() {
-    final overallMuted = _settingsService.overallMutedValue.value;
     final overallVolume = _settingsService.overallVolumeValue.value;
-    _soLoud.setGlobalVolume(overallMuted ? 0.0 : overallVolume);
+    _soLoud.setGlobalVolume(overallVolume);
   }
 
   void _onOverallMutedChanged() {

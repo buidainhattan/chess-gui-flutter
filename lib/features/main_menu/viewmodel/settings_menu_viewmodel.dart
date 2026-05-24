@@ -70,7 +70,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
   void _init() {
     // Profile
     _playerName = _settingsService.playerName;
-    _profileIconIndex = 0;
+    _profileIconIndex = _settingsService.profileIconIndex;
 
     // Gameplay
     _confirmMoves = _settingsService.confirmMovesValue.value;
@@ -110,6 +110,7 @@ class SettingsMenuViewmodel extends ChangeNotifier {
 
     _profileIconIndex = index;
     notifyListeners();
+    await _settingsService.saveProfileIconIndex(index);
   }
 
   // ── Gameplay ───────────────────────────────────────────────────────────────

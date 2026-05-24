@@ -567,28 +567,22 @@ class _SidebarPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Spacer(),
-            HoveringWrapper(
-              child: _SidebarButton(
-                icon: Icons.settings_outlined,
-                label: 'Settings',
-                onPressed: () {},
-              ),
+            _SidebarButton(
+              icon: Icons.settings_outlined,
+              label: 'Settings',
+              onTap: () => context.push('/settings'),
             ),
-            HoveringWrapper(
-              child: _SidebarButton(
-                icon: Icons.home_outlined,
-                label: 'Main Menu',
-                onPressed: () => context.go('/'),
-              ),
+            _SidebarButton(
+              icon: Icons.home_outlined,
+              label: 'Main Menu',
+              onTap: () => context.go('/'),
             ),
             const Spacer(),
             const Divider(height: 1, thickness: 1),
-            HoveringWrapper(
-              child: _SidebarButton(
-                icon: Icons.chevron_left,
-                label: 'Close',
-                onPressed: onToggle,
-              ),
+            _SidebarButton(
+              icon: Icons.chevron_left,
+              label: 'Close',
+              onTap: onToggle,
             ),
           ],
         ),
@@ -601,32 +595,34 @@ class _SidebarButton extends StatelessWidget {
   const _SidebarButton({
     required this.icon,
     required this.label,
-    required this.onPressed,
+    required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: colorScheme.primary.withValues(alpha: 0.75),
-            ),
-            const SizedBox(width: 12),
-            Text(label, style: context.menuLabel()),
-          ],
+    return GestureDetector(
+      onTap: onTap,
+      child: HoveringWrapper(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: colorScheme.primary.withValues(alpha: 0.75),
+              ),
+              const SizedBox(width: 12),
+              Text(label, style: context.menuLabel()),
+            ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,8 @@ class SettingsService {
   // Profile
   late String _playerName;
   String get playerName => _playerName;
+  late int _profileIconIndex;
+  int get profileIconIndex => _profileIconIndex;
 
   // Gameplay
   late final ValueNotifier<bool> confirmMovesValue;
@@ -45,6 +47,7 @@ class SettingsService {
     _asyncPrefs = SharedPreferencesAsync();
 
     _playerName = await loadPlayerName();
+    _profileIconIndex = await loadProfileIconIndex();
 
     confirmMovesValue = ValueNotifier<bool>(await loadConfirmMoves());
     autoPromoteValue = ValueNotifier<bool>(await loadAutoPromote());
@@ -79,6 +82,15 @@ class SettingsService {
 
   Future<String> loadPlayerName() async {
     return await _asyncPrefs.getString('player_name') ?? 'Player';
+  }
+
+  Future<void> saveProfileIconIndex(int value) async {
+    _profileIconIndex = value;
+    await _asyncPrefs.setInt('profile_icon_index', value);
+  }
+
+  Future<int> loadProfileIconIndex() async {
+    return await _asyncPrefs.getInt('profile_icon_index') ?? 0;
   }
 
   // ── Gameplay ───────────────────────────────────────────────────────────────
@@ -141,7 +153,7 @@ class SettingsService {
   }
 
   Future<int> loadThemeColorHex() async {
-    return await _asyncPrefs.getInt('color_hex_value') ?? 0xff7B61FF;
+    return await _asyncPrefs.getInt('color_hex_value') ?? 0xff6C3CE1;
   }
 
   Future<void> saveAnimationSpeed(int value) async {
@@ -200,7 +212,7 @@ class SettingsService {
   }
 
   Future<bool> loadLowTimeWarningMuted() async =>
-      await _asyncPrefs.getBool('low_time_warning_muted') ?? false;
+      await _asyncPrefs.getBool('low_time_warning_muted') ?? true;
 
   // ── Notifications ──────────────────────────────────────────────────────────
 

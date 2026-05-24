@@ -1,3 +1,4 @@
+import 'package:chess_app/core/constants/icons.dart';
 import 'package:chess_app/core/styles/text.dart';
 import 'package:chess_app/core/styles/theme.dart';
 import 'package:chess_app/core/widgets/animation_wrapper/hovering.dart';
@@ -7,21 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
-const List<IconData> _presetIcons = [
-  Icons.person_outline,
-  Icons.face_outlined,
-  Icons.face_2_outlined,
-  Icons.face_3_outlined,
-  Icons.face_4_outlined,
-  Icons.face_5_outlined,
-  Icons.face_6_outlined,
-  Icons.psychology_outlined,
-  Icons.smart_toy_outlined,
-  Icons.sports_esports_outlined,
-  Icons.emoji_events_outlined,
-  Icons.star_outline,
-];
 
 class SettingsMenu extends StatelessWidget {
   const SettingsMenu({super.key});
@@ -86,9 +72,10 @@ class SettingsMenu extends StatelessWidget {
           const _SoundSection(),
           const SizedBox(height: 20),
 
-          _SectionLabel(label: 'Notifications'),
-          const _NotificationsSection(),
-          const SizedBox(height: 32),
+          // TODO
+          // _SectionLabel(label: 'Notifications'),
+          // const _NotificationsSection(),
+          // const SizedBox(height: 32),
         ],
       ),
     );
@@ -348,10 +335,13 @@ class _SoundRow extends StatefulWidget {
 class _SoundRowState extends State<_SoundRow> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
+  late double _localVolume;
+  bool _hasFocused = false;
 
   @override
   void initState() {
     super.initState();
+    _localVolume = widget.volume;
     _controller = TextEditingController(text: _toDisplay(widget.volume));
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChange);
@@ -361,6 +351,7 @@ class _SoundRowState extends State<_SoundRow> {
   void didUpdateWidget(_SoundRow old) {
     super.didUpdateWidget(old);
     if (!_focusNode.hasFocus && old.volume != widget.volume) {
+      _localVolume = widget.volume;
       _controller.text = _toDisplay(widget.volume);
     }
   }
@@ -376,20 +367,40 @@ class _SoundRowState extends State<_SoundRow> {
   String _toDisplay(double v) => (v * 100).round().toString();
 
   void _onFocusChange() {
-    if (!_focusNode.hasFocus) _commit(_controller.text);
+    if (_focusNode.hasFocus) {
+      _hasFocused = true;
+    } else if (_hasFocused) {
+      _hasFocused = false;
+      _commit(_controller.text);
+    }
+  }
+
+  void _onSliderChanged(double v) {
+    setState(() {
+      _localVolume = v;
+      if (!_focusNode.hasFocus) _controller.text = _toDisplay(v);
+    });
+  }
+
+  void _onSliderChangeEnd(double v) {
+    widget.onVolumeChanged(v);
   }
 
   void _commit(String raw) {
     final parsed = int.tryParse(raw);
-    final clamped = (parsed ?? (widget.volume * 100).round()).clamp(0, 100);
-    _controller.text = clamped.toString();
-    widget.onVolumeChanged(clamped / 100);
+    final clamped = (parsed ?? (_localVolume * 100).round()).clamp(0, 100);
+    final newVolume = clamped / 100;
+    setState(() {
+      _localVolume = newVolume;
+      _controller.text = clamped.toString();
+    });
+    widget.onVolumeChanged(newVolume);
   }
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final effectiveVolume = widget.muted ? 0.0 : widget.volume;
+    final effectiveVolume = widget.muted ? 0.0 : _localVolume;
 
     return _SettingsRow(
       icon: widget.icon,
@@ -424,7 +435,8 @@ class _SoundRowState extends State<_SoundRow> {
                 value: effectiveVolume,
                 min: 0,
                 max: 1,
-                onChanged: widget.muted ? null : widget.onVolumeChanged,
+                onChanged: widget.muted ? null : _onSliderChanged,
+                onChangeEnd: widget.muted ? null : _onSliderChangeEnd,
               ),
             ),
           ),
@@ -654,7 +666,7 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                     radius: 28,
                     backgroundColor: colorScheme.primaryContainer,
                     child: Icon(
-                      _presetIcons[_selectedIndex],
+                      presetProfileIcons[_selectedIndex],
                       size: 24,
                       color: colorScheme.onPrimaryContainer,
                     ),
@@ -683,7 +695,7 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
                 physics: const NeverScrollableScrollPhysics(),
-                children: List.generate(_presetIcons.length, (i) {
+                children: List.generate(presetProfileIcons.length, (i) {
                   final selected = i == _selectedIndex;
                   return GestureDetector(
                     onTap: () => setState(() => _selectedIndex = i),
@@ -702,7 +714,7 @@ class _ProfileIconDialogState extends State<_ProfileIconDialog> {
                         ),
                       ),
                       child: Icon(
-                        _presetIcons[i],
+                        presetProfileIcons[i],
                         size: 28,
                         color: selected
                             ? colorScheme.onPrimaryContainer
@@ -795,7 +807,11 @@ class _ProfileSection extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(_presetIcons[index], size: 20, color: colorScheme.primary),
+                Icon(
+                  presetProfileIcons[index],
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
                 const SizedBox(width: 4),
                 Icon(Icons.chevron_right, size: 16, color: colorScheme.primary),
               ],
@@ -942,19 +958,9 @@ class _SoundSection extends StatefulWidget {
 }
 
 class _SoundSectionState extends State<_SoundSection> {
-  late double gameFXsVolume;
-  late double captureSoundsVolume;
-  late double overallVolume;
-  late double lowTimeWarningVolume;
-
   @override
   void initState() {
     super.initState();
-    final SettingsMenuViewmodel viewmodel = context
-        .read<SettingsMenuViewmodel>();
-    gameFXsVolume = viewmodel.gameFXsVolume;
-    overallVolume = viewmodel.overallVolume;
-    lowTimeWarningVolume = viewmodel.lowTimeWarningVolume;
   }
 
   @override
@@ -966,12 +972,9 @@ class _SoundSectionState extends State<_SoundSection> {
             _SoundRow(
               icon: Icons.volume_up,
               label: 'Overall',
-              volume: overallVolume,
+              volume: viewmodel.overallVolume,
               muted: viewmodel.overallMuted,
-              onVolumeChanged: (v) {
-                viewmodel.updateOverallVolume(v);
-                setState(() => overallVolume = v);
-              },
+              onVolumeChanged: viewmodel.updateOverallVolume,
               onMuteToggle: () {
                 viewmodel.updateOverallMuted(!viewmodel.overallMuted);
               },
@@ -979,12 +982,9 @@ class _SoundSectionState extends State<_SoundSection> {
             _SoundRow(
               icon: Icons.music_note_outlined,
               label: 'Game sound effects',
-              volume: gameFXsVolume,
+              volume: viewmodel.gameFXsVolume,
               muted: viewmodel.gameFXsMuted,
-              onVolumeChanged: (v) {
-                viewmodel.updateGameFXsVolume(v);
-                setState(() => gameFXsVolume = v);
-              },
+              onVolumeChanged: viewmodel.updateGameFXsVolume,
               onMuteToggle: () {
                 viewmodel.updateGameFXsMuted(!viewmodel.gameFXsMuted);
               },
@@ -993,12 +993,9 @@ class _SoundSectionState extends State<_SoundSection> {
               icon: Icons.timer_outlined,
               label: 'Low time warning',
               subtitle: 'Sound when clock drops below 10s',
-              volume: lowTimeWarningVolume,
+              volume: viewmodel.lowTimeWarningVolume,
               muted: viewmodel.lowTimeWarningMuted,
-              onVolumeChanged: (v) {
-                viewmodel.updateLowTimeWarningVolume(v);
-                setState(() => lowTimeWarningVolume = v);
-              },
+              onVolumeChanged: viewmodel.updateLowTimeWarningVolume,
               onMuteToggle: () {
                 viewmodel.updateLowTimeWarningMuted(
                   !viewmodel.lowTimeWarningMuted,
