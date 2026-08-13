@@ -39,6 +39,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   bool _isDragged = false;
   bool get isDragged => _isDragged;
+  final Set<String> _animatingPieceKeys = {};
+  bool isPieceAnimating(String pieceKey) =>
+      _animatingPieceKeys.contains(pieceKey);
   Completer<bool>? moveConfirmCompleter;
   Completer<bool>? promotetionCompleter;
 
@@ -242,7 +245,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
       moveConfirmCompleter = null; // Clean up
 
       if (!isConfirmed) {
+        final BoardState rejectedState = _boardState;
         _boardState = _rollbackState!;
+        _registerAnimationsForStateChange(rejectedState, _boardState);
         _rollbackState = null;
         notifyListeners();
         return;
@@ -268,7 +273,9 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   Future<void> _unMakeMove(int loopCount) async {
     _boardStateHistory.removeLast();
-    _boardState = _boardStateHistory.last;
+    final BoardState previousState = _boardStateHistory.last;
+    _registerAnimationsForStateChange(_boardState, previousState);
+    _boardState = previousState;
 
     if (loopCount <= 1) {
       await _startTurn(isUnMake: true);
@@ -279,6 +286,8 @@ class ChessBoardViewmodel extends ChangeNotifier {
 
   // Move a piece to a new square
   void _movePiece(String pieceKey, int from, int to) {
+    _animatingPieceKeys.add(pieceKey);
+
     final List<String> newPieceKeys = List<String>.from(_boardState.pieceKeys);
     newPieceKeys[from] = "";
     newPieceKeys[to] = pieceKey;
@@ -394,6 +403,29 @@ class ChessBoardViewmodel extends ChangeNotifier {
   void draggingEnd() {
     _isDragged = false;
     notifyListeners();
+  }
+
+  void onPieceAnimationEnd(String pieceKey) {
+    if (_animatingPieceKeys.remove(pieceKey)) {
+      notifyListeners();
+    }
+  }
+
+  void _registerAnimationsForStateChange(
+    BoardState before,
+    BoardState after,
+  ) {
+    for (final entry in after.pieceList.entries) {
+      final piece = entry.value;
+      if (piece.isCaptured) continue;
+
+      final beforePiece = before.pieceList[entry.key];
+      if (beforePiece != null &&
+          !beforePiece.isCaptured &&
+          beforePiece.index != piece.index) {
+        _animatingPieceKeys.add(entry.key);
+      }
+    }
   }
 
   Future<void> _openPromotionOverlay() async {

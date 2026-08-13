@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class HoveringWrapper extends StatefulWidget {
   final Widget child;
   final bool isPersisted;
+  final bool enabled;
   final Color? color;
   final BorderRadius? borderRadius;
 
@@ -10,6 +11,7 @@ class HoveringWrapper extends StatefulWidget {
     super.key,
     required this.child,
     this.isPersisted = false,
+    this.enabled = true,
     this.color,
     this.borderRadius,
   });
@@ -22,6 +24,16 @@ class _HoveringWrapperState extends State<HoveringWrapper> {
   bool isHovering = false;
 
   @override
+  void didUpdateWidget(HoveringWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enabled && !widget.enabled && isHovering) {
+      setState(() {
+        isHovering = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Color hoveringColor = Theme.of(
       context,
@@ -29,11 +41,13 @@ class _HoveringWrapperState extends State<HoveringWrapper> {
 
     return MouseRegion(
       onEnter: (event) {
+        if (!widget.enabled) return;
         setState(() {
           isHovering = true;
         });
       },
       onExit: (event) {
+        if (!widget.enabled) return;
         setState(() {
           isHovering = false;
         });
@@ -46,7 +60,7 @@ class _HoveringWrapperState extends State<HoveringWrapper> {
             Positioned.fill(
               child: IgnorePointer(
                 child: Container(
-                  color: isHovering || widget.isPersisted
+                  color: widget.enabled && (isHovering || widget.isPersisted)
                       ? widget.color ?? hoveringColor
                       : Colors.transparent,
                 ),

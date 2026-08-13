@@ -143,11 +143,12 @@ class ChessBoard extends StatelessWidget {
                 (entry) =>
                     Selector<
                       ChessBoardViewmodel,
-                      ({PieceModel? piece, bool isDragged})
+                      ({PieceModel? piece, bool isDragged, bool hoverEnabled})
                     >(
                       selector: (context, viewModel) => (
                         piece: viewModel.boardState.pieceList[entry.key],
                         isDragged: viewModel.isDragged,
+                        hoverEnabled: !viewModel.isPieceAnimating(entry.key),
                       ),
                       builder: (context, state, child) {
                         final pieceModel = state.piece;
@@ -178,6 +179,9 @@ class ChessBoard extends StatelessWidget {
                           left: leftPosition,
                           onEnd: () {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
+                              chessBoardViewmodel.onPieceAnimationEnd(
+                                pieceModel.key,
+                              );
                               chessBoardViewmodel.draggingEnd();
                             });
                           },
@@ -220,6 +224,7 @@ class ChessBoard extends StatelessWidget {
                               child: IgnorePointer(
                                 ignoring: state.isDragged,
                                 child: HoveringWrapper(
+                                  enabled: state.hoverEnabled,
                                   child: SizedBox(
                                     width: tileSize,
                                     height: tileSize,
